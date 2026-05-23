@@ -117,148 +117,9 @@ function StatusBadge({ status }) {
 // ============================================================================
 // HEADER / TOP NAVIGATION
 // ============================================================================
-function Header({ currentScreen, setScreen }) {
-  const isCustomer = ['landing', 'calendar', 'passengers', 'seatSelection', 'review', 'confirmation', 'dashboard'].includes(currentScreen);
-  return (
-    <header
-      className="sticky top-0 z-10 bg-white border-b px-6 flex items-center justify-between"
-      style={{ borderColor: COLORS.border, height: 72 }}
-    >
-      <button
-        onClick={() => setScreen('landing')}
-        className="flex items-center gap-2 font-bold text-lg"
-        style={{ color: COLORS.primary }}
-      >
-        <Ship size={24} />
-        F and S Marine Transport Inc.
-      </button>
-      {isCustomer ? (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setScreen('dashboard')}
-            className="text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100"
-            style={{ color: COLORS.ink }}
-          >
-            My Bookings
-          </button>
-          <OutlineButton onClick={() => setScreen('dashboard')}>Sign in</OutlineButton>
-        </div>
-      ) : (
-        <div className="flex items-center gap-3">
-          <span className="text-sm" style={{ color: COLORS.inkMuted }}>
-            Maria S. · Operations Manager
-          </span>
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-sm"
-            style={{ background: COLORS.ink }}
-          >
-            MS
-          </div>
-        </div>
-      )}
-    </header>
-  );
-}
-
-// ============================================================================
-// SCREEN NAVIGATOR (mockup-only — not part of real app)
-// ============================================================================
-function ScreenNav({ currentScreen, setScreen }) {
-  const screens = [
-    { id: 'landing', label: 'Landing', tier: 1, group: 'Customer' },
-    { id: 'calendar', label: 'Date Calendar', tier: 1, group: 'Customer' },
-    { id: 'sailings', label: "Today's Sailings", tier: 1, group: 'Customer' },
-    { id: 'time', label: 'Time Slot Picker', tier: 1, group: 'Customer' },
-    { id: 'classPicker', label: 'Class Picker', tier: 1, group: 'Customer' },
-    { id: 'passengers', label: 'Passenger Forms + ID Photo', tier: 1, group: 'Customer' },
-    { id: 'seatSelection', label: 'Seat Selection', tier: 1, group: 'Customer' },
-    { id: 'review', label: 'Review + Payment Channel', tier: 1, group: 'Customer' },
-    { id: 'email', label: 'Confirmation Method (Email or SMS)', tier: 1, group: 'Customer' },
-    { id: 'otpVerify', label: 'OTP Verification (UniSMS)', tier: 1, group: 'Customer' },
-    { id: 'confirmation', label: 'E-ticket', tier: 1, group: 'Customer' },
-    { id: 'dashboard', label: 'My Bookings', tier: 1, group: 'Customer' },
-    { id: 'bookingDetail', label: 'Booking Detail', tier: 1, group: 'Customer' },
-    { id: 'customerRefund', label: 'Request Refund', tier: 1, group: 'Customer' },
-    { id: 'customerNoShowRecovery', label: 'No-Show Recovery (Refund or Reschedule)', tier: 1, group: 'Customer' },
-    { id: 'customerReschedulePre', label: 'Pre-Departure Reschedule', tier: 1, group: 'Customer' },
-    { id: 'customerEmergencyRecovery', label: 'Emergency Recovery (Refund/Reschedule/Credit)', tier: 1, group: 'Customer' },
-    { id: 'creditWallet', label: 'Travel Credit Wallet', tier: 1, group: 'Customer' },
-    { id: 'adminOps', label: 'Ops Dashboard', tier: 1, group: 'Admin' },
-    { id: 'adminBookings', label: 'Bookings List', tier: 1, group: 'Admin' },
-    { id: 'adminSchedules', label: 'Schedule (Visual + Form)', tier: 1, group: 'Admin' },
-    { id: 'login', label: 'Customer Login', tier: 1, group: 'Customer' },
-    { id: 'profile', label: 'Profile Edit', tier: 1, group: 'Customer' },
-    { id: 'adminPorts', label: 'Port Management', tier: 1, group: 'Admin' },
-    { id: 'adminVessels', label: 'Vessel Management', tier: 1, group: 'Admin' },
-    { id: 'adminBlocked', label: 'Date Blocking', tier: 1, group: 'Admin' },
-    { id: 'adminEmergencyCancel', label: 'Emergency Cancellation', tier: 1, group: 'Admin' },
-    { id: 'adminFares', label: 'Fare + Port Overrides', tier: 1, group: 'Admin' },
-    { id: 'adminPromos', label: 'Promo Codes', tier: 1, group: 'Admin' },
-    { id: 'adminManifest', label: 'Manifest Export', tier: 1, group: 'Admin' },
-    { id: 'adminRefunds', label: 'Refund Queue', tier: 1, group: 'Admin' },
-    { id: 'adminReports', label: 'Sales Reports (per-vessel + per-port)', tier: 1, group: 'Admin' },
-    { id: 'adminSalesReports', label: 'Daily Sales Reports · Booked + Boarded', tier: 1, group: 'Admin' },
-    { id: 'adminUsers', label: 'User Management', tier: 1, group: 'Admin' },
-    { id: 'adminSettings', label: 'System Settings', tier: 1, group: 'Admin' },
-    { id: 'adminAudit', label: 'Audit Log', tier: 1, group: 'Admin' },
-    { id: 'staffWalkin', label: 'Staff Walk-in Booking', tier: 1, group: 'Staff' },
-    { id: 'staffCheckin', label: 'Staff Check-in (Counter)', tier: 1, group: 'Staff' },
-    { id: 'staffBoarding', label: 'Boarding Officer (Gangway + Final Manifest)', tier: 1, group: 'Staff' },
-    { id: 'nativeApp', label: 'PWA Mobile Apps Preview', tier: 1, group: 'Mobile' },
-  ];
-
-  const groups = ['Customer', 'Admin', 'Staff', 'Mobile'];
-
-  return (
-    <div className="bg-gray-50 border-b px-6 py-3" style={{ borderColor: COLORS.border }}>
-      <div className="text-xs font-semibold mb-2 uppercase tracking-wide" style={{ color: COLORS.inkMuted }}>
-        Mockup Navigator · click any screen
-      </div>
-      <div className="space-y-2">
-        {groups.map((g) => (
-          <div key={g} className="flex items-start gap-2 flex-wrap">
-            <span className="text-xs font-semibold pt-1.5 w-16 flex-shrink-0" style={{ color: COLORS.inkMuted }}>
-              {g}
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {screens.filter((s) => s.group === g).map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => setScreen(s.id)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
-                    currentScreen === s.id ? 'text-white' : ''
-                  }`}
-                  style={{
-                    background: currentScreen === s.id ? COLORS.ink : 'white',
-                    color: currentScreen === s.id ? 'white' : COLORS.ink,
-                    border: `1px solid ${currentScreen === s.id ? COLORS.ink : COLORS.border}`,
-                  }}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// MOCKUP BANNER
-// ============================================================================
-function MockupBanner() {
-  return (
-    <div
-      className="px-6 py-3 text-sm font-medium flex items-center gap-2"
-      style={{ background: '#FEF3C7', color: '#A16207' }}
-    >
-      <AlertCircle size={16} />
-      📐 PHASE 2.8 MOCKUP — F and S Marine Transport Inc. — 40 of 40 screens at full fidelity. Visual check of PRODUCT.md interpretation. Not live. No data persists.
-    </div>
-  );
-}
+// Header, ScreenNav, and MockupBanner are now integrated into the preview shell
+// in the main FandSMarineMockup component at the bottom of this file.
+// The old standalone components have been removed to avoid duplicate screen lists.
 
 // ============================================================================
 // TIER 1: LANDING PAGE
@@ -16182,10 +16043,23 @@ function SeatSelectionScreen({ setScreen }) {
 }
 
 // ============================================================================
-// MAIN APP
+// MAIN APP — Mobile-First Preview Shell
+// The mockup renders inside an iPhone-style phone frame centered on the page.
+// The ScreenNav sits alongside as a control panel. On narrow browser windows
+// the nav collapses above the phone. The phone frame's internal viewport is
+// 390px × 844px (iPhone 14 / 15 dimensions) and scrolls independently.
 // ============================================================================
 export default function FandSMarineMockup() {
   const [screen, setScreen] = useState('landing');
+  const [viewMode, setViewMode] = useState('phone'); // 'phone' | 'tablet' | 'desktop'
+  const [navCollapsed, setNavCollapsed] = useState(false);
+
+  // Screen groups for the mockup navigator (outside the phone)
+  const isCustomer = ['landing', 'calendar', 'sailings', 'time', 'classPicker', 'passengers',
+    'seatSelection', 'review', 'email', 'otpVerify', 'confirmation', 'dashboard', 'bookingDetail',
+    'customerRefund', 'customerNoShowRecovery', 'customerReschedulePre', 'customerEmergencyRecovery',
+    'creditWallet', 'login', 'profile'].includes(screen);
+  const isStaff = ['staffWalkin', 'staffCheckin', 'staffBoarding', 'nativeApp'].includes(screen);
 
   let content;
   if (screen === 'landing') content = <LandingScreen setScreen={setScreen} />;
@@ -16229,19 +16103,357 @@ export default function FandSMarineMockup() {
   else if (screen === 'staffBoarding') content = <StaffBoardingScreen setScreen={setScreen} />;
   else if (screen === 'nativeApp') content = <NativeAppPreviewScreen setScreen={setScreen} />;
 
+  // Viewport dimensions per mode
+  const viewports = {
+    phone: { width: 390, height: 844, radius: 44, padding: 12, innerRadius: 32, label: 'iPhone 15 · 390×844' },
+    tablet: { width: 768, height: 1024, radius: 24, padding: 10, innerRadius: 16, label: 'iPad · 768×1024' },
+    desktop: { width: 1280, height: 800, radius: 12, padding: 6, innerRadius: 8, label: 'Desktop · 1280×800' },
+  };
+  const vp = viewports[viewMode];
+
+  // Current screen label for the frame title
+  const currentLabel = (() => {
+    const all = [
+      { id: 'landing', label: 'Landing' }, { id: 'calendar', label: 'Date Calendar' },
+      { id: 'sailings', label: "Today's Sailings" }, { id: 'time', label: 'Time Picker' },
+      { id: 'classPicker', label: 'Class Picker' }, { id: 'passengers', label: 'Passengers' },
+      { id: 'seatSelection', label: 'Seat Selection' }, { id: 'review', label: 'Review + Pay' },
+      { id: 'email', label: 'Confirmation Method' }, { id: 'otpVerify', label: 'OTP Verify' },
+      { id: 'confirmation', label: 'E-Ticket' }, { id: 'dashboard', label: 'My Bookings' },
+      { id: 'bookingDetail', label: 'Booking Detail' }, { id: 'customerRefund', label: 'Refund' },
+      { id: 'customerNoShowRecovery', label: 'No-Show Recovery' },
+      { id: 'customerReschedulePre', label: 'Reschedule' },
+      { id: 'customerEmergencyRecovery', label: 'Emergency Recovery' },
+      { id: 'creditWallet', label: 'Credit Wallet' }, { id: 'login', label: 'Login' },
+      { id: 'profile', label: 'Profile' }, { id: 'adminOps', label: 'Ops Dashboard' },
+      { id: 'adminBookings', label: 'Bookings' }, { id: 'adminSchedules', label: 'Schedule' },
+      { id: 'adminPorts', label: 'Ports' }, { id: 'adminVessels', label: 'Vessels' },
+      { id: 'adminBlocked', label: 'Date Block' }, { id: 'adminEmergencyCancel', label: 'Emergency Cancel' },
+      { id: 'adminManifest', label: 'Manifest' }, { id: 'adminFares', label: 'Fares' },
+      { id: 'adminPromos', label: 'Promos' }, { id: 'adminRefunds', label: 'Refund Queue' },
+      { id: 'adminReports', label: 'Sales Reports' }, { id: 'adminSalesReports', label: 'Daily Sales' },
+      { id: 'adminUsers', label: 'Users' }, { id: 'adminSettings', label: 'Settings' },
+      { id: 'adminAudit', label: 'Audit Log' }, { id: 'staffWalkin', label: 'Walk-in' },
+      { id: 'staffCheckin', label: 'Check-in' }, { id: 'staffBoarding', label: 'Boarding Officer' },
+      { id: 'nativeApp', label: 'PWA Preview' },
+    ];
+    return all.find(s => s.id === screen)?.label || screen;
+  })();
+
   return (
-    <div className="min-h-screen" style={{ background: COLORS.bgMuted, fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}>
-      <MockupBanner />
-      <Header currentScreen={screen} setScreen={setScreen} />
-      <ScreenNav currentScreen={screen} setScreen={setScreen} />
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-6">
-        {content}
-      </main>
-      <footer className="text-center py-6 text-xs" style={{ color: COLORS.inkMuted }}>
-        Mockup generated by Spec-Driven Platform V31 · Phase 2.8 · Airbnb aesthetic from getdesign.md
-        <br />
-        Powered by Powerbyte I.T. Solutions · © 2026 All rights reserved.
-      </footer>
+    <div style={{ background: '#111827', minHeight: '100vh', fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}>
+      {/* Top banner — mockup info bar */}
+      <div
+        className="px-4 py-2 text-xs font-medium flex items-center gap-2 flex-wrap justify-between"
+        style={{ background: '#1F2937', color: '#9CA3AF', borderBottom: '1px solid #374151' }}
+      >
+        <div className="flex items-center gap-2">
+          <Ship size={14} style={{ color: COLORS.primary }} />
+          <span style={{ color: '#E5E7EB' }}>F and S Marine Transport Inc.</span>
+          <span>·</span>
+          <span>Phase 2.8 · Batch 18 · 40 screens</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span style={{ color: '#6B7280' }}>Powered by Powerbyte I.T. Solutions</span>
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row" style={{ minHeight: 'calc(100vh - 36px)' }}>
+        {/* LEFT PANEL — screen navigator */}
+        <div
+          className="lg:w-72 flex-shrink-0 overflow-y-auto"
+          style={{ background: '#1F2937', borderRight: '1px solid #374151', maxHeight: 'calc(100vh - 36px)' }}
+        >
+          {/* View mode toggle */}
+          <div className="p-3 border-b" style={{ borderColor: '#374151' }}>
+            <div className="text-[10px] uppercase tracking-wider mb-2 font-semibold" style={{ color: '#6B7280' }}>
+              Preview mode
+            </div>
+            <div className="flex gap-1.5">
+              {[
+                { mode: 'phone', icon: '📱', label: 'Phone' },
+                { mode: 'tablet', icon: '📟', label: 'Tablet' },
+                { mode: 'desktop', icon: '🖥️', label: 'Desktop' },
+              ].map(v => (
+                <button
+                  key={v.mode}
+                  onClick={() => setViewMode(v.mode)}
+                  className="flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={{
+                    background: viewMode === v.mode ? COLORS.primary : '#374151',
+                    color: viewMode === v.mode ? 'white' : '#9CA3AF',
+                  }}
+                >
+                  {v.icon} {v.label}
+                </button>
+              ))}
+            </div>
+            <div className="text-[10px] mt-1.5 text-center" style={{ color: '#6B7280' }}>
+              {vp.label}
+            </div>
+          </div>
+
+          {/* Screen groups */}
+          {['Customer', 'Admin', 'Staff', 'Mobile'].map(group => {
+            const groupScreens = [
+              { id: 'landing', label: 'Landing', group: 'Customer' },
+              { id: 'calendar', label: 'Date Calendar', group: 'Customer' },
+              { id: 'sailings', label: "Today's Sailings", group: 'Customer' },
+              { id: 'time', label: 'Time Slot Picker', group: 'Customer' },
+              { id: 'classPicker', label: 'Class Picker', group: 'Customer' },
+              { id: 'passengers', label: 'Passenger Forms', group: 'Customer' },
+              { id: 'seatSelection', label: 'Seat Selection', group: 'Customer' },
+              { id: 'review', label: 'Review + Pay', group: 'Customer' },
+              { id: 'email', label: 'Confirmation Method', group: 'Customer' },
+              { id: 'otpVerify', label: 'OTP Verification', group: 'Customer' },
+              { id: 'confirmation', label: 'E-Ticket', group: 'Customer' },
+              { id: 'dashboard', label: 'My Bookings', group: 'Customer' },
+              { id: 'bookingDetail', label: 'Booking Detail', group: 'Customer' },
+              { id: 'customerRefund', label: 'Request Refund', group: 'Customer' },
+              { id: 'customerNoShowRecovery', label: 'No-Show Recovery', group: 'Customer' },
+              { id: 'customerReschedulePre', label: 'Reschedule', group: 'Customer' },
+              { id: 'customerEmergencyRecovery', label: 'Emergency Recovery', group: 'Customer' },
+              { id: 'creditWallet', label: 'Travel Credit Wallet', group: 'Customer' },
+              { id: 'login', label: 'Login', group: 'Customer' },
+              { id: 'profile', label: 'Profile Edit', group: 'Customer' },
+              { id: 'adminOps', label: 'Ops Dashboard', group: 'Admin' },
+              { id: 'adminBookings', label: 'Bookings List', group: 'Admin' },
+              { id: 'adminSchedules', label: 'Schedule', group: 'Admin' },
+              { id: 'adminPorts', label: 'Port Management', group: 'Admin' },
+              { id: 'adminVessels', label: 'Vessel Management', group: 'Admin' },
+              { id: 'adminBlocked', label: 'Date Blocking', group: 'Admin' },
+              { id: 'adminEmergencyCancel', label: 'Emergency Cancel', group: 'Admin' },
+              { id: 'adminFares', label: 'Fare Overrides', group: 'Admin' },
+              { id: 'adminPromos', label: 'Promo Codes', group: 'Admin' },
+              { id: 'adminManifest', label: 'Manifest Export', group: 'Admin' },
+              { id: 'adminRefunds', label: 'Refund Queue', group: 'Admin' },
+              { id: 'adminReports', label: 'Sales Reports', group: 'Admin' },
+              { id: 'adminSalesReports', label: 'Daily Sales', group: 'Admin' },
+              { id: 'adminUsers', label: 'User Management', group: 'Admin' },
+              { id: 'adminSettings', label: 'System Settings', group: 'Admin' },
+              { id: 'adminAudit', label: 'Audit Log', group: 'Admin' },
+              { id: 'staffWalkin', label: 'Walk-in Booking', group: 'Staff' },
+              { id: 'staffCheckin', label: 'Check-in Scanner', group: 'Staff' },
+              { id: 'staffBoarding', label: 'Boarding Officer', group: 'Staff' },
+              { id: 'nativeApp', label: 'PWA Preview', group: 'Mobile' },
+            ].filter(s => s.group === group);
+
+            const groupColor = group === 'Customer' ? COLORS.primary
+              : group === 'Admin' ? '#3B82F6'
+              : group === 'Staff' ? '#7C3AED'
+              : '#F59E0B';
+
+            return (
+              <div key={group} className="px-3 py-2 border-b" style={{ borderColor: '#374151' }}>
+                <div className="text-[10px] uppercase tracking-wider mb-1.5 font-semibold flex items-center gap-1.5"
+                  style={{ color: groupColor }}>
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: groupColor }} />
+                  {group} ({groupScreens.length})
+                </div>
+                <div className="space-y-0.5">
+                  {groupScreens.map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => setScreen(s.id)}
+                      className="w-full text-left px-2.5 py-1.5 rounded-md text-xs transition-all truncate"
+                      style={{
+                        background: screen === s.id ? `${groupColor}22` : 'transparent',
+                        color: screen === s.id ? '#E5E7EB' : '#9CA3AF',
+                        fontWeight: screen === s.id ? 600 : 400,
+                        borderLeft: screen === s.id ? `2px solid ${groupColor}` : '2px solid transparent',
+                      }}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* RIGHT PANEL — phone frame preview area */}
+        <div
+          className="flex-1 flex items-start justify-center overflow-y-auto py-6 px-4"
+          style={{ background: '#111827' }}
+        >
+          <div>
+            {/* Screen label above the device */}
+            <div className="text-center mb-3">
+              <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{
+                background: isCustomer ? `${COLORS.primary}33` : isStaff ? '#7C3AED33' : '#3B82F633',
+                color: isCustomer ? COLORS.primary : isStaff ? '#A78BFA' : '#60A5FA',
+              }}>
+                {isCustomer ? 'Customer' : isStaff ? 'Staff' : 'Admin'} · {currentLabel}
+              </span>
+            </div>
+
+            {/* Device frame */}
+            <div
+              className="mx-auto relative"
+              style={{
+                width: vp.width + (vp.padding * 2),
+                maxWidth: '100%',
+                background: '#0a0a0a',
+                borderRadius: vp.radius,
+                padding: vp.padding,
+                boxShadow: '0 25px 60px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05)',
+              }}
+            >
+              {/* Inner screen */}
+              <div
+                className="relative overflow-hidden"
+                style={{
+                  background: '#fff',
+                  borderRadius: vp.innerRadius,
+                  height: viewMode === 'desktop' ? vp.height : vp.height,
+                }}
+              >
+                {/* Status bar — phone and tablet only */}
+                {viewMode !== 'desktop' && (
+                  <div
+                    className="flex items-center justify-between px-7 pt-2 pb-1.5 relative z-20"
+                    style={{ background: 'white', color: COLORS.ink, fontSize: 12, fontWeight: 600 }}
+                  >
+                    <span>4:32</span>
+                    {/* Dynamic Island notch — phone only */}
+                    {viewMode === 'phone' && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 6,
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: 95,
+                          height: 26,
+                          background: '#0a0a0a',
+                          borderRadius: 16,
+                        }}
+                      />
+                    )}
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex items-end gap-0.5">
+                        {[1, 2, 3, 4].map((b) => (
+                          <div
+                            key={b}
+                            style={{
+                              width: 3,
+                              height: 3 + b * 1.5,
+                              background: b <= 4 ? COLORS.ink : '#D1D5DB',
+                              borderRadius: 1,
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <span style={{ fontSize: 10 }}>5G</span>
+                      <div
+                        className="flex items-center"
+                        style={{
+                          width: 22,
+                          height: 11,
+                          border: `1px solid ${COLORS.ink}`,
+                          borderRadius: 3,
+                          position: 'relative',
+                          padding: 1,
+                        }}
+                      >
+                        <div style={{ width: '87%', height: '100%', background: COLORS.ink, borderRadius: 1 }} />
+                        <div style={{ position: 'absolute', right: -3, top: 3, width: 2, height: 5, background: COLORS.ink, borderRadius: 1 }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* App header inside the device */}
+                <div
+                  className="flex items-center justify-between px-4 border-b z-10"
+                  style={{
+                    borderColor: COLORS.border,
+                    height: viewMode === 'phone' ? 48 : 56,
+                    background: 'white',
+                  }}
+                >
+                  <button
+                    onClick={() => setScreen('landing')}
+                    className="flex items-center gap-1.5 font-bold"
+                    style={{ color: COLORS.primary, fontSize: viewMode === 'phone' ? 13 : 15 }}
+                  >
+                    <Ship size={viewMode === 'phone' ? 18 : 20} />
+                    <span className="truncate" style={{ maxWidth: viewMode === 'phone' ? 160 : 300 }}>
+                      {viewMode === 'phone' ? 'F&S Marine' : 'F and S Marine Transport Inc.'}
+                    </span>
+                  </button>
+                  {isCustomer ? (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setScreen('dashboard')}
+                        className="text-xs font-medium px-2 py-1 rounded-md"
+                        style={{ color: COLORS.ink }}
+                      >
+                        {viewMode === 'phone' ? 'Bookings' : 'My Bookings'}
+                      </button>
+                      <button
+                        onClick={() => setScreen('login')}
+                        className="text-xs font-medium px-2.5 py-1 rounded-md border"
+                        style={{ color: COLORS.ink, borderColor: COLORS.border }}
+                      >
+                        Sign in
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
+                        style={{ background: COLORS.ink }}
+                      >
+                        MS
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Scrollable content area */}
+                <div
+                  className="overflow-y-auto overflow-x-hidden"
+                  style={{
+                    height: vp.height - (viewMode !== 'desktop' ? 36 : 0) - (viewMode === 'phone' ? 48 : 56) - 10,
+                    background: COLORS.bgMuted,
+                  }}
+                >
+                  <div className="px-4 py-4">
+                    {content}
+                  </div>
+                  <footer className="text-center py-4 text-[10px]" style={{ color: COLORS.inkMuted }}>
+                    Powered by Powerbyte I.T. Solutions · © 2026
+                  </footer>
+                </div>
+
+                {/* Home indicator — phone only */}
+                {viewMode === 'phone' && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: 8,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: 120,
+                      height: 4,
+                      background: COLORS.ink,
+                      borderRadius: 2,
+                      opacity: 0.8,
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Info below the device */}
+            <div className="text-center mt-3 text-[10px]" style={{ color: '#6B7280' }}>
+              Scroll inside the device · {vp.label} · Not live — no data persists
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
