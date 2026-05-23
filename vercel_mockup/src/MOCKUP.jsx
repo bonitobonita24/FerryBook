@@ -150,10 +150,10 @@ function LandingScreen({ setScreen }) {
           <div className="text-xs font-semibold mb-3 px-3 py-1 inline-block rounded-full bg-white/80 backdrop-blur" style={{ color: COLORS.primary }}>
             🚢 Batangas ↔ Lubang Island · Daily Departures
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-3" style={{ color: COLORS.ink }}>
+          <h1 className="text-2xl font-bold leading-tight mb-2" style={{ color: COLORS.ink }}>
             Book your trip to Lubang Island in just a minute.
           </h1>
-          <p className="text-lg mb-6" style={{ color: COLORS.ink }}>
+          <p className="text-sm mb-4" style={{ color: COLORS.ink }}>
             Pick your date, see live seat availability, book secure with GCash, Maya, or card.
           </p>
         </div>
