@@ -424,11 +424,11 @@ function CalendarScreen({ setScreen }) {
         </div>
 
         {/* LEGEND */}
-        <div className="flex flex-wrap gap-3 mb-4 text-xs">
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full" style={{ background: '#3B82F6' }}></span>Open Air</span>
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full" style={{ background: COLORS.primary }}></span>Aircon</span>
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full" style={{ background: COLORS.warning }}></span>VIP</span>
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full" style={{ background: COLORS.bgMuted, border: `1px solid ${COLORS.border}` }}></span>Unavailable</span>
+        <div className="flex flex-wrap gap-3 mb-4 text-xs" style={{ color: COLORS.inkMuted }}>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: COLORS.success }}></span>Available</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: COLORS.warning }}></span>Filling up</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: COLORS.destructive }}></span>Almost full</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: COLORS.bgMuted, border: `1px solid ${COLORS.border}` }}></span>Unavailable</span>
         </div>
 
         <div className="grid grid-cols-7 gap-2">
@@ -449,7 +449,7 @@ function CalendarScreen({ setScreen }) {
                 key={d.day}
                 disabled={disabled}
                 onClick={() => setSelectedDate({ year: viewYear, month: viewMonth, day: d.day })}
-                className={`aspect-square rounded-xl border-2 p-1.5 flex flex-col items-center justify-between transition-all ${
+                className={`aspect-square rounded-xl border-2 flex flex-col items-center justify-center transition-all ${
                   disabled ? 'cursor-not-allowed' : 'hover:shadow-md cursor-pointer'
                 }`}
                 style={{
@@ -464,30 +464,20 @@ function CalendarScreen({ setScreen }) {
                 >
                   {d.day}
                 </span>
-                {!disabled && (
-                  <div className="flex gap-0.5 mt-0.5">
-                    <span
-                      className="text-[9px] px-1 rounded-sm font-semibold"
-                      style={{ background: isSelected ? 'rgba(255,255,255,0.2)' : '#DBEAFE', color: isSelected ? 'white' : '#1E40AF' }}
-                    >
-                      {d.openAir}
-                    </span>
-                    <span
-                      className="text-[9px] px-1 rounded-sm font-semibold"
-                      style={{ background: isSelected ? 'rgba(255,255,255,0.2)' : '#FFE5E9', color: isSelected ? 'white' : COLORS.primary }}
-                    >
-                      {d.aircon}
-                    </span>
-                    <span
-                      className="text-[9px] px-1 rounded-sm font-semibold"
-                      style={{ background: isSelected ? 'rgba(255,255,255,0.2)' : '#FEF3C7', color: isSelected ? 'white' : '#A16207' }}
-                    >
-                      {d.vip}
-                    </span>
-                  </div>
+                {!disabled && !d.blocked && (
+                  <div
+                    className="w-1.5 h-1.5 rounded-full mt-1"
+                    style={{
+                      background: (d.openAir + d.aircon + d.vip) > 60
+                        ? COLORS.success
+                        : (d.openAir + d.aircon + d.vip) > 20
+                        ? COLORS.warning
+                        : COLORS.destructive,
+                    }}
+                  />
                 )}
                 {d.blocked && (
-                  <span className="text-[9px] font-semibold" style={{ color: COLORS.destructive }}>Blocked</span>
+                  <span className="text-[8px] font-semibold mt-0.5" style={{ color: isSelected ? 'rgba(255,255,255,0.7)' : COLORS.destructive }}>Blocked</span>
                 )}
               </button>
             );
@@ -1147,18 +1137,21 @@ function ReviewScreen({ setScreen }) {
           <div className="bg-white rounded-2xl p-6 border" style={{ borderColor: COLORS.border }}>
             <h3 className="font-bold text-lg mb-4" style={{ color: COLORS.ink }}>3 passengers</h3>
             {[
-              { name: 'Maria Cristina B. Reyes', type: 'Adult', fare: 550, discount: 0, seat: 'A03-B' },
-              { name: 'Joaquin Miguel S. Reyes', type: 'Child (3–12)', fare: 550, discount: 275, seat: 'A03-C' },
-              { name: 'Lola Salvacion C. Bautista', type: 'Senior (RA 9994)', fare: 550, discount: 110, seat: 'A03-D' },
+              { name: 'Maria Cristina B. Reyes', type: 'Adult', fare: 550, discount: 0, seat: 'A03-B', ticket: 'BTN-2026-0518-3B7K' },
+              { name: 'Joaquin Miguel S. Reyes', type: 'Child (3–12)', fare: 550, discount: 275, seat: 'A03-C', ticket: 'BTN-2026-0518-4C8L' },
+              { name: 'Lola Salvacion C. Bautista', type: 'Senior (RA 9994)', fare: 550, discount: 110, seat: 'A03-D', ticket: 'BTN-2026-0518-5D9M' },
             ].map((p, i) => (
               <div key={i} className="flex items-center justify-between py-2 text-sm border-b last:border-0" style={{ borderColor: COLORS.border }}>
                 <div>
                   <div className="font-semibold" style={{ color: COLORS.ink }}>{p.name}</div>
-                  <div className="flex items-center gap-2 text-xs" style={{ color: COLORS.inkMuted }}>
+                  <div className="flex items-center gap-2 text-xs flex-wrap" style={{ color: COLORS.inkMuted }}>
                     <span>{p.type}</span>
                     <span className="font-mono font-semibold px-1.5 py-0.5 rounded" style={{ background: '#FFE5E9', color: COLORS.primary }}>
                       Seat {p.seat}
                     </span>
+                  </div>
+                  <div className="text-[10px] font-mono mt-0.5" style={{ color: COLORS.inkMuted }}>
+                    Ticket: {p.ticket}
                   </div>
                 </div>
                 <div className="text-right">
@@ -1378,7 +1371,7 @@ function ConfirmationMethodScreen({ setScreen }) {
                     </div>
                   </div>
                   <div className="text-sm leading-relaxed" style={{ color: COLORS.ink }}>
-                    F&amp;S Marine: Booking confirmed ✓ Ref: <span className="font-mono font-semibold">FSM-2026-0519-7K2A</span>
+                    F&amp;S Marine: Booking confirmed ✓ Ref: <span className="font-mono font-semibold">BR-2026-0519-7K2A</span>
                     {' · '}Sat May 22 06:00 · Nasugbu→Tilik · 3 pax · Aircon ₱1,285. Show this ref at the pier.
                   </div>
                 </div>
@@ -1751,14 +1744,14 @@ function ConfirmationScreen({ setScreen }) {
         className="rounded-2xl overflow-hidden mb-6 mx-auto max-w-2xl"
         style={{ border: `1px solid ${COLORS.border}`, boxShadow: '0 6px 16px rgba(0,0,0,0.08)' }}
       >
-        <div className="px-6 py-4 flex items-center justify-between" style={{ background: COLORS.ink, color: 'white' }}>
+        <div className="px-5 py-3 flex items-center justify-between" style={{ background: COLORS.ink, color: 'white' }}>
           <div className="flex items-center gap-2">
-            <Ship size={20} />
-            <span className="font-bold">F AND S MARINE TRANSPORT INC.</span>
+            <Ship size={18} />
+            <span className="font-bold text-sm">F AND S MARINE TRANSPORT INC.</span>
           </div>
-          <div className="text-xs">
+          <div className="text-[10px] text-right">
             <div className="opacity-70">Booking Ref</div>
-            <div className="font-mono font-bold">FSM-2026-0518-7K2A</div>
+            <div className="font-mono font-bold">BR-2026-0518-7K2A</div>
           </div>
         </div>
 
@@ -1800,30 +1793,38 @@ function ConfirmationScreen({ setScreen }) {
 
             {/* Passenger list */}
             <div className="pt-3 border-t" style={{ borderColor: COLORS.border }}>
-              <div className="text-xs font-semibold uppercase mb-1" style={{ color: COLORS.inkMuted }}>Passengers</div>
-              <div className="text-sm space-y-0.5" style={{ color: COLORS.ink }}>
-                <div className="flex items-center gap-2">
-                  <span>1. Maria Cristina B. Reyes — Adult</span>
-                  <span className="font-mono text-xs font-semibold px-1.5 py-0.5 rounded" style={{ background: '#FFE5E9', color: COLORS.primary }}>A03-B</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span>2. Joaquin Miguel S. Reyes — Child (3–12)</span>
-                  <span className="font-mono text-xs font-semibold px-1.5 py-0.5 rounded" style={{ background: '#FFE5E9', color: COLORS.primary }}>A03-C</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span>3. Lola Salvacion C. Bautista — Senior</span>
-                  <span className="font-mono text-xs font-semibold px-1.5 py-0.5 rounded" style={{ background: '#FFE5E9', color: COLORS.primary }}>A03-D</span>
-                </div>
+              <div className="text-xs font-semibold uppercase mb-2" style={{ color: COLORS.inkMuted }}>Passengers</div>
+              <div className="text-sm space-y-2" style={{ color: COLORS.ink }}>
+                {[
+                  { name: 'Maria Cristina B. Reyes', type: 'Adult', seat: 'A03-B', ticket: 'BTN-2026-0518-3B7K' },
+                  { name: 'Joaquin Miguel S. Reyes', type: 'Child (3–12)', seat: 'A03-C', ticket: 'BTN-2026-0518-4C8L' },
+                  { name: 'Lola Salvacion C. Bautista', type: 'Senior', seat: 'A03-D', ticket: 'BTN-2026-0518-5D9M' },
+                ].map((p, i) => (
+                  <div key={i} className="rounded-lg p-2 border" style={{ borderColor: COLORS.border }}>
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-xs">{i + 1}. {p.name} — {p.type}</span>
+                      <span className="font-mono text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: '#FFE5E9', color: COLORS.primary }}>{p.seat}</span>
+                    </div>
+                    <div className="text-[10px] font-mono mt-1" style={{ color: COLORS.inkMuted }}>
+                      Ticket: <span style={{ color: COLORS.primary }}>{p.ticket}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* QR Code — below passenger list */}
             <div className="flex flex-col items-center justify-center rounded-xl p-4 mt-4" style={{ background: COLORS.bgMuted }}>
-              <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center mb-2 border" style={{ borderColor: COLORS.border }}>
-                <QrCode size={96} style={{ color: COLORS.ink }} />
+              <div className="w-28 h-28 bg-white rounded-lg flex items-center justify-center mb-2 border" style={{ borderColor: COLORS.border }}>
+                <QrCode size={80} style={{ color: COLORS.ink }} />
               </div>
-              <div className="text-xs font-mono text-center" style={{ color: COLORS.inkMuted }}>FSM-2026-0518-7K2A</div>
-              <div className="text-xs text-center mt-1" style={{ color: COLORS.inkMuted }}>Show at boarding</div>
+              <div className="text-xs font-mono text-center font-semibold" style={{ color: COLORS.primary }}>BTN-2026-0518-3B7K</div>
+              <div className="text-[10px] text-center mt-0.5" style={{ color: COLORS.inkMuted }}>
+                Ticket for Maria Cristina B. Reyes
+              </div>
+              <div className="text-[10px] text-center mt-2 px-4" style={{ color: COLORS.inkMuted }}>
+                Each passenger has their own QR ticket. Show at counter + gangway. All 3 tickets sent via SMS.
+              </div>
             </div>
         </div>
 
@@ -1970,20 +1971,22 @@ function ConfirmationScreen({ setScreen }) {
             >
               <div className="font-semibold mb-1">F&S Marine: Booking confirmed!</div>
               <div className="mb-2">
-                Ref: <span className="font-mono font-bold">FSM-2026-0518-7K2A</span>
+                Booking Ref: <span className="font-mono font-bold">BR-2026-0518-7K2A</span>
               </div>
               <div className="space-y-0.5 text-xs">
                 <div>📅 Fri, May 22, 2026 · 08:00</div>
                 <div>⛴️ Nasugbu → Tilik</div>
                 <div>🚢 MV Our Lady of St Therese</div>
-                <div>💺 Aircon · Seats A03-B, A03-C, A03-D</div>
-                <div>👥 3 pax · ₱1,285 paid via GCash</div>
+                <div>💺 Aircon · 3 pax · ₱1,285 via GCash</div>
               </div>
               <div className="mt-2 pt-2 border-t text-xs" style={{ borderColor: '#D1D5DB' }}>
-                Show this ref or QR at counter + gangway. Arrive 2hrs early with valid ID.
+                <div className="font-semibold mb-1">Your Ticket Numbers:</div>
+                <div>1. Maria Cristina — BTN-2026-0518-3B7K · A03-B</div>
+                <div>2. Joaquin Miguel — BTN-2026-0518-4C8L · A03-C</div>
+                <div>3. Lola Salvacion — BTN-2026-0518-5D9M · A03-D</div>
               </div>
               <div className="mt-1 text-[10px]" style={{ color: COLORS.inkMuted }}>
-                fandsmarinetransport.com/account/booking/FSM-2026-0518-7K2A
+                Each ticket has its own QR. Show at counter + gangway.
               </div>
             </div>
 
@@ -1999,10 +2002,10 @@ function ConfirmationScreen({ setScreen }) {
             >
               <div className="font-semibold mb-1">F&S Marine: ID reminder</div>
               <div className="space-y-0.5 text-xs">
-                <div>Ref: <span className="font-mono font-bold">FSM-2026-0518-7K2A</span></div>
-                <div>1. Maria Cristina Reyes (Adult) · A03-B → bring valid govt ID</div>
-                <div>2. Joaquin Miguel Reyes (Child) · A03-C → bring PSA birth cert</div>
-                <div>3. Lola Salvacion Bautista (Senior) · A03-D → bring OSCA Senior ID (RA 9994)</div>
+                <div>Booking: <span className="font-mono font-bold">BR-2026-0518-7K2A</span></div>
+                <div>1. Maria Cristina (Adult) · <span className="font-mono">BTN-3B7K</span> · A03-B → valid govt ID</div>
+                <div>2. Joaquin Miguel (Child) · <span className="font-mono">BTN-4C8L</span> · A03-C → PSA birth cert</div>
+                <div>3. Lola Salvacion (Senior) · <span className="font-mono">BTN-5D9M</span> · A03-D → OSCA Senior ID</div>
               </div>
               <div className="mt-2 text-[10px]" style={{ color: '#92400E' }}>
                 ⚠ Discount forfeited if ID not presented at counter.
@@ -2042,22 +2045,22 @@ function ConfirmationScreen({ setScreen }) {
 function DashboardScreen({ setScreen }) {
   const [tab, setTab] = useState('active');
   const active = [
-    { ref: 'FSM-2026-0518-7K2A', date: 'Fri, May 22, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', pax: 3, total: 1285, status: 'Confirmed' },
-    { ref: 'FSM-2026-0519-9M3B', date: 'Sun, Jun 14, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'VIP', pax: 2, total: 1700, status: 'Confirmed' },
+    { ref: 'BR-2026-0518-7K2A', date: 'Fri, May 22, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', pax: 3, total: 1285, status: 'Confirmed' },
+    { ref: 'BR-2026-0519-9M3B', date: 'Sun, Jun 14, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'VIP', pax: 2, total: 1700, status: 'Confirmed' },
   ];
   // Bookings marked as no-show that are still within the 5-day grace period,
   // OR bookings hit by an Emergency Cancellation still inside the 72h customer-choice window.
   // Customers can refund / reschedule / credit depending on case.
   const actionNeeded = [
-    { ref: 'FSM-2026-0518-7K2A', date: 'Fri, May 22, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', pax: 3, total: 1285, status: 'Emergency Cancelled', emergencyHoursElapsed: 8, emergencyReason: 'Typhoon Mawar advisory' },
-    { ref: 'FSM-2026-0518-9V2K', date: 'Tue, May 19, 2026', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', pax: 2, total: 1100, status: 'No-Show', hoursSinceManifest: 18 },
+    { ref: 'BR-2026-0518-7K2A', date: 'Fri, May 22, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', pax: 3, total: 1285, status: 'Emergency Cancelled', emergencyHoursElapsed: 8, emergencyReason: 'Typhoon Mawar advisory' },
+    { ref: 'BR-2026-0518-9V2K', date: 'Tue, May 19, 2026', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', pax: 2, total: 1100, status: 'No-Show', hoursSinceManifest: 18 },
   ];
   const past = [
-    { ref: 'FSM-2026-0312-4A1F', date: 'Wed, Mar 11, 2026', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', pax: 4, total: 1400, status: 'Used' },
-    { ref: 'FSM-2026-0205-8B2C', date: 'Wed, Feb 04, 2026', time: '08:00', vessel: 'MV Our Mother of Perpetual Help', class: 'Aircon', pax: 2, total: 1100, status: 'Used' },
-    { ref: 'FSM-2026-0118-2D5E', date: 'Sat, Jan 17, 2026', time: '10:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', pax: 3, total: 1650, status: 'Refunded' },
-    { ref: 'FSM-2025-1224-7F9G', date: 'Tue, Dec 23, 2025', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'VIP', pax: 2, total: 1700, status: 'Used' },
-    { ref: 'FSM-2025-1108-3H6J', date: 'Sat, Nov 08, 2025', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', pax: 1, total: 350, status: 'No-Show' },
+    { ref: 'BR-2026-0312-4A1F', date: 'Wed, Mar 11, 2026', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', pax: 4, total: 1400, status: 'Used' },
+    { ref: 'BR-2026-0205-8B2C', date: 'Wed, Feb 04, 2026', time: '08:00', vessel: 'MV Our Mother of Perpetual Help', class: 'Aircon', pax: 2, total: 1100, status: 'Used' },
+    { ref: 'BR-2026-0118-2D5E', date: 'Sat, Jan 17, 2026', time: '10:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', pax: 3, total: 1650, status: 'Refunded' },
+    { ref: 'BR-2025-1224-7F9G', date: 'Tue, Dec 23, 2025', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'VIP', pax: 2, total: 1700, status: 'Used' },
+    { ref: 'BR-2025-1108-3H6J', date: 'Sat, Nov 08, 2025', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', pax: 1, total: 350, status: 'No-Show' },
   ];
   const rows = tab === 'active' ? active : tab === 'action' ? actionNeeded : past;
 
@@ -2387,11 +2390,11 @@ function AdminOpsScreen({ setScreen }) {
             <h3 className="font-bold mb-3" style={{ color: COLORS.ink }}>Recent activity</h3>
             <div className="space-y-2 text-xs">
               {[
-                { who: 'Booking FSM-...-7K2A', what: 'Confirmed · 3 pax', when: '2m ago' },
-                { who: 'Booking FSM-...-3X9M', what: 'Refund requested', when: '14m ago' },
-                { who: 'Booking FSM-...-8P4Q', what: 'Confirmed · 1 pax', when: '23m ago' },
+                { who: 'Booking BR-...-7K2A', what: 'Confirmed · 3 pax', when: '2m ago' },
+                { who: 'Booking BR-...-3X9M', what: 'Refund requested', when: '14m ago' },
+                { who: 'Booking BR-...-8P4Q', what: 'Confirmed · 1 pax', when: '23m ago' },
                 { who: 'Manifest', what: 'Exported · 14:00 voyage', when: '38m ago' },
-                { who: 'Booking FSM-...-2K7L', what: 'Cancelled by customer', when: '51m ago' },
+                { who: 'Booking BR-...-2K7L', what: 'Cancelled by customer', when: '51m ago' },
               ].map((a, i) => (
                 <div key={i} className="pb-2 border-b last:border-0" style={{ borderColor: COLORS.border }}>
                   <div className="font-semibold" style={{ color: COLORS.ink }}>{a.who}</div>
@@ -2414,26 +2417,26 @@ function AdminOpsScreen({ setScreen }) {
 // ============================================================================
 function AdminBookingsScreen({ setScreen }) {
   const bookings = [
-    { ref: 'FSM-2026-0518-7K2A', creator: 'Maria Cristina Reyes', pax: 3, date: 'May 22, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', total: 1285, status: 'Confirmed', payment: 'GCash' },
-    { ref: 'FSM-2026-0519-9M3B', creator: 'Juan Carlos Mendoza', pax: 2, date: 'Jun 14, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'VIP', total: 1700, status: 'Confirmed', payment: 'Maya' },
-    { ref: 'FSM-2026-0519-3X9M', creator: 'Ramon Aquino Jr.', pax: 1, date: 'May 21, 2026', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', total: 350, status: 'Refund Pending', payment: 'Card' },
-    { ref: 'FSM-2026-0519-8P4Q', creator: 'Joselito Bautista', pax: 1, date: 'May 20, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', total: 550, status: 'Confirmed', payment: 'GCash' },
-    { ref: 'FSM-2026-0519-2K7L', creator: 'Beatriz Salonga-Cruz', pax: 4, date: 'May 23, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'Aircon', total: 2200, status: 'Cancelled', payment: 'Card' },
-    { ref: 'FSM-2026-0518-1A6F', creator: 'Eduardo Magtanggol', pax: 2, date: 'May 20, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'VIP', total: 1700, status: 'Confirmed', payment: 'GrabPay' },
-    { ref: 'FSM-2026-0518-5J2H', creator: 'Andrea Patricia Lim', pax: 3, date: 'May 22, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', total: 1050, status: 'Pending Payment', payment: 'Bank' },
-    { ref: 'FSM-2026-0518-4N8G', creator: 'Roberto Pangilinan', pax: 1, date: 'May 19, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'Aircon', total: 550, status: 'Used', payment: 'GCash' },
-    { ref: 'FSM-2026-0517-6T1D', creator: 'Cristina Villaroman', pax: 2, date: 'May 21, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'VIP', total: 1700, status: 'Confirmed', payment: 'Card' },
-    { ref: 'FSM-2026-0517-9V3K', creator: 'Lourdes Maramag', pax: 5, date: 'May 25, 2026', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', total: 1750, status: 'Confirmed', payment: 'GCash' },
-    { ref: 'FSM-2026-0517-2B5C', creator: 'Felipe Antonio Garcia', pax: 1, date: 'May 19, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', total: 550, status: 'No-Show', payment: 'OTC' },
-    { ref: 'FSM-2026-0516-7Y2L', creator: 'Marisol Yulo-Carrasco', pax: 3, date: 'May 27, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'VIP', total: 2550, status: 'Confirmed', payment: 'Maya' },
-    { ref: 'FSM-2026-0516-3R9M', creator: 'Anthony Pacquiao', pax: 2, date: 'May 22, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'Aircon', total: 1100, status: 'Rebooked', payment: 'GCash' },
-    { ref: 'FSM-2026-0516-8K4F', creator: 'Roselyn Sanchez-Tan', pax: 4, date: 'May 30, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', total: 1400, status: 'Confirmed', payment: 'Bank' },
-    { ref: 'FSM-2026-0515-5G7H', creator: 'Mariano Diokno III', pax: 2, date: 'May 20, 2026', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'VIP', total: 1700, status: 'Used', payment: 'Card' },
-    { ref: 'FSM-2026-0515-1Q3W', creator: 'Patricia Anne Hidalgo', pax: 6, date: 'May 28, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', total: 3300, status: 'Confirmed', payment: 'GCash' },
-    { ref: 'FSM-2026-0514-9E2D', creator: 'Carlos Miguel Yulo', pax: 1, date: 'May 18, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'Open Air', total: 350, status: 'Used', payment: 'Cash' },
-    { ref: 'FSM-2026-0514-4T8S', creator: 'Vivian Punsalan-Reyes', pax: 3, date: 'May 24, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', total: 1650, status: 'Refunded', payment: 'GCash' },
-    { ref: 'FSM-2026-0513-7H1B', creator: 'Domingo Aguinaldo', pax: 2, date: 'May 26, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'VIP', total: 1700, status: 'Refunded', payment: 'Card' },
-    { ref: 'FSM-2026-0513-2N5J', creator: 'Esperanza Buenaventura', pax: 4, date: 'Jun 02, 2026', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', total: 1400, status: 'Confirmed', payment: 'Maya' },
+    { ref: 'BR-2026-0518-7K2A', creator: 'Maria Cristina Reyes', pax: 3, date: 'May 22, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', total: 1285, status: 'Confirmed', payment: 'GCash' },
+    { ref: 'BR-2026-0519-9M3B', creator: 'Juan Carlos Mendoza', pax: 2, date: 'Jun 14, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'VIP', total: 1700, status: 'Confirmed', payment: 'Maya' },
+    { ref: 'BR-2026-0519-3X9M', creator: 'Ramon Aquino Jr.', pax: 1, date: 'May 21, 2026', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', total: 350, status: 'Refund Pending', payment: 'Card' },
+    { ref: 'BR-2026-0519-8P4Q', creator: 'Joselito Bautista', pax: 1, date: 'May 20, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', total: 550, status: 'Confirmed', payment: 'GCash' },
+    { ref: 'BR-2026-0519-2K7L', creator: 'Beatriz Salonga-Cruz', pax: 4, date: 'May 23, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'Aircon', total: 2200, status: 'Cancelled', payment: 'Card' },
+    { ref: 'BR-2026-0518-1A6F', creator: 'Eduardo Magtanggol', pax: 2, date: 'May 20, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'VIP', total: 1700, status: 'Confirmed', payment: 'GrabPay' },
+    { ref: 'BR-2026-0518-5J2H', creator: 'Andrea Patricia Lim', pax: 3, date: 'May 22, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', total: 1050, status: 'Pending Payment', payment: 'Bank' },
+    { ref: 'BR-2026-0518-4N8G', creator: 'Roberto Pangilinan', pax: 1, date: 'May 19, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'Aircon', total: 550, status: 'Used', payment: 'GCash' },
+    { ref: 'BR-2026-0517-6T1D', creator: 'Cristina Villaroman', pax: 2, date: 'May 21, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'VIP', total: 1700, status: 'Confirmed', payment: 'Card' },
+    { ref: 'BR-2026-0517-9V3K', creator: 'Lourdes Maramag', pax: 5, date: 'May 25, 2026', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', total: 1750, status: 'Confirmed', payment: 'GCash' },
+    { ref: 'BR-2026-0517-2B5C', creator: 'Felipe Antonio Garcia', pax: 1, date: 'May 19, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', total: 550, status: 'No-Show', payment: 'OTC' },
+    { ref: 'BR-2026-0516-7Y2L', creator: 'Marisol Yulo-Carrasco', pax: 3, date: 'May 27, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'VIP', total: 2550, status: 'Confirmed', payment: 'Maya' },
+    { ref: 'BR-2026-0516-3R9M', creator: 'Anthony Pacquiao', pax: 2, date: 'May 22, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'Aircon', total: 1100, status: 'Rebooked', payment: 'GCash' },
+    { ref: 'BR-2026-0516-8K4F', creator: 'Roselyn Sanchez-Tan', pax: 4, date: 'May 30, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', total: 1400, status: 'Confirmed', payment: 'Bank' },
+    { ref: 'BR-2026-0515-5G7H', creator: 'Mariano Diokno III', pax: 2, date: 'May 20, 2026', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'VIP', total: 1700, status: 'Used', payment: 'Card' },
+    { ref: 'BR-2026-0515-1Q3W', creator: 'Patricia Anne Hidalgo', pax: 6, date: 'May 28, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', total: 3300, status: 'Confirmed', payment: 'GCash' },
+    { ref: 'BR-2026-0514-9E2D', creator: 'Carlos Miguel Yulo', pax: 1, date: 'May 18, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'Open Air', total: 350, status: 'Used', payment: 'Cash' },
+    { ref: 'BR-2026-0514-4T8S', creator: 'Vivian Punsalan-Reyes', pax: 3, date: 'May 24, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', total: 1650, status: 'Refunded', payment: 'GCash' },
+    { ref: 'BR-2026-0513-7H1B', creator: 'Domingo Aguinaldo', pax: 2, date: 'May 26, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'VIP', total: 1700, status: 'Refunded', payment: 'Card' },
+    { ref: 'BR-2026-0513-2N5J', creator: 'Esperanza Buenaventura', pax: 4, date: 'Jun 02, 2026', time: '06:00', vessel: 'MV Our Lady of St Therese', class: 'Open Air', total: 1400, status: 'Confirmed', payment: 'Maya' },
   ];
 
   return (
@@ -5039,18 +5042,18 @@ function AdminManifestScreen({ setScreen }) {
   const [exportToast, setExportToast] = useState(null);
 
   const samplePassengers = [
-    { seat: 'A03-B', name: 'Maria Cristina Reyes', age: 34, sex: 'F', id: 'PhilHealth · 12-345678901-2', contact: '+63 917 234 5678', class: 'Aircon', ref: 'FSM-2026-0518-7K2A' },
-    { seat: 'A03-C', name: 'Jose Antonio Reyes', age: 36, sex: 'M', id: 'Driver License · N01-23-456789', contact: '+63 917 234 5678', class: 'Aircon', ref: 'FSM-2026-0518-7K2A' },
-    { seat: 'A03-D', name: 'Sofia Margarita Reyes', age: 8, sex: 'F', id: 'PSA Birth Cert · 2018-NAS-04421', contact: 'with parent', class: 'Aircon', ref: 'FSM-2026-0518-7K2A' },
-    { seat: 'V01-A', name: 'Eduardo Magtanggol', age: 52, sex: 'M', id: 'UMID · CRN-0012-3456789-0', contact: '+63 919 887 2210', class: 'VIP', ref: 'FSM-2026-0518-1A6F' },
-    { seat: 'V01-B', name: 'Lourdes Magtanggol', age: 49, sex: 'F', id: 'Senior Citizen · SEN-2024-04421', contact: '+63 919 887 2210', class: 'VIP', ref: 'FSM-2026-0518-1A6F' },
-    { seat: 'O02-D', name: 'Roberto Pangilinan', age: 28, sex: 'M', id: 'National ID · PCN 1234-5678-9012-3456', contact: '+63 928 445 6701', class: 'Open Air', ref: 'FSM-2026-0518-4N8G' },
-    { seat: 'O02-E', name: 'Cristina Pangilinan', age: 26, sex: 'F', id: 'National ID · PCN 9876-5432-1098-7654', contact: '+63 928 445 6701', class: 'Open Air', ref: 'FSM-2026-0518-4N8G' },
-    { seat: 'A04-A', name: 'Beatriz Salonga-Cruz', age: 41, sex: 'F', id: 'PWD ID · PWD-2022-NAS-00832', contact: '+63 917 882 1144', class: 'Aircon', ref: 'FSM-2026-0518-5C8R' },
-    { seat: 'A04-B', name: 'Ramon Aquino Jr.', age: 31, sex: 'M', id: 'SSS · 34-5678901-2', contact: '+63 906 778 9921', class: 'Aircon', ref: 'FSM-2026-0518-3X9M' },
-    { seat: 'O02-F', name: 'Andrea Patricia Lim', age: 25, sex: 'F', id: 'Passport · P1234567A', contact: '+63 945 112 6630', class: 'Open Air', ref: 'FSM-2026-0518-5J2H' },
-    { seat: 'O02-G', name: 'Felipe Antonio Garcia', age: 38, sex: 'M', id: 'Driver License · N02-87-665544', contact: '+63 917 332 8821', class: 'Open Air', ref: 'FSM-2026-0517-2B5C' },
-    { seat: 'A05-A', name: 'Marisol Yulo-Carrasco', age: 44, sex: 'F', id: 'UMID · CRN-0023-1234567-8', contact: '+63 920 887 6655', class: 'Aircon', ref: 'FSM-2026-0517-6T1D' },
+    { seat: 'A03-B', name: 'Maria Cristina Reyes', age: 34, sex: 'F', id: 'PhilHealth · 12-345678901-2', contact: '+63 917 234 5678', class: 'Aircon', ref: 'BR-2026-0518-7K2A' },
+    { seat: 'A03-C', name: 'Jose Antonio Reyes', age: 36, sex: 'M', id: 'Driver License · N01-23-456789', contact: '+63 917 234 5678', class: 'Aircon', ref: 'BR-2026-0518-7K2A' },
+    { seat: 'A03-D', name: 'Sofia Margarita Reyes', age: 8, sex: 'F', id: 'PSA Birth Cert · 2018-NAS-04421', contact: 'with parent', class: 'Aircon', ref: 'BR-2026-0518-7K2A' },
+    { seat: 'V01-A', name: 'Eduardo Magtanggol', age: 52, sex: 'M', id: 'UMID · CRN-0012-3456789-0', contact: '+63 919 887 2210', class: 'VIP', ref: 'BR-2026-0518-1A6F' },
+    { seat: 'V01-B', name: 'Lourdes Magtanggol', age: 49, sex: 'F', id: 'Senior Citizen · SEN-2024-04421', contact: '+63 919 887 2210', class: 'VIP', ref: 'BR-2026-0518-1A6F' },
+    { seat: 'O02-D', name: 'Roberto Pangilinan', age: 28, sex: 'M', id: 'National ID · PCN 1234-5678-9012-3456', contact: '+63 928 445 6701', class: 'Open Air', ref: 'BR-2026-0518-4N8G' },
+    { seat: 'O02-E', name: 'Cristina Pangilinan', age: 26, sex: 'F', id: 'National ID · PCN 9876-5432-1098-7654', contact: '+63 928 445 6701', class: 'Open Air', ref: 'BR-2026-0518-4N8G' },
+    { seat: 'A04-A', name: 'Beatriz Salonga-Cruz', age: 41, sex: 'F', id: 'PWD ID · PWD-2022-NAS-00832', contact: '+63 917 882 1144', class: 'Aircon', ref: 'BR-2026-0518-5C8R' },
+    { seat: 'A04-B', name: 'Ramon Aquino Jr.', age: 31, sex: 'M', id: 'SSS · 34-5678901-2', contact: '+63 906 778 9921', class: 'Aircon', ref: 'BR-2026-0518-3X9M' },
+    { seat: 'O02-F', name: 'Andrea Patricia Lim', age: 25, sex: 'F', id: 'Passport · P1234567A', contact: '+63 945 112 6630', class: 'Open Air', ref: 'BR-2026-0518-5J2H' },
+    { seat: 'O02-G', name: 'Felipe Antonio Garcia', age: 38, sex: 'M', id: 'Driver License · N02-87-665544', contact: '+63 917 332 8821', class: 'Open Air', ref: 'BR-2026-0517-2B5C' },
+    { seat: 'A05-A', name: 'Marisol Yulo-Carrasco', age: 44, sex: 'F', id: 'UMID · CRN-0023-1234567-8', contact: '+63 920 887 6655', class: 'Aircon', ref: 'BR-2026-0517-6T1D' },
   ];
 
   const handleExport = (fmt) => {
@@ -5984,13 +5987,13 @@ function AdminPromosScreen({ setScreen }) {
 // ============================================================================
 function AdminRefundsScreen({ setScreen }) {
   const [refunds, setRefunds] = useState([
-    { id: 'rf1', ref: 'FSM-2026-0519-3X9M', customer: 'Ramon Aquino Jr.', total: 350, refundable: 280, fee: 70, reason: 'Cancellation 48-72h before departure (20% fee)', requested: 'May 19 · 14:30', method: 'Card · BPI ****4421', status: 'Pending', port: 'BAT-NAS' },
-    { id: 'rf2', ref: 'FSM-2026-0518-9V2K', customer: 'Mariano Diokno III', total: 1100, refundable: 1100, fee: 0, reason: 'Vessel maintenance cancellation (full refund)', requested: 'May 18 · 09:15', method: 'GCash · 0917 ***1234', status: 'Pending', port: 'BAT-CAL' },
-    { id: 'rf3', ref: 'FSM-2026-0518-7T1D', customer: 'Vivian Punsalan-Reyes', total: 1650, refundable: 1650, fee: 0, reason: 'Weather block — typhoon advisory', requested: 'May 18 · 06:42', method: 'GCash · 0917 ***5544', status: 'Processing', port: 'BAT-NAS' },
-    { id: 'rf4', ref: 'FSM-2026-0517-2N5J', customer: 'Esperanza Buenaventura', total: 1400, refundable: 1120, fee: 280, reason: 'Cancellation 48-72h before departure (20% fee)', requested: 'May 17 · 22:08', method: 'Maya · 0928 ***7821', status: 'Failed', port: 'BAT-NAS', failReason: 'Xendit timeout' },
-    { id: 'rf5', ref: 'FSM-2026-0517-8P4Q', customer: 'Joselito Bautista', total: 550, refundable: 0, fee: 550, reason: 'No-show (no refund per policy)', requested: 'May 17 · 19:45', method: 'GCash · 0917 ***2210', status: 'Denied', port: 'BAT-NAS' },
-    { id: 'rf6', ref: 'FSM-2026-0516-5J2H', customer: 'Andrea Patricia Lim', total: 1050, refundable: 525, fee: 525, reason: 'Cancellation 24-48h before departure (50% fee)', requested: 'May 16 · 11:22', method: 'Bank · BDO ****8821', status: 'Processed', port: 'BAT-CAL', processedAt: 'May 16 · 16:08' },
-    { id: 'rf7', ref: 'FSM-2026-0515-1A6F', customer: 'Eduardo Magtanggol', total: 1700, refundable: 1700, fee: 0, reason: 'Operator schedule change', requested: 'May 15 · 14:00', method: 'GrabPay · 0919 ***2210', status: 'Processed', port: 'BAT-NAS', processedAt: 'May 15 · 14:32' },
+    { id: 'rf1', ref: 'BR-2026-0519-3X9M', customer: 'Ramon Aquino Jr.', total: 350, refundable: 280, fee: 70, reason: 'Cancellation 48-72h before departure (20% fee)', requested: 'May 19 · 14:30', method: 'Card · BPI ****4421', status: 'Pending', port: 'BAT-NAS' },
+    { id: 'rf2', ref: 'BR-2026-0518-9V2K', customer: 'Mariano Diokno III', total: 1100, refundable: 1100, fee: 0, reason: 'Vessel maintenance cancellation (full refund)', requested: 'May 18 · 09:15', method: 'GCash · 0917 ***1234', status: 'Pending', port: 'BAT-CAL' },
+    { id: 'rf3', ref: 'BR-2026-0518-7T1D', customer: 'Vivian Punsalan-Reyes', total: 1650, refundable: 1650, fee: 0, reason: 'Weather block — typhoon advisory', requested: 'May 18 · 06:42', method: 'GCash · 0917 ***5544', status: 'Processing', port: 'BAT-NAS' },
+    { id: 'rf4', ref: 'BR-2026-0517-2N5J', customer: 'Esperanza Buenaventura', total: 1400, refundable: 1120, fee: 280, reason: 'Cancellation 48-72h before departure (20% fee)', requested: 'May 17 · 22:08', method: 'Maya · 0928 ***7821', status: 'Failed', port: 'BAT-NAS', failReason: 'Xendit timeout' },
+    { id: 'rf5', ref: 'BR-2026-0517-8P4Q', customer: 'Joselito Bautista', total: 550, refundable: 0, fee: 550, reason: 'No-show (no refund per policy)', requested: 'May 17 · 19:45', method: 'GCash · 0917 ***2210', status: 'Denied', port: 'BAT-NAS' },
+    { id: 'rf6', ref: 'BR-2026-0516-5J2H', customer: 'Andrea Patricia Lim', total: 1050, refundable: 525, fee: 525, reason: 'Cancellation 24-48h before departure (50% fee)', requested: 'May 16 · 11:22', method: 'Bank · BDO ****8821', status: 'Processed', port: 'BAT-CAL', processedAt: 'May 16 · 16:08' },
+    { id: 'rf7', ref: 'BR-2026-0515-1A6F', customer: 'Eduardo Magtanggol', total: 1700, refundable: 1700, fee: 0, reason: 'Operator schedule change', requested: 'May 15 · 14:00', method: 'GrabPay · 0919 ***2210', status: 'Processed', port: 'BAT-NAS', processedAt: 'May 15 · 14:32' },
   ]);
 
   const [filter, setFilter] = useState('all');
@@ -7816,7 +7819,7 @@ function AdminSettingsScreen({ setScreen }) {
             >
               <div className="text-xs font-semibold mb-1" style={{ color: '#1E40AF' }}>Preview with sample data</div>
               <div className="text-sm font-mono leading-relaxed" style={{ color: COLORS.ink }}>
-                F&amp;S Marine: Booking confirmed ✓ Ref: FSM-2026-0519-7K2A · Sat May 22 06:00 · Nasugbu→Tilik · 3 pax · Aircon ₱1,285. Show this ref at the pier.
+                F&amp;S Marine: Booking confirmed ✓ Ref: BR-2026-0519-7K2A · Sat May 22 06:00 · Nasugbu→Tilik · 3 pax · Aircon ₱1,285. Show this ref at the pier.
               </div>
               <div className="text-xs mt-1 font-mono" style={{ color: COLORS.inkMuted }}>
                 155 / 160 characters · 1 SMS
@@ -7915,19 +7918,19 @@ function AdminSettingsScreen({ setScreen }) {
 // ============================================================================
 function AdminAuditScreen({ setScreen }) {
   const events = [
-    { id: 'ev0e', ts: 'May 19 · 19:22:08', user: 'Mariano Diokno III', role: 'Customer', type: 'noshow.reschedule.request', entity: 'booking/FSM-2026-0518-9V2K', action: 'Submitted reschedule request · missed May 19 06:00 sailing · 30% fee (₱330) · new sailing May 25 06:00 · request NSB-2026-0519-7H2C', severity: 'low' },
-    { id: 'ev0d', ts: 'May 19 · 18:47:51', user: 'Patricia Aquino', role: 'Finance Manager', type: 'noshow.refund.request', entity: 'booking/FSM-2026-0518-3K7N', action: 'Approved no-show refund · 18h after manifest · 50% tier · ₱550 to GCash · request NSR-2026-0519-4B8M', severity: 'medium' },
+    { id: 'ev0e', ts: 'May 19 · 19:22:08', user: 'Mariano Diokno III', role: 'Customer', type: 'noshow.reschedule.request', entity: 'booking/BR-2026-0518-9V2K', action: 'Submitted reschedule request · missed May 19 06:00 sailing · 30% fee (₱330) · new sailing May 25 06:00 · request NSB-2026-0519-7H2C', severity: 'low' },
+    { id: 'ev0d', ts: 'May 19 · 18:47:51', user: 'Patricia Aquino', role: 'Finance Manager', type: 'noshow.refund.request', entity: 'booking/BR-2026-0518-3K7N', action: 'Approved no-show refund · 18h after manifest · 50% tier · ₱550 to GCash · request NSR-2026-0519-4B8M', severity: 'medium' },
     { id: 'ev0c', ts: 'May 19 · 17:14:33', user: 'system', role: 'Automated', type: 'sms.failed', entity: 'msg/c8i2f77f-a759-8aef-ea2a', action: 'OTP SMS failed · +63 933 221 4488 · UniSMS reports invalid recipient · webhook message.failed', severity: 'medium' },
     { id: 'ev0b', ts: 'May 19 · 17:08:47', user: 'system', role: 'Automated', type: 'otp.verified', entity: 'customer/c12', action: 'OTP verified for login · phone +63 928 445 6701 · UniSMS reference msg_a6g0d55d', severity: 'low' },
-    { id: 'ev0a', ts: 'May 19 · 16:55:21', user: 'system', role: 'Automated', type: 'sms.sent', entity: 'msg/95f9c44c-7426-57bc-b797', action: 'Booking confirmation SMS sent · FSM-2026-0519-7K2A · +63 919 887 2210 · 1 credit', severity: 'low' },
+    { id: 'ev0a', ts: 'May 19 · 16:55:21', user: 'system', role: 'Automated', type: 'sms.sent', entity: 'msg/95f9c44c-7426-57bc-b797', action: 'Booking confirmation SMS sent · BR-2026-0519-7K2A · +63 919 887 2210 · 1 credit', severity: 'low' },
     { id: 'ev1', ts: 'May 19 · 16:42:18', user: 'Carmela Bautista', role: 'Super Admin', type: 'user.update', entity: 'admin/u3', action: 'Promoted Patricia Aquino to Finance Manager', severity: 'high' },
     { id: 'ev2', ts: 'May 19 · 15:08:42', user: 'Reynaldo Salonga', role: 'Operations Manager', type: 'schedule.create', entity: 'schedule/sch-244', action: 'Created new sailing: Sat May 24, 06:00 · Nasugbu Port · MV Our Lady', severity: 'medium' },
-    { id: 'ev3', ts: 'May 19 · 14:31:09', user: 'Patricia Aquino', role: 'Finance Manager', type: 'refund.approve', entity: 'refund/rf2', action: 'Approved ₱1,100 refund · FSM-2026-0518-9V2K · Mariano Diokno III', severity: 'medium' },
+    { id: 'ev3', ts: 'May 19 · 14:31:09', user: 'Patricia Aquino', role: 'Finance Manager', type: 'refund.approve', entity: 'refund/rf2', action: 'Approved ₱1,100 refund · BR-2026-0518-9V2K · Mariano Diokno III', severity: 'medium' },
     { id: 'ev4', ts: 'May 19 · 11:22:53', user: 'Patricia Aquino', role: 'Finance Manager', type: 'fare.update', entity: 'fare/global/aircon', action: 'Aircon global fare ₱500 → ₱550', severity: 'high' },
     { id: 'ev5', ts: 'May 19 · 10:18:21', user: 'Reynaldo Salonga', role: 'Operations Manager', type: 'voyage.port_reassign', entity: 'voyage/v-2026-0521-08', action: 'Reassigned MV Our Mother from BAT-NAS → BAT-CAL for May 21 08:00', severity: 'high' },
     { id: 'ev6', ts: 'May 19 · 09:45:11', user: 'Carmela Bautista', role: 'Super Admin', type: 'settings.update', entity: 'settings/cancellation', action: 'Cancellation policy: 24-48h refund tier changed 50% → 50% (no change)', severity: 'low' },
-    { id: 'ev7', ts: 'May 18 · 22:08:33', user: 'Patricia Aquino', role: 'Finance Manager', type: 'refund.fail', entity: 'refund/rf4', action: 'Xendit refund failed · FSM-2026-0517-2N5J · timeout · auto-retry queued', severity: 'medium' },
-    { id: 'ev8', ts: 'May 18 · 18:30:14', user: 'Marisol Hidalgo', role: 'Ticketing Staff', type: 'booking.checkin', entity: 'booking/FSM-2026-0518-4N8G', action: 'Checked in Roberto Pangilinan + Cristina Pangilinan · BAT-NAS', severity: 'low' },
+    { id: 'ev7', ts: 'May 18 · 22:08:33', user: 'Patricia Aquino', role: 'Finance Manager', type: 'refund.fail', entity: 'refund/rf4', action: 'Xendit refund failed · BR-2026-0517-2N5J · timeout · auto-retry queued', severity: 'medium' },
+    { id: 'ev8', ts: 'May 18 · 18:30:14', user: 'Marisol Hidalgo', role: 'Ticketing Staff', type: 'booking.checkin', entity: 'booking/BR-2026-0518-4N8G', action: 'Checked in Roberto Pangilinan + Cristina Pangilinan · BAT-NAS', severity: 'low' },
     { id: 'ev9', ts: 'May 18 · 16:00:00', user: 'system', role: 'Automated', type: 'manifest.email', entity: 'voyage/v-2026-0518-1800', action: 'Auto-emailed manifest to manifest@marina.gov.ph · 58 pax · BAT-CAL', severity: 'low' },
     { id: 'ev10', ts: 'May 18 · 14:22:50', user: 'Carmela Bautista', role: 'Super Admin', type: 'block.create', entity: 'block/b1', action: 'Date block created · May 24 · All ports · Typhoon Wilma · 47 bookings refunded', severity: 'high' },
     { id: 'ev11', ts: 'May 18 · 11:55:09', user: 'Carmela Bautista', role: 'Super Admin', type: 'user.suspend', entity: 'customer/c7', action: 'Suspended customer Andrea Patricia Lim · fraudulent ID flag', severity: 'high' },
@@ -7935,9 +7938,9 @@ function AdminAuditScreen({ setScreen }) {
     { id: 'ev13', ts: 'May 17 · 16:42:01', user: 'Reynaldo Salonga', role: 'Operations Manager', type: 'port.update', entity: 'port/p2', action: 'Updated Calatagan Port contact: +63 43 419 8867', severity: 'low' },
     { id: 'ev14', ts: 'May 17 · 14:08:55', user: 'Reynaldo Salonga', role: 'Operations Manager', type: 'vessel.update', entity: 'vessel/v2', action: 'Updated MV Our Mother capacity · VIP 8 → 10', severity: 'medium' },
     { id: 'ev15', ts: 'May 17 · 10:30:00', user: 'system', role: 'Automated', type: 'auth.failed_login', entity: 'admin/u4', action: 'Failed login attempt · jose.castillo@fandsmarine.ph · 3rd attempt · throttled', severity: 'medium' },
-    { id: 'ev16', ts: 'May 16 · 16:08:42', user: 'Patricia Aquino', role: 'Finance Manager', type: 'refund.processed', entity: 'refund/rf6', action: 'Refund ₱525 confirmed by Xendit · FSM-2026-0516-5J2H', severity: 'low' },
+    { id: 'ev16', ts: 'May 16 · 16:08:42', user: 'Patricia Aquino', role: 'Finance Manager', type: 'refund.processed', entity: 'refund/rf6', action: 'Refund ₱525 confirmed by Xendit · BR-2026-0516-5J2H', severity: 'low' },
     { id: 'ev17', ts: 'May 16 · 11:22:33', user: 'Patricia Aquino', role: 'Finance Manager', type: 'fare.override_add', entity: 'fare/override/o1', action: 'Added Calatagan VIP surcharge +₱50 · applies to all BAT-CAL VIP sailings', severity: 'high' },
-    { id: 'ev18', ts: 'May 15 · 14:32:18', user: 'Patricia Aquino', role: 'Finance Manager', type: 'refund.processed', entity: 'refund/rf7', action: 'Refund ₱1,700 confirmed · FSM-2026-0515-1A6F · Eduardo Magtanggol', severity: 'low' },
+    { id: 'ev18', ts: 'May 15 · 14:32:18', user: 'Patricia Aquino', role: 'Finance Manager', type: 'refund.processed', entity: 'refund/rf7', action: 'Refund ₱1,700 confirmed · BR-2026-0515-1A6F · Eduardo Magtanggol', severity: 'low' },
     { id: 'ev19', ts: 'May 12 · 14:22:00', user: 'Carmela Bautista', role: 'Super Admin', type: 'settings.update', entity: 'settings/tos', action: 'Terms of Service updated · version 4.2 published', severity: 'high' },
     { id: 'ev20', ts: 'May 03, 16:08', user: 'Reynaldo Salonga', role: 'Operations Manager', type: 'voyage.port_reassign', entity: 'voyage/v-2026-0503-1400', action: 'Reassigned afternoon sailing from BAT-NAS → BAT-CAL · weather repositioning', severity: 'high' },
   ];
@@ -8192,7 +8195,7 @@ function StaffWalkinScreen({ setScreen }) {
   const handleConfirm = () => {
     const refDate = '0519';
     const refRand = Math.random().toString(36).substring(2, 6).toUpperCase();
-    setBookingRef(`FSM-2026-${refDate}-${refRand}`);
+    setBookingRef(`BR-2026-${refDate}-${refRand}`);
     setStep(4);
   };
 
@@ -8697,18 +8700,18 @@ function StaffCheckinScreen({ setScreen }) {
   //   Infant   → free (0-3y), MUST present a PSA birth certificate (age proof)
   //   Adult    → any valid government ID
   const [manifest, setManifest] = useState([
-    { id: 'mp1', seat: 'A03-B', name: 'Maria Cristina Reyes', age: 34, idType: 'PhilHealth', passengerType: 'Adult', class: 'Aircon', ref: 'FSM-2026-0518-7K2A', status: 'pending' },
-    { id: 'mp2', seat: 'A03-C', name: 'Jose Antonio Reyes', age: 36, idType: 'Driver License', passengerType: 'Adult', class: 'Aircon', ref: 'FSM-2026-0518-7K2A', status: 'pending' },
-    { id: 'mp3', seat: 'A03-D', name: 'Sofia Margarita Reyes', age: 8, idType: 'PSA Birth Cert', passengerType: 'Child', class: 'Aircon', ref: 'FSM-2026-0518-7K2A', status: 'pending' },
-    { id: 'mp4', seat: 'V01-A', name: 'Eduardo Magtanggol', age: 52, idType: 'UMID', passengerType: 'Adult', class: 'VIP', ref: 'FSM-2026-0518-1A6F', status: 'checked' },
-    { id: 'mp5', seat: 'V01-B', name: 'Lourdes Magtanggol', age: 49, idType: 'Senior Citizen ID', passengerType: 'Senior', class: 'VIP', ref: 'FSM-2026-0518-1A6F', status: 'checked' },
-    { id: 'mp6', seat: 'O02-D', name: 'Roberto Pangilinan', age: 28, idType: 'National ID', passengerType: 'Adult', class: 'Open Air', ref: 'FSM-2026-0518-4N8G', status: 'checked' },
-    { id: 'mp7', seat: 'O02-E', name: 'Cristina Pangilinan', age: 26, idType: 'National ID', passengerType: 'Adult', class: 'Open Air', ref: 'FSM-2026-0518-4N8G', status: 'checked' },
-    { id: 'mp8', seat: 'A04-A', name: 'Beatriz Salonga-Cruz', age: 41, idType: 'PWD ID', passengerType: 'PWD', class: 'Aircon', ref: 'FSM-2026-0518-5C8R', status: 'pending' },
-    { id: 'mp9', seat: 'A04-B', name: 'Ramon Aquino Jr.', age: 21, idType: 'Student ID', passengerType: 'Student', class: 'Aircon', ref: 'FSM-2026-0518-3X9M', status: 'pending' },
-    { id: 'mp10', seat: 'O02-F', name: 'Andrea Patricia Lim', age: 25, idType: 'Passport', passengerType: 'Adult', class: 'Open Air', ref: 'FSM-2026-0518-5J2H', status: 'pending' },
-    { id: 'mp11', seat: 'O02-G', name: 'Felipe Antonio Garcia', age: 38, idType: 'Driver License', passengerType: 'Adult', class: 'Open Air', ref: 'FSM-2026-0517-2B5C', status: 'noshow' },
-    { id: 'mp12', seat: 'A05-A', name: 'Marisol Yulo-Carrasco', age: 64, idType: 'Senior Citizen ID', passengerType: 'Senior', class: 'Aircon', ref: 'FSM-2026-0517-6T1D', status: 'pending' },
+    { id: 'mp1', seat: 'A03-B', name: 'Maria Cristina Reyes', age: 34, idType: 'PhilHealth', passengerType: 'Adult', class: 'Aircon', ref: 'BR-2026-0518-7K2A', ticket: 'BTN-2026-0518-3B7K', status: 'pending' },
+    { id: 'mp2', seat: 'A03-C', name: 'Jose Antonio Reyes', age: 36, idType: 'Driver License', passengerType: 'Adult', class: 'Aircon', ref: 'BR-2026-0518-7K2A', ticket: 'BTN-2026-0518-4C8L', status: 'pending' },
+    { id: 'mp3', seat: 'A03-D', name: 'Sofia Margarita Reyes', age: 8, idType: 'PSA Birth Cert', passengerType: 'Child', class: 'Aircon', ref: 'BR-2026-0518-7K2A', ticket: 'BTN-2026-0518-5D9M', status: 'pending' },
+    { id: 'mp4', seat: 'V01-A', name: 'Eduardo Magtanggol', age: 52, idType: 'UMID', passengerType: 'Adult', class: 'VIP', ref: 'BR-2026-0518-1A6F', ticket: 'BTN-2026-0518-6E1N', status: 'checked' },
+    { id: 'mp5', seat: 'V01-B', name: 'Lourdes Magtanggol', age: 49, idType: 'Senior Citizen ID', passengerType: 'Senior', class: 'VIP', ref: 'BR-2026-0518-1A6F', ticket: 'BTN-2026-0518-7F2P', status: 'checked' },
+    { id: 'mp6', seat: 'O02-D', name: 'Roberto Pangilinan', age: 28, idType: 'National ID', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0518-4N8G', ticket: 'BTN-2026-0518-8G3Q', status: 'checked' },
+    { id: 'mp7', seat: 'O02-E', name: 'Cristina Pangilinan', age: 26, idType: 'National ID', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0518-4N8G', ticket: 'BTN-2026-0518-9H4R', status: 'checked' },
+    { id: 'mp8', seat: 'A04-A', name: 'Beatriz Salonga-Cruz', age: 41, idType: 'PWD ID', passengerType: 'PWD', class: 'Aircon', ref: 'BR-2026-0518-5C8R', ticket: 'BTN-2026-0518-1J5S', status: 'pending' },
+    { id: 'mp9', seat: 'A04-B', name: 'Ramon Aquino Jr.', age: 21, idType: 'Student ID', passengerType: 'Student', class: 'Aircon', ref: 'BR-2026-0518-3X9M', ticket: 'BTN-2026-0518-2K6T', status: 'pending' },
+    { id: 'mp10', seat: 'O02-F', name: 'Andrea Patricia Lim', age: 25, idType: 'Passport', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0518-5J2H', ticket: 'BTN-2026-0518-3L7U', status: 'pending' },
+    { id: 'mp11', seat: 'O02-G', name: 'Felipe Antonio Garcia', age: 38, idType: 'Driver License', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0517-2B5C', ticket: 'BTN-2026-0517-4M8V', status: 'noshow' },
+    { id: 'mp12', seat: 'A05-A', name: 'Marisol Yulo-Carrasco', age: 64, idType: 'Senior Citizen ID', passengerType: 'Senior', class: 'Aircon', ref: 'BR-2026-0517-6T1D', ticket: 'BTN-2026-0517-5N9W', status: 'pending' },
   ]);
 
   // Map passenger type → required ID for verification at the counter
@@ -8764,6 +8767,7 @@ function StaffCheckinScreen({ setScreen }) {
         name: pax.name,
         seat: pax.seat,
         ref: pax.ref,
+        ticket: pax.ticket,
         passengerType: pax.passengerType,
         idType: pax.idType,
       });
@@ -8825,6 +8829,7 @@ function StaffCheckinScreen({ setScreen }) {
         name: next.name,
         seat: next.seat,
         ref: next.ref,
+        ticket: next.ticket,
         passengerType: next.passengerType,
         idType: next.idType,
         pendingId: next.id, // remember which row this toast is for
@@ -8909,7 +8914,7 @@ function StaffCheckinScreen({ setScreen }) {
                   {lastScan.name} · Seat <span className="font-mono font-semibold">{lastScan.seat}</span>
                 </div>
                 <div className="text-xs font-mono" style={{ color: needsVerify ? '#92400E' : '#166534', opacity: 0.7 }}>
-                  {lastScan.ref}
+                  Ticket: {lastScan.ticket} · Booking: {lastScan.ref}
                 </div>
 
                 {needsVerify && req && (
@@ -9327,7 +9332,7 @@ function BookingDetailScreen({ setScreen }) {
   // either the pre-departure, post-departure (no-show), or operator-side
   // (emergency cancellation) action flows.
   const booking = {
-    ref: 'FSM-2026-0518-7K2A',
+    ref: 'BR-2026-0518-7K2A',
     bookedOn: 'Mon, May 18, 2026 · 14:32',
     bookedBy: 'Maria Cristina Reyes',
     status: demoStatus,
@@ -9924,7 +9929,7 @@ function CustomerRefundScreen({ setScreen }) {
   const [requestRef, setRequestRef] = useState('');
 
   const booking = {
-    ref: 'FSM-2026-0518-7K2A',
+    ref: 'BR-2026-0518-7K2A',
     date: 'Fri, May 22, 2026',
     time: '08:00',
     vessel: 'MV Our Lady of St Therese',
@@ -10691,18 +10696,18 @@ function StaffBoardingScreen({ setScreen }) {
   // (didn't board yet), 'walkup' = boarded without counter check (rare),
   // 'noshow' = neither counter nor gangway
   const [pax, setPax] = useState([
-    { id: 'p1', seat: 'A03-B', name: 'Maria Cristina Reyes', age: 34, sex: 'F', idType: 'PhilHealth', idNumber: '12-345678901-2', contact: '+63 917 234 5678', class: 'Aircon', ref: 'FSM-2026-0518-7K2A', status: 'boarded', category: 'adult' },
-    { id: 'p2', seat: 'A03-C', name: 'Jose Antonio Reyes', age: 36, sex: 'M', idType: 'Driver License', idNumber: 'N01-23-456789', contact: '+63 917 234 5678', class: 'Aircon', ref: 'FSM-2026-0518-7K2A', status: 'boarded', category: 'adult' },
-    { id: 'p3', seat: 'A03-D', name: 'Sofia Margarita Reyes', age: 8, sex: 'F', idType: 'PSA Birth Cert', idNumber: '2018-NAS-04421', contact: 'with parent', class: 'Aircon', ref: 'FSM-2026-0518-7K2A', status: 'boarded', category: 'child' },
-    { id: 'p4', seat: 'V01-A', name: 'Eduardo Magtanggol', age: 52, sex: 'M', idType: 'UMID', idNumber: 'CRN-0012-3456789-0', contact: '+63 919 887 2210', class: 'VIP', ref: 'FSM-2026-0518-1A6F', status: 'boarded', category: 'adult' },
-    { id: 'p5', seat: 'V01-B', name: 'Lourdes Magtanggol', age: 49, sex: 'F', idType: 'Senior Citizen ID', idNumber: 'SEN-2024-04421', contact: '+63 919 887 2210', class: 'VIP', ref: 'FSM-2026-0518-1A6F', status: 'boarded', category: 'adult' },
-    { id: 'p6', seat: 'O02-D', name: 'Roberto Pangilinan', age: 28, sex: 'M', idType: 'National ID', idNumber: 'PCN 1234-5678-9012', contact: '+63 928 445 6701', class: 'Open Air', ref: 'FSM-2026-0518-4N8G', status: 'boarded', category: 'adult' },
-    { id: 'p7', seat: 'O02-E', name: 'Cristina Pangilinan', age: 26, sex: 'F', idType: 'National ID', idNumber: 'PCN 9876-5432-1098', contact: '+63 928 445 6701', class: 'Open Air', ref: 'FSM-2026-0518-4N8G', status: 'boarded', category: 'adult' },
-    { id: 'p8', seat: 'A04-A', name: 'Beatriz Salonga-Cruz', age: 41, sex: 'F', idType: 'PWD ID', idNumber: 'PWD-2022-NAS-00832', contact: '+63 917 882 1144', class: 'Aircon', ref: 'FSM-2026-0518-5C8R', status: 'boarded', category: 'adult' },
-    { id: 'p9', seat: 'A04-B', name: 'Ramon Aquino Jr.', age: 31, sex: 'M', idType: 'SSS', idNumber: '34-5678901-2', contact: '+63 906 778 9921', class: 'Aircon', ref: 'FSM-2026-0518-3X9M', status: 'checked', category: 'adult' },
-    { id: 'p10', seat: 'O02-F', name: 'Andrea Patricia Lim', age: 25, sex: 'F', idType: 'Passport', idNumber: 'P1234567A', contact: '+63 945 112 6630', class: 'Open Air', ref: 'FSM-2026-0518-5J2H', status: 'checked', category: 'adult' },
-    { id: 'p11', seat: 'O02-G', name: 'Felipe Antonio Garcia', age: 38, sex: 'M', idType: 'Driver License', idNumber: 'N02-87-665544', contact: '+63 917 332 8821', class: 'Open Air', ref: 'FSM-2026-0517-2B5C', status: 'noshow', category: 'adult' },
-    { id: 'p12', seat: 'A05-A', name: 'Marisol Yulo-Carrasco', age: 44, sex: 'F', idType: 'UMID', idNumber: 'CRN-0023-1234567-8', contact: '+63 920 887 6655', class: 'Aircon', ref: 'FSM-2026-0517-6T1D', status: 'boarded', category: 'adult' },
+    { id: 'p1', seat: 'A03-B', name: 'Maria Cristina Reyes', age: 34, sex: 'F', idType: 'PhilHealth', idNumber: '12-345678901-2', contact: '+63 917 234 5678', class: 'Aircon', ref: 'BR-2026-0518-7K2A', status: 'boarded', category: 'adult' },
+    { id: 'p2', seat: 'A03-C', name: 'Jose Antonio Reyes', age: 36, sex: 'M', idType: 'Driver License', idNumber: 'N01-23-456789', contact: '+63 917 234 5678', class: 'Aircon', ref: 'BR-2026-0518-7K2A', status: 'boarded', category: 'adult' },
+    { id: 'p3', seat: 'A03-D', name: 'Sofia Margarita Reyes', age: 8, sex: 'F', idType: 'PSA Birth Cert', idNumber: '2018-NAS-04421', contact: 'with parent', class: 'Aircon', ref: 'BR-2026-0518-7K2A', status: 'boarded', category: 'child' },
+    { id: 'p4', seat: 'V01-A', name: 'Eduardo Magtanggol', age: 52, sex: 'M', idType: 'UMID', idNumber: 'CRN-0012-3456789-0', contact: '+63 919 887 2210', class: 'VIP', ref: 'BR-2026-0518-1A6F', status: 'boarded', category: 'adult' },
+    { id: 'p5', seat: 'V01-B', name: 'Lourdes Magtanggol', age: 49, sex: 'F', idType: 'Senior Citizen ID', idNumber: 'SEN-2024-04421', contact: '+63 919 887 2210', class: 'VIP', ref: 'BR-2026-0518-1A6F', status: 'boarded', category: 'adult' },
+    { id: 'p6', seat: 'O02-D', name: 'Roberto Pangilinan', age: 28, sex: 'M', idType: 'National ID', idNumber: 'PCN 1234-5678-9012', contact: '+63 928 445 6701', class: 'Open Air', ref: 'BR-2026-0518-4N8G', status: 'boarded', category: 'adult' },
+    { id: 'p7', seat: 'O02-E', name: 'Cristina Pangilinan', age: 26, sex: 'F', idType: 'National ID', idNumber: 'PCN 9876-5432-1098', contact: '+63 928 445 6701', class: 'Open Air', ref: 'BR-2026-0518-4N8G', status: 'boarded', category: 'adult' },
+    { id: 'p8', seat: 'A04-A', name: 'Beatriz Salonga-Cruz', age: 41, sex: 'F', idType: 'PWD ID', idNumber: 'PWD-2022-NAS-00832', contact: '+63 917 882 1144', class: 'Aircon', ref: 'BR-2026-0518-5C8R', status: 'boarded', category: 'adult' },
+    { id: 'p9', seat: 'A04-B', name: 'Ramon Aquino Jr.', age: 31, sex: 'M', idType: 'SSS', idNumber: '34-5678901-2', contact: '+63 906 778 9921', class: 'Aircon', ref: 'BR-2026-0518-3X9M', status: 'checked', category: 'adult' },
+    { id: 'p10', seat: 'O02-F', name: 'Andrea Patricia Lim', age: 25, sex: 'F', idType: 'Passport', idNumber: 'P1234567A', contact: '+63 945 112 6630', class: 'Open Air', ref: 'BR-2026-0518-5J2H', status: 'checked', category: 'adult' },
+    { id: 'p11', seat: 'O02-G', name: 'Felipe Antonio Garcia', age: 38, sex: 'M', idType: 'Driver License', idNumber: 'N02-87-665544', contact: '+63 917 332 8821', class: 'Open Air', ref: 'BR-2026-0517-2B5C', status: 'noshow', category: 'adult' },
+    { id: 'p12', seat: 'A05-A', name: 'Marisol Yulo-Carrasco', age: 44, sex: 'F', idType: 'UMID', idNumber: 'CRN-0023-1234567-8', contact: '+63 920 887 6655', class: 'Aircon', ref: 'BR-2026-0517-6T1D', status: 'boarded', category: 'adult' },
   ]);
 
   // Companions (under-3 children attached to an adult per MC 180 §3a)
@@ -11690,15 +11695,15 @@ function NativeAppPreviewScreen({ setScreen }) {
 
   // Recent scans for boarding (last 3)
   const recentBoarded = [
-    { name: 'Roberto Pangilinan', seat: 'O02-D', ref: 'FSM-2026-0518-4N8G', ts: '06:42' },
-    { name: 'Cristina Pangilinan', seat: 'O02-E', ref: 'FSM-2026-0518-4N8G', ts: '06:42' },
-    { name: 'Eduardo Magtanggol', seat: 'V01-A', ref: 'FSM-2026-0518-1A6F', ts: '06:38' },
+    { name: 'Roberto Pangilinan', seat: 'O02-D', ref: 'BR-2026-0518-4N8G', ts: '06:42' },
+    { name: 'Cristina Pangilinan', seat: 'O02-E', ref: 'BR-2026-0518-4N8G', ts: '06:42' },
+    { name: 'Eduardo Magtanggol', seat: 'V01-A', ref: 'BR-2026-0518-1A6F', ts: '06:38' },
   ];
 
   const recentCheckedIn = [
-    { name: 'Maria Cristina Reyes', seat: 'A03-B', ref: 'FSM-2026-0518-7K2A', ts: '06:18' },
-    { name: 'Jose Antonio Reyes', seat: 'A03-C', ref: 'FSM-2026-0518-7K2A', ts: '06:18' },
-    { name: 'Sofia Margarita Reyes', seat: 'A03-D', ref: 'FSM-2026-0518-7K2A', ts: '06:18' },
+    { name: 'Maria Cristina Reyes', seat: 'A03-B', ref: 'BR-2026-0518-7K2A', ts: '06:18' },
+    { name: 'Jose Antonio Reyes', seat: 'A03-C', ref: 'BR-2026-0518-7K2A', ts: '06:18' },
+    { name: 'Sofia Margarita Reyes', seat: 'A03-D', ref: 'BR-2026-0518-7K2A', ts: '06:18' },
   ];
 
   return (
@@ -12742,7 +12747,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
   const [requestRef, setRequestRef] = useState('');
 
   const booking = {
-    ref: 'FSM-2026-0518-9V2K',
+    ref: 'BR-2026-0518-9V2K',
     originalDate: 'Tue, May 19, 2026',
     originalTime: '06:00',
     manifestFinalizedAt: 'Tue, May 19, 2026 · 06:18',
@@ -13528,7 +13533,7 @@ function CustomerReschedulePreScreen({ setScreen }) {
 
   // Seed: matches the Confirmed booking from BookingDetailScreen
   const booking = {
-    ref: 'FSM-2026-0518-7K2A',
+    ref: 'BR-2026-0518-7K2A',
     originalDate: 'Fri, May 22, 2026',
     originalTime: '08:00',
     vessel: 'MV Our Lady of St Therese',
@@ -13610,9 +13615,9 @@ function CustomerReschedulePreScreen({ setScreen }) {
   const netCharge = rescheduleFee + fareDiff;
 
   const handleSubmit = () => {
-    // Mockup-only: generate a fresh booking ref in the FSM-2026-MMDD-XXXX format
+    // Mockup-only: generate a fresh booking ref in the BR-2026-MMDD-XXXX format
     const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
-    setNewBookingRef(`FSM-2026-0519-${rand}`);
+    setNewBookingRef(`BR-2026-0519-${rand}`);
     setStep(3);
   };
 
@@ -14288,25 +14293,25 @@ function AdminEmergencyCancelScreen({ setScreen }) {
   // Affected bookings preview — mocked, would be derived server-side
   const affectedBookings = scope === 'voyage'
     ? [
-        { ref: 'FSM-2026-0518-7K2A', customer: 'Maria Cristina Reyes', phone: '+63 917 *** 2103', pax: 3, total: 1285, class: 'Aircon' },
-        { ref: 'FSM-2026-0518-9V2K', customer: 'Eduardo Magtanggol',   phone: '+63 919 *** 5432', pax: 2, total: 1700, class: 'VIP' },
-        { ref: 'FSM-2026-0518-4N8G', customer: 'Roberto Pangilinan',   phone: '+63 919 *** 2210', pax: 2, total: 700,  class: 'Open Air' },
-        { ref: 'FSM-2026-0517-6T1D', customer: 'Cristina Villaroman',  phone: '+63 917 *** 1144', pax: 2, total: 1700, class: 'VIP' },
-        { ref: 'FSM-2026-0518-1A6F', customer: 'Lourdes Magtanggol',   phone: '+63 919 *** 6622', pax: 4, total: 2200, class: 'Aircon' },
+        { ref: 'BR-2026-0518-7K2A', customer: 'Maria Cristina Reyes', phone: '+63 917 *** 2103', pax: 3, total: 1285, class: 'Aircon' },
+        { ref: 'BR-2026-0518-9V2K', customer: 'Eduardo Magtanggol',   phone: '+63 919 *** 5432', pax: 2, total: 1700, class: 'VIP' },
+        { ref: 'BR-2026-0518-4N8G', customer: 'Roberto Pangilinan',   phone: '+63 919 *** 2210', pax: 2, total: 700,  class: 'Open Air' },
+        { ref: 'BR-2026-0517-6T1D', customer: 'Cristina Villaroman',  phone: '+63 917 *** 1144', pax: 2, total: 1700, class: 'VIP' },
+        { ref: 'BR-2026-0518-1A6F', customer: 'Lourdes Magtanggol',   phone: '+63 919 *** 6622', pax: 4, total: 2200, class: 'Aircon' },
       ]
     : scope === 'date-port'
     ? [
-        { ref: 'FSM-2026-0518-7K2A', customer: 'Maria Cristina Reyes', phone: '+63 917 *** 2103', pax: 3, total: 1285, class: 'Aircon' },
-        { ref: 'FSM-2026-0518-9V2K', customer: 'Eduardo Magtanggol',   phone: '+63 919 *** 5432', pax: 2, total: 1700, class: 'VIP' },
-        { ref: 'FSM-2026-0518-4N8G', customer: 'Roberto Pangilinan',   phone: '+63 919 *** 2210', pax: 2, total: 700,  class: 'Open Air' },
+        { ref: 'BR-2026-0518-7K2A', customer: 'Maria Cristina Reyes', phone: '+63 917 *** 2103', pax: 3, total: 1285, class: 'Aircon' },
+        { ref: 'BR-2026-0518-9V2K', customer: 'Eduardo Magtanggol',   phone: '+63 919 *** 5432', pax: 2, total: 1700, class: 'VIP' },
+        { ref: 'BR-2026-0518-4N8G', customer: 'Roberto Pangilinan',   phone: '+63 919 *** 2210', pax: 2, total: 700,  class: 'Open Air' },
       ]
     : [
-        { ref: 'FSM-2026-0518-7K2A', customer: 'Maria Cristina Reyes', phone: '+63 917 *** 2103', pax: 3, total: 1285, class: 'Aircon' },
-        { ref: 'FSM-2026-0518-9V2K', customer: 'Eduardo Magtanggol',   phone: '+63 919 *** 5432', pax: 2, total: 1700, class: 'VIP' },
-        { ref: 'FSM-2026-0518-4N8G', customer: 'Roberto Pangilinan',   phone: '+63 919 *** 2210', pax: 2, total: 700,  class: 'Open Air' },
-        { ref: 'FSM-2026-0517-6T1D', customer: 'Cristina Villaroman',  phone: '+63 917 *** 1144', pax: 2, total: 1700, class: 'VIP' },
-        { ref: 'FSM-2026-0518-1A6F', customer: 'Lourdes Magtanggol',   phone: '+63 919 *** 6622', pax: 4, total: 2200, class: 'Aircon' },
-        { ref: 'FSM-2026-0518-5J2H', customer: 'Andrea Patricia Lim',  phone: '+63 917 *** 8843', pax: 1, total: 350,  class: 'Open Air' },
+        { ref: 'BR-2026-0518-7K2A', customer: 'Maria Cristina Reyes', phone: '+63 917 *** 2103', pax: 3, total: 1285, class: 'Aircon' },
+        { ref: 'BR-2026-0518-9V2K', customer: 'Eduardo Magtanggol',   phone: '+63 919 *** 5432', pax: 2, total: 1700, class: 'VIP' },
+        { ref: 'BR-2026-0518-4N8G', customer: 'Roberto Pangilinan',   phone: '+63 919 *** 2210', pax: 2, total: 700,  class: 'Open Air' },
+        { ref: 'BR-2026-0517-6T1D', customer: 'Cristina Villaroman',  phone: '+63 917 *** 1144', pax: 2, total: 1700, class: 'VIP' },
+        { ref: 'BR-2026-0518-1A6F', customer: 'Lourdes Magtanggol',   phone: '+63 919 *** 6622', pax: 4, total: 2200, class: 'Aircon' },
+        { ref: 'BR-2026-0518-5J2H', customer: 'Andrea Patricia Lim',  phone: '+63 917 *** 8843', pax: 1, total: 350,  class: 'Open Air' },
       ];
 
   const totalLiability = affectedBookings.reduce((sum, b) => sum + b.total, 0);
@@ -14836,7 +14841,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
 
   // The cancelled booking
   const booking = {
-    ref: 'FSM-2026-0518-7K2A',
+    ref: 'BR-2026-0518-7K2A',
     cancelledAt: 'Fri, May 21, 2026 · 13:42',
     announcementRef: 'EMC-2026-0521-7K2M',
     reason: 'Bad weather / typhoon',
@@ -14878,7 +14883,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
     const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
     if (mode === 'refund')      setRecoveryRef(`EMR-2026-0521-${rand}`);
     else if (mode === 'credit') setRecoveryRef(`CRD-2026-0521-${rand}`);
-    else                        setRecoveryRef(`FSM-2026-0521-${rand}`); // new booking ref for reschedule
+    else                        setRecoveryRef(`BR-2026-0521-${rand}`); // new booking ref for reschedule
     setStep(3);
   };
 
@@ -15433,7 +15438,7 @@ function CustomerCreditWalletScreen({ setScreen }) {
       issuedAt: 'Fri, May 21, 2026',
       expiresAt: 'May 21, 2027',
       reason: 'Emergency cancellation — Typhoon Mawar (May 22 BAT-NAS sailings)',
-      sourceBookingRef: 'FSM-2026-0518-7K2A',
+      sourceBookingRef: 'BR-2026-0518-7K2A',
       originalValue: 1285,
       remaining: 1285,
       used: [],
@@ -15444,11 +15449,11 @@ function CustomerCreditWalletScreen({ setScreen }) {
       issuedAt: 'Thu, Mar 12, 2026',
       expiresAt: 'Mar 12, 2027',
       reason: 'Emergency cancellation — vessel mechanical issue (Mar 13 BAT-NAS 06:00)',
-      sourceBookingRef: 'FSM-2026-0311-8K2T',
+      sourceBookingRef: 'BR-2026-0311-8K2T',
       originalValue: 1700,
       remaining: 550,
       used: [
-        { date: 'Apr 18, 2026', appliedTo: 'FSM-2026-0418-2M5N', amount: 1150 },
+        { date: 'Apr 18, 2026', appliedTo: 'BR-2026-0418-2M5N', amount: 1150 },
       ],
       daysUntilExpiry: 295,
     },
@@ -15457,12 +15462,12 @@ function CustomerCreditWalletScreen({ setScreen }) {
       issuedAt: 'Sat, Nov 08, 2025',
       expiresAt: 'Nov 08, 2026',
       reason: 'Emergency cancellation — port closure (Nov 9 BAT-CAL all sailings)',
-      sourceBookingRef: 'FSM-2025-1107-5J9P',
+      sourceBookingRef: 'BR-2025-1107-5J9P',
       originalValue: 700,
       remaining: 0,
       used: [
-        { date: 'Dec 22, 2025', appliedTo: 'FSM-2025-1222-9P3K', amount: 350 },
-        { date: 'Feb 14, 2026', appliedTo: 'FSM-2026-0214-7T4M', amount: 350 },
+        { date: 'Dec 22, 2025', appliedTo: 'BR-2025-1222-9P3K', amount: 350 },
+        { date: 'Feb 14, 2026', appliedTo: 'BR-2026-0214-7T4M', amount: 350 },
       ],
       daysUntilExpiry: 171,
     },
