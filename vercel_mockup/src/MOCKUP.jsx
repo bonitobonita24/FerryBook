@@ -248,12 +248,14 @@ function LandingScreen({ setScreen }) {
       <h2 className="text-xl font-bold mb-4" style={{ color: COLORS.ink }}>Three ways to sail</h2>
       <div className="space-y-3 mb-8">
         {[
-          { name: 'Open Air', from: '₱350', desc: 'Outdoor deck. Sea breeze, mountain views. Backpacker favorite.', bg: '#E0F2FE', color: '#1E40AF' },
-          { name: 'Aircon', from: '₱550', desc: 'Climate-controlled cabin with reclining seats and USB charging.', bg: '#FFE5E9', color: COLORS.primary },
-          { name: 'VIP', from: '₱850', desc: 'Private lounge. Refreshments, expedited boarding, prime window seats.', bg: '#FEF3C7', color: '#A16207' },
+          { name: 'Open Air', from: '₱350', desc: 'Outdoor deck. Sea breeze, mountain views. Backpacker favorite.', bg: '#E0F2FE', color: '#1E40AF', Icon: Wind },
+          { name: 'Aircon', from: '₱550', desc: 'Climate-controlled cabin with reclining seats and USB charging.', bg: '#FFE5E9', color: COLORS.primary, Icon: Snowflake },
+          { name: 'VIP', from: '₱850', desc: 'Private lounge. Refreshments, expedited boarding, prime window seats.', bg: '#FEF3C7', color: '#A16207', Icon: Crown },
         ].map((c, i) => (
           <div key={i} className="rounded-xl overflow-hidden border flex" style={{ borderColor: COLORS.border, background: 'white' }}>
-            <div className="w-20 flex-shrink-0 flex items-center justify-center text-3xl" style={{ background: c.bg }}>🚢</div>
+            <div className="w-16 flex-shrink-0 flex items-center justify-center" style={{ background: c.bg }}>
+              <c.Icon size={24} style={{ color: c.color }} />
+            </div>
             <div className="p-3 flex-1 min-w-0">
               <div className="flex items-baseline justify-between mb-0.5">
                 <h3 className="text-base font-bold" style={{ color: COLORS.ink }}>{c.name}</h3>
@@ -8157,6 +8159,7 @@ function StaffWalkinScreen({ setScreen }) {
   const [cashTendered, setCashTendered] = useState('');
   const [bookingRef, setBookingRef] = useState('');
   const [ticketNumbers, setTicketNumbers] = useState([]);
+  const [showPrintPreview, setShowPrintPreview] = useState(true);
 
   // Staff session — terminal locked to Nasugbu Port
   const staff = { name: 'Marisol Hidalgo', port: 'BAT-NAS', portName: 'Nasugbu Port' };
@@ -8447,7 +8450,7 @@ function StaffWalkinScreen({ setScreen }) {
               <span className="flex items-center gap-1"><span className="w-3 h-3 rounded" style={{ background: COLORS.primary }}></span>Your pick</span>
               <span className="flex items-center gap-1"><span className="w-3 h-3 rounded" style={{ background: '#E5E7EB' }}></span>Taken</span>
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto flex justify-center">
               <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${seatGrid.cols}, 28px)` }}>
                 {Array.from({ length: seatGrid.rows }).map((_, r) =>
                   Array.from({ length: seatGrid.cols }).map((_, c) => {
@@ -8628,13 +8631,157 @@ function StaffWalkinScreen({ setScreen }) {
           </div>
 
           <div className="grid grid-cols-2 gap-2 mb-2">
-            <OutlineButton>
-              <span className="flex items-center justify-center gap-1 text-xs"><FileText size={14} /> Print</span>
-            </OutlineButton>
+            <button
+              onClick={() => setShowPrintPreview(!showPrintPreview)}
+              className="h-10 rounded-lg font-semibold text-xs border flex items-center justify-center gap-1"
+              style={{ color: COLORS.ink, borderColor: COLORS.border, background: showPrintPreview ? COLORS.bgMuted : 'white' }}
+            >
+              <FileText size={14} /> {showPrintPreview ? 'Hide preview' : 'Print preview'}
+            </button>
             <OutlineButton>
               <span className="flex items-center justify-center gap-1 text-xs"><Mail size={14} /> SMS tickets</span>
             </OutlineButton>
           </div>
+
+          {/* Printable booking confirmation — continuous form / crosswise A4 */}
+          {showPrintPreview && (
+            <div className="mb-3">
+              <div className="text-[10px] text-center mb-1.5" style={{ color: COLORS.inkMuted }}>
+                Print preview · Continuous form / A4 landscape
+              </div>
+              <div className="overflow-x-auto" style={{ background: 'white', border: '1px solid #ccc', boxShadow: '0 1px 6px rgba(0,0,0,0.08)' }}>
+                <div style={{ minWidth: 560, padding: '20px 24px', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: 11, color: '#111', lineHeight: 1.4 }}>
+
+                  {/* HEADER */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #222', paddingBottom: 8, marginBottom: 10 }}>
+                    <div>
+                      <div style={{ fontSize: 16, fontWeight: 'bold' }}>F AND S MARINE TRANSPORT INC.</div>
+                      <div style={{ fontSize: 9, color: '#555' }}>Batangas ↔ Lubang Island Ferry Service</div>
+                      <div style={{ fontSize: 9, color: '#555' }}>MARINA Licensed · Cert. PSL-2019-04287</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 14, fontWeight: 'bold', color: COLORS.primary }}>BOOKING CONFIRMATION</div>
+                      <div style={{ fontSize: 9, color: '#555' }}>Walk-in · Counter Terminal</div>
+                    </div>
+                  </div>
+
+                  {/* BOOKING + TRIP INFO */}
+                  <div style={{ display: 'flex', gap: 20, marginBottom: 10 }}>
+                    <div style={{ flex: 1 }}>
+                      <table style={{ width: '100%', fontSize: 10, borderCollapse: 'collapse' }}>
+                        <tbody>
+                          <tr><td style={{ padding: '2px 0', color: '#555', width: 90 }}>Booking Ref:</td><td style={{ fontWeight: 'bold', fontFamily: 'Courier New, monospace', fontSize: 12 }}>{bookingRef}</td></tr>
+                          <tr><td style={{ padding: '2px 0', color: '#555' }}>Date:</td><td style={{ fontWeight: 'bold' }}>May 19, 2026</td></tr>
+                          <tr><td style={{ padding: '2px 0', color: '#555' }}>Sailing:</td><td style={{ fontWeight: 'bold' }}>{activeSailing?.time} departure</td></tr>
+                          <tr><td style={{ padding: '2px 0', color: '#555' }}>Route:</td><td>{staff.port} → MIN-TIL (Tilik, Lubang)</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <table style={{ width: '100%', fontSize: 10, borderCollapse: 'collapse' }}>
+                        <tbody>
+                          <tr><td style={{ padding: '2px 0', color: '#555', width: 90 }}>Vessel:</td><td>MV Our Lady of St Therese</td></tr>
+                          <tr><td style={{ padding: '2px 0', color: '#555' }}>Class:</td><td style={{ fontWeight: 'bold' }}>{selectedClass === 'openair' ? 'Open Air' : selectedClass === 'aircon' ? 'Aircon' : 'VIP'}</td></tr>
+                          <tr><td style={{ padding: '2px 0', color: '#555' }}>Staff:</td><td>{staff.name} · {staff.port}</td></tr>
+                          <tr><td style={{ padding: '2px 0', color: '#555' }}>Payment:</td><td>{paymentMethod === 'cash' ? 'Cash' : 'Card POS'}</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* PASSENGER TABLE */}
+                  <div style={{ marginBottom: 10 }}>
+                    <div style={{ fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', marginBottom: 4, color: '#555', letterSpacing: 0.5 }}>
+                      Passenger Manifest — {paxCount} passenger{paxCount > 1 ? 's' : ''}
+                    </div>
+                    <table style={{ width: '100%', fontSize: 10, borderCollapse: 'collapse', border: '1px solid #ccc' }}>
+                      <thead>
+                        <tr style={{ background: '#f3f4f6' }}>
+                          {['#', 'Passenger Name', 'Age', 'Sex', 'Type', 'ID Type / Number', 'Seat', 'Ticket Number'].map((h, hi) => (
+                            <th key={hi} style={{ border: '1px solid #ccc', padding: '4px 6px', textAlign: hi < 2 || hi > 5 ? 'left' : hi === 2 || hi === 3 || hi === 6 ? 'center' : 'left', fontWeight: 'bold', fontSize: 9 }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {passengers.map((p, i) => (
+                          <tr key={i}>
+                            <td style={{ border: '1px solid #ccc', padding: '3px 6px', textAlign: 'center' }}>{i + 1}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '3px 6px', fontWeight: 'bold' }}>{p.name || '—'}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '3px 6px', textAlign: 'center' }}>{p.age || '—'}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '3px 6px', textAlign: 'center' }}>{p.sex}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '3px 6px' }}>{p.passengerType}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '3px 6px', fontSize: 9 }}>{p.idType}{p.idNumber ? ` · ${p.idNumber}` : ''}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '3px 6px', textAlign: 'center', fontFamily: 'Courier New, monospace', fontWeight: 'bold' }}>{p.seat || '—'}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '3px 6px', fontFamily: 'Courier New, monospace', fontWeight: 'bold', color: COLORS.primary }}>{ticketNumbers[i]}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* PAYMENT SUMMARY — right aligned */}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+                    <table style={{ fontSize: 10, borderCollapse: 'collapse', minWidth: 220 }}>
+                      <tbody>
+                        <tr><td style={{ padding: '2px 8px', color: '#555' }}>{paxCount} × ₱{fares[selectedClass].toLocaleString()} ({selectedClass === 'openair' ? 'Open Air' : selectedClass === 'aircon' ? 'Aircon' : 'VIP'})</td><td style={{ padding: '2px 8px', textAlign: 'right' }}>₱{subtotal.toLocaleString()}.00</td></tr>
+                        <tr style={{ borderTop: '2px solid #222' }}><td style={{ padding: '4px 8px', fontWeight: 'bold', fontSize: 12 }}>TOTAL</td><td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 'bold', fontSize: 12, fontFamily: 'Courier New, monospace' }}>₱{subtotal.toLocaleString()}.00</td></tr>
+                        <tr><td style={{ padding: '2px 8px', color: '#555' }}>Payment</td><td style={{ padding: '2px 8px', textAlign: 'right' }}>{paymentMethod === 'cash' ? 'CASH' : 'CARD POS'}</td></tr>
+                        {paymentMethod === 'cash' && cashTendered && (
+                          <>
+                            <tr><td style={{ padding: '2px 8px', color: '#555' }}>Tendered</td><td style={{ padding: '2px 8px', textAlign: 'right' }}>₱{Number(cashTendered).toLocaleString()}.00</td></tr>
+                            {change > 0 && <tr><td style={{ padding: '2px 8px', color: '#555' }}>Change</td><td style={{ padding: '2px 8px', textAlign: 'right' }}>₱{change.toLocaleString()}.00</td></tr>}
+                          </>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* REMINDERS */}
+                  <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', padding: '6px 10px', marginBottom: 10, fontSize: 9 }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: 2 }}>IMPORTANT REMINDERS:</div>
+                    <div>• Present your Booking Ticket Number (BTN) at counter check-in and gangway boarding.</div>
+                    <div>• Each passenger must present a valid government-issued ID matching the name above.</div>
+                    <div>• Discounted passengers (Senior/PWD/Student/Child) must present the required original ID — discount forfeited if not presented.</div>
+                    <div>• Arrive at least 2 hours before departure. 20kg baggage allowance per passenger.</div>
+                    <div>• This booking is non-transferable. Reschedule and refund policies apply per company terms.</div>
+                  </div>
+
+                  {/* TEAR-OFF PASSENGER TICKET STUBS */}
+                  <div style={{ borderTop: '1px dashed #999', paddingTop: 8 }}>
+                    <div style={{ fontSize: 8, textTransform: 'uppercase', color: '#999', textAlign: 'center', marginBottom: 6, letterSpacing: 1 }}>
+                      ✂ CUT HERE — INDIVIDUAL BOARDING TICKETS ✂
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      {passengers.map((p, i) => (
+                        <div key={i} style={{ flex: '1 1 160px', border: '1px solid #ccc', borderRadius: 4, padding: '8px 10px', fontSize: 9, minWidth: 160 }}>
+                          <div style={{ fontWeight: 'bold', fontSize: 10, marginBottom: 2 }}>F&S MARINE — BOARDING TICKET</div>
+                          <div style={{ borderBottom: '1px solid #eee', paddingBottom: 3, marginBottom: 3 }}>
+                            <div style={{ fontWeight: 'bold', fontSize: 11 }}>{p.name || `Passenger ${i + 1}`}</div>
+                            <div>{p.passengerType} · {p.sex} · Age {p.age || '—'}</div>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                            <span>Seat: <strong style={{ fontFamily: 'Courier New, monospace' }}>{p.seat || '—'}</strong></span>
+                            <span>Class: <strong>{selectedClass === 'openair' ? 'OA' : selectedClass === 'aircon' ? 'AC' : 'VIP'}</strong></span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                            <span>{activeSailing?.time} · May 19</span>
+                            <span>{staff.port} → TIL</span>
+                          </div>
+                          <div style={{ fontFamily: 'Courier New, monospace', fontWeight: 'bold', fontSize: 12, color: COLORS.primary, marginTop: 2 }}>{ticketNumbers[i]}</div>
+                          <div style={{ fontSize: 7, color: '#999', marginTop: 2 }}>Booking: {bookingRef}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* FOOTER */}
+                  <div style={{ textAlign: 'center', marginTop: 12, fontSize: 8, color: '#999', borderTop: '1px solid #eee', paddingTop: 6 }}>
+                    F and S Marine Transport Inc. · fandsmarinetransport.com · Powered by Powerbyte I.T. Solutions
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <PrimaryButton onClick={reset} size="md" className="w-full">
             New walk-in booking
@@ -8758,9 +8905,10 @@ function StaffCheckinScreen({ setScreen }) {
     setManifest(manifest.map((m) => (m.id === id ? { ...m, status: 'noshow' } : m)));
   };
 
-  const handleUndo = (id) => {
-    setManifest(manifest.map((m) => (m.id === id ? { ...m, status: 'pending' } : m)));
-  };
+  // No undo — once a passenger is checked-in or marked no-show, the status
+  // is locked permanently. This prevents fraudulent re-scanning of copied QR
+  // codes or ticket numbers. Only a supervisor with admin access can override
+  // via the web admin panel (not available on the Counter PWA).
 
   // Simulated scan picks the next pending passenger. For discounted types the
   // row jumps to a verification state (status stays pending; we surface a
@@ -9001,19 +9149,17 @@ function StaffCheckinScreen({ setScreen }) {
               </div>
 
               <div className="flex gap-2 mt-3">
+                <div className="flex-1 flex items-center gap-1.5 text-[10px] px-3 py-2 rounded-lg"
+                  style={{ background: '#FEE2E2', color: '#7F1D1D' }}>
+                  <Lock size={11} />
+                  <span>This scan is permanently recorded and cannot be undone</span>
+                </div>
                 <button
                   onClick={() => setDuplicateScanAlert(null)}
-                  className="flex-1 h-10 rounded-lg font-semibold text-xs"
-                  style={{ background: 'white', color: COLORS.ink, border: `1px solid ${COLORS.border}` }}
-                >
-                  Dismiss alert
-                </button>
-                <button
-                  onClick={() => setDuplicateScanAlert(null)}
-                  className="flex-[2] h-10 rounded-lg font-semibold text-xs text-white"
+                  className="flex-shrink-0 h-10 px-3 rounded-lg font-semibold text-xs text-white"
                   style={{ background: COLORS.destructive }}
                 >
-                  <AlertTriangle size={13} className="inline mr-1" /> Report to supervisor
+                  <AlertTriangle size={13} className="inline mr-1" /> Report
                 </button>
               </div>
             </div>
@@ -9084,6 +9230,14 @@ function StaffCheckinScreen({ setScreen }) {
             </div>
           </button>
         )}
+      </div>
+
+      {/* Anti-fraud security notice */}
+      <div className="rounded-lg p-2.5 mb-3 flex items-start gap-2" style={{ background: '#FEF2F2', border: '1px solid #FECACA' }}>
+        <Lock size={13} className="flex-shrink-0 mt-0.5" style={{ color: '#7F1D1D' }} />
+        <div className="text-[10px]" style={{ color: '#7F1D1D' }}>
+          <span className="font-bold">Scan-once policy:</span> Each ticket (BTN) can only be scanned once. Check-in status is <span className="font-bold">permanent and irreversible</span> — staff cannot undo a scan. If the same QR code or ticket number is presented again, the system blocks it and flags the attempt. This prevents fraudulent use of copied tickets.
+        </div>
       </div>
 
       {/* ID-verification compliance banner */}
@@ -9264,13 +9418,14 @@ function StaffCheckinScreen({ setScreen }) {
                       </button>
                     </>
                   ) : (
-                    <button
-                      onClick={() => handleUndo(m.id)}
-                      className="text-xs font-semibold px-3 py-2 rounded-lg border bg-white"
-                      style={{ color: COLORS.ink, borderColor: COLORS.border }}
-                    >
-                      Undo
-                    </button>
+                    <div className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1.5 rounded-lg"
+                      style={{
+                        background: m.status === 'checked' ? '#DCFCE7' : '#FEF3C7',
+                        color: m.status === 'checked' ? '#166534' : '#92400E',
+                      }}>
+                      <Lock size={10} />
+                      {m.status === 'checked' ? 'Locked ✓' : 'No-show'}
+                    </div>
                   )}
                 </div>
               </div>
@@ -10934,19 +11089,17 @@ function StaffBoardingScreen({ setScreen }) {
                 </div>
 
                 <div className="flex gap-2 mt-3">
+                  <div className="flex-1 flex items-center gap-1.5 text-[10px] px-3 py-2 rounded-lg"
+                    style={{ background: '#FEE2E2', color: '#7F1D1D' }}>
+                    <Lock size={11} />
+                    <span>This scan is permanently recorded — cannot be undone</span>
+                  </div>
                   <button
                     onClick={() => setDuplicateBoardAlert(null)}
-                    className="flex-1 h-10 rounded-lg font-semibold text-xs"
-                    style={{ background: 'white', color: COLORS.ink, border: `1px solid ${COLORS.border}` }}
-                  >
-                    Dismiss
-                  </button>
-                  <button
-                    onClick={() => setDuplicateBoardAlert(null)}
-                    className="flex-[2] h-10 rounded-lg font-semibold text-xs text-white"
+                    className="flex-shrink-0 h-10 px-3 rounded-lg font-semibold text-xs text-white"
                     style={{ background: COLORS.destructive }}
                   >
-                    <AlertTriangle size={13} className="inline mr-1" /> Deny boarding · report
+                    <AlertTriangle size={13} className="inline mr-1" /> Deny + report
                   </button>
                 </div>
               </div>
@@ -11010,6 +11163,14 @@ function StaffBoardingScreen({ setScreen }) {
               </div>
             </button>
           )}
+        </div>
+
+        {/* Anti-fraud security notice */}
+        <div className="rounded-lg p-2.5 mb-3 flex items-start gap-2" style={{ background: '#EDE9FE', border: '1px solid #C4B5FD' }}>
+          <Lock size={13} className="flex-shrink-0 mt-0.5" style={{ color: '#5B21B6' }} />
+          <div className="text-[10px]" style={{ color: '#5B21B6' }}>
+            <span className="font-bold">Scan-once policy:</span> Each ticket (BTN) can only be scanned once at the gangway. Boarding status is <span className="font-bold">permanent and irreversible</span>. If the same QR code or ticket number is presented again, boarding is denied and the attempt is flagged. This prevents unauthorized boarding with copied tickets.
+          </div>
         </div>
 
         {/* Live boarding tally */}
@@ -15879,8 +16040,8 @@ function SeatSelectionScreen({ setScreen }) {
         </div>
 
         {/* Seat grid */}
-        <div className="overflow-x-auto -mx-2 px-2">
-          <div className="mx-auto inline-block">
+        <div className="overflow-x-auto -mx-2 px-2 flex justify-center">
+          <div className="inline-block">
             {Array.from({ length: config.rows }).map((_, r) => (
               <div key={r} className="flex items-center gap-1.5 mb-1.5">
                 {/* Row label */}
@@ -16043,7 +16204,11 @@ export default function FandSMarineMockup() {
     tablet: { width: 768, height: 1024, radius: 24, padding: 10, innerRadius: 16, label: 'iPad · 768×1024' },
     desktop: { width: 1280, height: 800, radius: 12, padding: 6, innerRadius: 8, label: 'Desktop · 1280×800' },
   };
-  const vp = viewports[viewMode];
+
+  // Some screens require a minimum viewport — Walk-in POS is tablet/desktop only
+  const pcOnlyScreens = ['staffWalkin'];
+  const effectiveViewMode = pcOnlyScreens.includes(screen) && viewMode === 'phone' ? 'tablet' : viewMode;
+  const vp = viewports[effectiveViewMode];
 
   // Current screen label for the frame title
   const currentLabel = (() => {
@@ -16220,6 +16385,11 @@ export default function FandSMarineMockup() {
               }}>
                 {isCustomer ? 'Customer' : isStaff ? 'Staff' : 'Admin'} · {currentLabel}
               </span>
+              {pcOnlyScreens.includes(screen) && viewMode === 'phone' && (
+                <div className="text-[10px] mt-1" style={{ color: '#F59E0B' }}>
+                  ⚠ Walk-in POS requires tablet or desktop — auto-switched to tablet view
+                </div>
+              )}
             </div>
 
             {/* Device frame */}
@@ -16240,18 +16410,18 @@ export default function FandSMarineMockup() {
                 style={{
                   background: '#fff',
                   borderRadius: vp.innerRadius,
-                  height: viewMode === 'desktop' ? vp.height : vp.height,
+                  height: effectiveViewMode === 'desktop' ? vp.height : vp.height,
                 }}
               >
                 {/* Status bar — phone and tablet only */}
-                {viewMode !== 'desktop' && (
+                {effectiveViewMode !== 'desktop' && (
                   <div
                     className="flex items-center justify-between px-7 pt-2 pb-1.5 relative z-20"
                     style={{ background: 'white', color: COLORS.ink, fontSize: 12, fontWeight: 600 }}
                   >
                     <span>4:32</span>
                     {/* Dynamic Island notch — phone only */}
-                    {viewMode === 'phone' && (
+                    {effectiveViewMode === 'phone' && (
                       <div
                         style={{
                           position: 'absolute',
@@ -16303,18 +16473,18 @@ export default function FandSMarineMockup() {
                   className="flex items-center justify-between px-4 border-b z-10"
                   style={{
                     borderColor: COLORS.border,
-                    height: viewMode === 'phone' ? 48 : 56,
+                    height: effectiveViewMode === 'phone' ? 48 : 56,
                     background: 'white',
                   }}
                 >
                   <button
                     onClick={() => setScreen('landing')}
                     className="flex items-center gap-1.5 font-bold"
-                    style={{ color: COLORS.primary, fontSize: viewMode === 'phone' ? 13 : 15 }}
+                    style={{ color: COLORS.primary, fontSize: effectiveViewMode === 'phone' ? 13 : 15 }}
                   >
-                    <Ship size={viewMode === 'phone' ? 18 : 20} />
-                    <span className="truncate" style={{ maxWidth: viewMode === 'phone' ? 160 : 300 }}>
-                      {viewMode === 'phone' ? 'F&S Marine' : 'F and S Marine Transport Inc.'}
+                    <Ship size={effectiveViewMode === 'phone' ? 18 : 20} />
+                    <span className="truncate" style={{ maxWidth: effectiveViewMode === 'phone' ? 160 : 300 }}>
+                      {effectiveViewMode === 'phone' ? 'F&S Marine' : 'F and S Marine Transport Inc.'}
                     </span>
                   </button>
                   {isCustomer ? (
@@ -16324,7 +16494,7 @@ export default function FandSMarineMockup() {
                         className="text-xs font-medium px-2 py-1 rounded-md"
                         style={{ color: COLORS.ink }}
                       >
-                        {viewMode === 'phone' ? 'Bookings' : 'My Bookings'}
+                        {effectiveViewMode === 'phone' ? 'Bookings' : 'My Bookings'}
                       </button>
                       <button
                         onClick={() => setScreen('login')}
@@ -16350,13 +16520,13 @@ export default function FandSMarineMockup() {
                 <div
                   className="overflow-y-auto overflow-x-hidden"
                   style={{
-                    height: vp.height - (viewMode !== 'desktop' ? 36 : 0) - (viewMode === 'phone' ? 48 : 56) - 10,
+                    height: vp.height - (effectiveViewMode !== 'desktop' ? 36 : 0) - (effectiveViewMode === 'phone' ? 48 : 56) - 10,
                     background: COLORS.bgMuted,
                   }}
                 >
                   <div style={{
-                    padding: viewMode === 'desktop' ? '24px 48px' : viewMode === 'tablet' ? '20px 32px' : '16px 16px',
-                    maxWidth: viewMode === 'desktop' ? 960 : viewMode === 'tablet' ? 640 : '100%',
+                    padding: effectiveViewMode === 'desktop' ? '24px 48px' : effectiveViewMode === 'tablet' ? '20px 32px' : '16px 16px',
+                    maxWidth: effectiveViewMode === 'desktop' ? 960 : effectiveViewMode === 'tablet' ? 640 : '100%',
                     margin: '0 auto',
                   }}>
                     {content}
@@ -16367,7 +16537,7 @@ export default function FandSMarineMockup() {
                 </div>
 
                 {/* Home indicator — phone only */}
-                {viewMode === 'phone' && (
+                {effectiveViewMode === 'phone' && (
                   <div
                     style={{
                       position: 'absolute',
