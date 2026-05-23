@@ -10652,146 +10652,17 @@ function CustomerRefundScreen({ setScreen }) {
 // HTML5 canvas with Pointer Events — works for stylus, finger, and mouse.
 // Parent receives the data URL via onChange when the user lifts the pointer.
 // ============================================================================
-function SignaturePad({ value, onChange, label, signatoryName, signatoryRole }) {
-  const canvasRef = useRef(null);
-  const drawingRef = useRef(false);
-  const lastPointRef = useRef(null);
-  const hasDrawnRef = useRef(false);
-
-  // Set up canvas resolution for crisp lines on high-DPI screens
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ratio = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * ratio;
-    canvas.height = rect.height * ratio;
-    const ctx = canvas.getContext('2d');
-    ctx.scale(ratio, ratio);
-    ctx.strokeStyle = '#1a1a1a';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-  }, []);
-
-  const getPos = (e) => {
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-  };
-
-  const handlePointerDown = (e) => {
-    e.preventDefault();
-    drawingRef.current = true;
-    lastPointRef.current = getPos(e);
-    hasDrawnRef.current = true;
-    // Draw a single dot in case user just taps
-    const ctx = canvasRef.current.getContext('2d');
-    ctx.beginPath();
-    ctx.arc(lastPointRef.current.x, lastPointRef.current.y, 1, 0, Math.PI * 2);
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fill();
-  };
-
-  const handlePointerMove = (e) => {
-    if (!drawingRef.current) return;
-    e.preventDefault();
-    const pos = getPos(e);
-    const ctx = canvasRef.current.getContext('2d');
-    ctx.beginPath();
-    ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    lastPointRef.current = pos;
-  };
-
-  const handlePointerUp = (e) => {
-    if (!drawingRef.current) return;
-    drawingRef.current = false;
-    // Save the signature as a data URL and pass to parent
-    const dataUrl = canvasRef.current.toDataURL('image/png');
-    onChange(dataUrl);
-  };
-
-  const handleClear = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    hasDrawnRef.current = false;
-    onChange(null);
-  };
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-1.5">
-        <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.inkMuted }}>
-          {label}
-        </div>
-        {value && (
-          <button
-            onClick={handleClear}
-            className="text-xs font-semibold flex items-center gap-1"
-            style={{ color: COLORS.destructive }}
-          >
-            <RefreshCw size={11} /> Clear
-          </button>
-        )}
-      </div>
-      <div
-        className="relative rounded-lg overflow-hidden bg-white"
-        style={{ border: `2px solid ${value ? COLORS.success : COLORS.border}` }}
-      >
-        <canvas
-          ref={canvasRef}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
-          style={{
-            width: '100%',
-            height: 120,
-            touchAction: 'none',
-            cursor: 'crosshair',
-            display: 'block',
-          }}
-        />
-        {!value && (
-          <div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-            style={{ color: COLORS.inkMuted }}
-          >
-            <div className="text-center">
-              <Pencil size={20} className="mx-auto mb-1" style={{ opacity: 0.5 }} />
-              <div className="text-xs">Sign here — stylus, finger, or mouse</div>
-            </div>
-          </div>
-        )}
-        {/* Signature baseline */}
-        <div
-          className="absolute left-3 right-3 pointer-events-none"
-          style={{ bottom: 24, height: 1, background: COLORS.border }}
-        />
-      </div>
-      <div className="text-xs mt-1.5 px-1" style={{ color: COLORS.inkMuted }}>
-        <span className="font-semibold" style={{ color: COLORS.ink }}>{signatoryName}</span>
-        {' · '}
-        {signatoryRole}
-      </div>
-    </div>
-  );
-}
+// SignaturePad removed — manifest uses blank wet-ink signature lines instead.
+// Print the manifest and have both parties sign with pen before PCG/MARINA submission.
 
 // ============================================================================
 // TIER 1: BOARDING OFFICER — GANGWAY SCAN + FINAL MANIFEST (Batch 8)
-// New role beyond Ticketing Staff. Tablet runs at the dockside/gangway near
-// the vessel. Three modes:
+// Three modes:
 //   A. Gangway scanning   — QR rescan as people physically board
-//   B. Finalize check     — anomaly review (counter checked-in but didn't
-//                           board, walk-ups, no-shows)
-//   C. Final manifest     — MARINA MC-180 compliant manifest with dual
-//                           signature pads (Boarding Officer + Master/Captain)
+//   B. Finalize check     — anomaly review
+//   C. Final manifest     — MARINA MC-180 with blank wet-ink signature lines
 // ============================================================================
-function StaffBoardingScreen({ setScreen }) {
+function StaffBoardingScreen({ setScreen, onShowManifest }) {
   const [mode, setMode] = useState('A'); // 'A' scanning, 'B' finalize, 'C' manifest
   const [scannerActive, setScannerActive] = useState(false);
   const [lastBoarded, setLastBoarded] = useState(null);
@@ -10855,8 +10726,6 @@ function StaffBoardingScreen({ setScreen }) {
   ];
 
   // Signatures captured as data URLs
-  const [officerSig, setOfficerSig] = useState(null);
-  const [masterSig, setMasterSig] = useState(null);
   const [submitted, setSubmitted] = useState(false);
 
   // Counters
@@ -10901,6 +10770,7 @@ function StaffBoardingScreen({ setScreen }) {
 
   const handleSubmitManifest = () => {
     setSubmitted(true);
+    if (onShowManifest) onShowManifest(true);
   };
 
   // ============== MODE A: GANGWAY SCANNING ==============
@@ -11411,6 +11281,7 @@ function StaffBoardingScreen({ setScreen }) {
     );
   }
 
+
   // ============== MODE C: SIGNED MANIFEST PREVIEW ==============
   // Submitted state
   if (submitted) {
@@ -11459,6 +11330,20 @@ function StaffBoardingScreen({ setScreen }) {
           <PrimaryButton onClick={() => setScreen('landing')} size="md" className="w-full">
             Done
           </PrimaryButton>
+
+          {/* A4 MANIFEST PRINT PREVIEW — shown inline after finalization */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-xs font-bold" style={{ color: COLORS.ink }}>Print Preview — A4 Manifest</div>
+              <button
+                onClick={() => onShowManifest(true)}
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white flex items-center gap-1"
+                style={{ background: '#7C3AED' }}
+              >
+                <FileText size={12} /> View A4 Print Preview
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -11491,10 +11376,11 @@ function StaffBoardingScreen({ setScreen }) {
         </div>
         <div className="flex gap-2">
           <button
+            onClick={() => onShowManifest(true)}
             className="text-xs font-semibold px-3 py-2 rounded-lg border bg-white flex items-center gap-1.5"
             style={{ color: COLORS.ink, borderColor: COLORS.border }}
           >
-            <FileText size={14} /> Print
+            <FileText size={14} /> View A4 Print Preview
           </button>
           <button
             className="text-xs font-semibold px-3 py-2 rounded-lg border bg-white flex items-center gap-1.5"
@@ -11725,78 +11611,52 @@ function StaffBoardingScreen({ setScreen }) {
           </p>
         </div>
 
-        {/* Signatures */}
+        {/* Signatures — blank lines for wet ink (pen) signatures */}
         <div className="px-6 py-5">
           <div className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: COLORS.ink }}>
-            VI. Signatures
+            VI. Signatures (Wet Ink — Sign on Printed Copy)
           </div>
-          <div className="grid md:grid-cols-2 gap-5">
-            <SignaturePad
-              value={officerSig}
-              onChange={setOfficerSig}
-              label="Boarding Officer"
-              signatoryName={voyage.boardingOfficer}
-              signatoryRole={`ID ${voyage.boardingOfficerId}`}
-            />
-            <SignaturePad
-              value={masterSig}
-              onChange={setMasterSig}
-              label="Master / Vessel Captain"
-              signatoryName={voyage.master}
-              signatoryRole={`PCG Lic. ${voyage.masterLicense}`}
-            />
+          <div className="grid grid-cols-2 gap-6">
+            <div className="text-center">
+              <div className="h-16 border-b-2 mb-2 flex items-end justify-center" style={{ borderColor: COLORS.ink }}>
+                <span className="text-[10px] mb-1" style={{ color: COLORS.inkMuted }}>sign above this line</span>
+              </div>
+              <div className="text-xs font-bold" style={{ color: COLORS.ink }}>{voyage.boardingOfficer}</div>
+              <div className="text-[10px]" style={{ color: COLORS.inkMuted }}>Boarding Officer · {voyage.boardingOfficerId}</div>
+              <div className="text-[10px] mt-1" style={{ color: COLORS.inkMuted }}>Date: _______________</div>
+            </div>
+            <div className="text-center">
+              <div className="h-16 border-b-2 mb-2 flex items-end justify-center" style={{ borderColor: COLORS.ink }}>
+                <span className="text-[10px] mb-1" style={{ color: COLORS.inkMuted }}>sign above this line</span>
+              </div>
+              <div className="text-xs font-bold" style={{ color: COLORS.ink }}>{voyage.master}</div>
+              <div className="text-[10px]" style={{ color: COLORS.inkMuted }}>Master / Captain · PCG Lic. {voyage.masterLicense}</div>
+              <div className="text-[10px] mt-1" style={{ color: COLORS.inkMuted }}>Date: _______________</div>
+            </div>
           </div>
-          <div className="text-xs mt-4 text-center font-mono" style={{ color: COLORS.inkMuted }}>
-            Generated electronically · {voyage.date} · F and S Marine Transport Inc.
+          <div className="text-[10px] mt-3 text-center" style={{ color: COLORS.inkMuted }}>
+            Print this manifest and have both parties sign with pen before submission.
           </div>
         </div>
       </div>
 
-      {/* Submission CTA */}
-      <div
-        className="rounded-2xl p-4 mb-4 border-2"
-        style={{
-          background: officerSig && masterSig ? '#DCFCE7' : '#FEF3C7',
-          borderColor: officerSig && masterSig ? COLORS.success : COLORS.warning,
-        }}
-      >
-        {officerSig && masterSig ? (
-          <div className="flex items-start gap-2 text-sm" style={{ color: '#166534' }}>
-            <ShieldCheck size={18} className="flex-shrink-0 mt-0.5" />
-            <div>
-              <span className="font-semibold">Both signatures captured.</span> The
-              manifest is ready to submit to Philippine Coast Guard and MARINA.
-            </div>
+      {/* Submission CTA — no signature gate, manifest can be finalized and printed */}
+      <div className="rounded-xl p-3 mb-3 border" style={{ background: '#DCFCE7', borderColor: COLORS.success }}>
+        <div className="flex items-start gap-2 text-xs" style={{ color: '#166534' }}>
+          <ShieldCheck size={16} className="flex-shrink-0 mt-0.5" />
+          <div>
+            <span className="font-semibold">Manifest ready.</span> Print the manifest, collect wet-ink signatures from the Boarding Officer and Master/Captain, then submit the signed hard copy to PCG / MARINA.
           </div>
-        ) : (
-          <div className="flex items-start gap-2 text-sm" style={{ color: '#92400E' }}>
-            <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
-            <div>
-              <span className="font-semibold">Awaiting signatures.</span> Both
-              the Boarding Officer and the Master/Captain must sign before the
-              manifest can be submitted.
-              <span className="block mt-1 text-xs opacity-80">
-                {!officerSig && '· Boarding Officer signature pending'}
-                {!officerSig && !masterSig && <br/>}
-                {!masterSig && '· Master/Captain signature pending'}
-              </span>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
       <button
         onClick={handleSubmitManifest}
-        disabled={!officerSig || !masterSig}
-        className="w-full h-14 rounded-xl font-semibold text-white text-base"
-        style={{
-          background: officerSig && masterSig ? COLORS.success : COLORS.inkMuted,
-          opacity: officerSig && masterSig ? 1 : 0.5,
-          cursor: officerSig && masterSig ? 'pointer' : 'not-allowed',
-        }}
+        className="w-full h-12 rounded-xl font-semibold text-white text-sm"
+        style={{ background: COLORS.success }}
       >
         <span className="flex items-center justify-center gap-2">
-          <Send size={18} /> Finalize & submit to PCG / MARINA
+          <Send size={16} /> Finalize & submit to PCG / MARINA
         </span>
       </button>
     </div>
@@ -16148,6 +16008,7 @@ export default function FandSMarineMockup() {
   const [screen, setScreen] = useState('landing');
   const [viewMode, setViewMode] = useState('phone'); // 'phone' | 'tablet' | 'desktop'
   const [navCollapsed, setNavCollapsed] = useState(false);
+  const [showManifestPreview, setShowManifestPreview] = useState(false);
 
   // Screen groups for the mockup navigator (outside the phone)
   const isCustomer = ['landing', 'calendar', 'sailings', 'time', 'classPicker', 'passengers',
@@ -16195,7 +16056,7 @@ export default function FandSMarineMockup() {
   else if (screen === 'adminAudit') content = <AdminAuditScreen setScreen={setScreen} />;
   else if (screen === 'staffWalkin') content = <StaffWalkinScreen setScreen={setScreen} />;
   else if (screen === 'staffCheckin') content = <StaffCheckinScreen setScreen={setScreen} />;
-  else if (screen === 'staffBoarding') content = <StaffBoardingScreen setScreen={setScreen} />;
+  else if (screen === 'staffBoarding') content = <StaffBoardingScreen setScreen={setScreen} onShowManifest={setShowManifestPreview} />;
   else if (screen === 'nativeApp') content = <NativeAppPreviewScreen setScreen={setScreen} />;
 
   // Viewport dimensions per mode
@@ -16353,7 +16214,7 @@ export default function FandSMarineMockup() {
                   {groupScreens.map(s => (
                     <button
                       key={s.id}
-                      onClick={() => setScreen(s.id)}
+                      onClick={() => { setScreen(s.id); setShowManifestPreview(false); }}
                       className="w-full text-left px-2.5 py-1.5 rounded-md text-xs transition-all truncate"
                       style={{
                         background: screen === s.id ? `${groupColor}22` : 'transparent',
@@ -16560,6 +16421,169 @@ export default function FandSMarineMockup() {
               Scroll inside the device · {vp.label} · Not live — no data persists
             </div>
           </div>
+
+          {/* A4 MANIFEST — appears to the right of the device when boarding officer submits */}
+          {showManifestPreview && screen === 'staffBoarding' && (
+            <div className="flex-shrink-0 ml-6" style={{ width: 620 }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-semibold px-3 py-1 rounded-full" style={{ background: '#7C3AED22', color: '#A78BFA' }}>
+                  A4 Print Preview · MC-180 Manifest
+                </span>
+                <button
+                  onClick={() => setShowManifestPreview(false)}
+                  className="text-[10px] px-2 py-1 rounded" style={{ color: '#9CA3AF' }}
+                >
+                  ✕ Close
+                </button>
+              </div>
+              <div
+                className="overflow-y-auto rounded-lg"
+                style={{
+                  background: 'white',
+                  border: '1px solid #555',
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+                  maxHeight: vp.height + (vp.padding * 2),
+                }}
+              >
+                <div style={{ padding: '28px 32px', fontFamily: 'Times New Roman, serif', fontSize: 11, color: '#111', lineHeight: 1.5 }}>
+
+                  {/* Header */}
+                  <div style={{ textAlign: 'center', marginBottom: 18 }}>
+                    <div style={{ fontSize: 13, fontWeight: 'bold', letterSpacing: 1.5 }}>REPUBLIC OF THE PHILIPPINES</div>
+                    <div style={{ fontSize: 10 }}>MARITIME INDUSTRY AUTHORITY · PHILIPPINE COAST GUARD</div>
+                    <div style={{ borderBottom: '2px solid #222', margin: '8px auto', width: 200 }} />
+                    <div style={{ fontSize: 16, fontWeight: 'bold', marginTop: 10 }}>PASSENGER MANIFEST</div>
+                    <div style={{ fontSize: 9 }}>Submitted per MARINA MC No. 180 · Section IV</div>
+                    <div style={{ fontSize: 11, fontWeight: 'bold', marginTop: 6 }}>F AND S MARINE TRANSPORT INC.</div>
+                    <div style={{ fontSize: 9 }}>CPC No. 2024-BAT-0842 · PSL-2019-04287</div>
+                  </div>
+
+                  {/* I. Voyage Particulars */}
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 11, fontWeight: 'bold', borderBottom: '1px solid #999', paddingBottom: 3, marginBottom: 8 }}>I. VOYAGE PARTICULARS</div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <tbody>
+                        {[
+                          ['Voyage No.:', 'FSM-V-2026-05-19-001', 'Date:', 'Tue, May 19, 2026'],
+                          ['Vessel:', 'MV Our Lady of St Therese', 'Registry:', 'PHIL-MNL-2018-04421'],
+                          ['Master:', 'Capt. Roberto Santos', 'License:', 'MM-2015-04421'],
+                          ['From:', 'Nasugbu Port (BAT-NAS)', 'To:', 'Tilik Port (MIN-TIL)'],
+                          ['ETD:', '06:00', 'ETA:', '10:00'],
+                          ['Distance:', '54 nautical miles', 'Weather:', 'Fair / moderate seas'],
+                        ].map((row, ri) => (
+                          <tr key={ri}>
+                            <td style={{ padding: '2px 0', width: '20%', fontWeight: 'bold' }}>{row[0]}</td>
+                            <td style={{ padding: '2px 0', width: '30%', fontFamily: ri === 0 ? 'Courier New, monospace' : undefined }}>{row[1]}</td>
+                            <td style={{ padding: '2px 0', width: '20%', fontWeight: 'bold' }}>{row[2]}</td>
+                            <td style={{ padding: '2px 0', width: '30%' }}>{row[3]}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* II. Passenger List */}
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 11, fontWeight: 'bold', borderBottom: '1px solid #999', paddingBottom: 3, marginBottom: 8 }}>
+                      II. PASSENGER LIST — 11 passengers boarded
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #999', fontSize: 9 }}>
+                      <thead>
+                        <tr style={{ background: '#f0f0f0' }}>
+                          {['#', 'Ticket (BTN)', 'Seat', 'Name', 'Age', 'Sex', 'ID Type', 'ID No.', 'Class'].map((h, hi) => (
+                            <th key={hi} style={{ border: '1px solid #999', padding: '3px 4px', textAlign: 'left', fontWeight: 'bold', fontSize: 8 }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { n: 1, t: 'BTN-..3B7K', s: 'A03-B', nm: 'Maria Cristina Reyes', a: 34, sx: 'F', id: 'PhilHealth', idn: '12-3456..', cl: 'Aircon' },
+                          { n: 2, t: 'BTN-..4C8L', s: 'A03-C', nm: 'Jose Antonio Reyes', a: 36, sx: 'M', id: 'Driver Lic', idn: 'N01-23..', cl: 'Aircon' },
+                          { n: 3, t: 'BTN-..5D9M', s: 'A03-D', nm: 'Sofia Margarita Reyes', a: 8, sx: 'F', id: 'PSA Birth', idn: '2018-NAS..', cl: 'Aircon' },
+                          { n: 4, t: 'BTN-..6E1N', s: 'V01-A', nm: 'Eduardo Magtanggol', a: 52, sx: 'M', id: 'UMID', idn: 'CRN-0012..', cl: 'VIP' },
+                          { n: 5, t: 'BTN-..7F2P', s: 'V01-B', nm: 'Lourdes Magtanggol', a: 49, sx: 'F', id: 'Senior ID', idn: 'SEN-2024..', cl: 'VIP' },
+                          { n: 6, t: 'BTN-..8G3Q', s: 'O02-D', nm: 'Roberto Pangilinan', a: 28, sx: 'M', id: 'National ID', idn: 'PCN 1234..', cl: 'Open Air' },
+                          { n: 7, t: 'BTN-..9H4R', s: 'O02-E', nm: 'Cristina Pangilinan', a: 26, sx: 'F', id: 'National ID', idn: 'PCN 9876..', cl: 'Open Air' },
+                          { n: 8, t: 'BTN-..1J5S', s: 'A04-A', nm: 'Beatriz Salonga-Cruz', a: 41, sx: 'F', id: 'PWD ID', idn: 'PWD-2022..', cl: 'Aircon' },
+                          { n: 9, t: 'BTN-..2K6T', s: 'A04-B', nm: 'Ramon Aquino Jr.', a: 31, sx: 'M', id: 'SSS', idn: '34-5678..', cl: 'Aircon' },
+                          { n: 10, t: 'BTN-..3L7U', s: 'O02-F', nm: 'Andrea Patricia Lim', a: 25, sx: 'F', id: 'Passport', idn: 'P12345..', cl: 'Open Air' },
+                          { n: 11, t: 'BTN-..5N9W', s: 'A05-A', nm: 'Marisol Yulo-Carrasco', a: 44, sx: 'F', id: 'UMID', idn: 'CRN-0023..', cl: 'Aircon' },
+                        ].map(p => (
+                          <tr key={p.n}>
+                            <td style={{ border: '1px solid #ccc', padding: '2px 4px', textAlign: 'center' }}>{p.n}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '2px 3px', fontFamily: 'Courier New, monospace', fontSize: 7.5 }}>{p.t}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '2px 4px', fontFamily: 'Courier New, monospace', fontWeight: 'bold', textAlign: 'center' }}>{p.s}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '2px 4px', fontWeight: 'bold' }}>{p.nm}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '2px 4px', textAlign: 'center' }}>{p.a}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '2px 4px', textAlign: 'center' }}>{p.sx}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '2px 4px' }}>{p.id}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '2px 3px', fontFamily: 'Courier New, monospace', fontSize: 7.5 }}>{p.idn}</td>
+                            <td style={{ border: '1px solid #ccc', padding: '2px 4px' }}>{p.cl}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div style={{ fontSize: 8, marginTop: 4, fontStyle: 'italic', color: '#666' }}>
+                      Infant (lap): Baby Reyes (15 mo, F) — attached to Maria Cristina Reyes, Seat A03-B
+                    </div>
+                  </div>
+
+                  {/* III. Summary */}
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 11, fontWeight: 'bold', borderBottom: '1px solid #999', paddingBottom: 3, marginBottom: 8 }}>III. SUMMARY</div>
+                    <table style={{ borderCollapse: 'collapse', border: '1px solid #999' }}>
+                      <thead><tr style={{ background: '#f0f0f0' }}>
+                        {['Class', 'Passengers Boarded'].map((h, hi) => (
+                          <th key={hi} style={{ border: '1px solid #999', padding: '3px 14px', textAlign: hi === 0 ? 'left' : 'center' }}>{h}</th>
+                        ))}
+                      </tr></thead>
+                      <tbody>
+                        {[
+                          { c: 'Open Air', bd: 3 },
+                          { c: 'Aircon', bd: 6 },
+                          { c: 'VIP', bd: 2 },
+                        ].map((r, ri) => (
+                          <tr key={ri}><td style={{ border: '1px solid #999', padding: '2px 14px' }}>{r.c}</td><td style={{ border: '1px solid #999', padding: '2px 14px', textAlign: 'center' }}>{r.bd}</td></tr>
+                        ))}
+                        <tr style={{ fontWeight: 'bold', borderTop: '2px solid #222' }}><td style={{ border: '1px solid #999', padding: '3px 14px' }}>TOTAL</td><td style={{ border: '1px solid #999', padding: '3px 14px', textAlign: 'center' }}>11</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* IV. Certification + blank signature lines */}
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 11, fontWeight: 'bold', borderBottom: '1px solid #999', paddingBottom: 3, marginBottom: 8 }}>IV. CERTIFICATION</div>
+                    <p style={{ fontSize: 9, marginBottom: 20 }}>
+                      I hereby certify that the above is a true and correct manifest of all passengers on board this vessel for this voyage, in compliance with MARINA Memorandum Circular No. 180.
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+                      <div style={{ width: '42%', textAlign: 'center' }}>
+                        <div style={{ height: 55, borderBottom: '1px solid #222', marginBottom: 6 }} />
+                        <div style={{ fontWeight: 'bold', fontSize: 10 }}>Domingo Bayani</div>
+                        <div style={{ fontSize: 9 }}>Boarding Officer</div>
+                        <div style={{ fontSize: 8, color: '#555' }}>BO-NAS-2024-001</div>
+                        <div style={{ fontSize: 9, marginTop: 4 }}>Date: ___________________</div>
+                      </div>
+                      <div style={{ width: '42%', textAlign: 'center' }}>
+                        <div style={{ height: 55, borderBottom: '1px solid #222', marginBottom: 6 }} />
+                        <div style={{ fontWeight: 'bold', fontSize: 10 }}>Capt. Roberto Santos</div>
+                        <div style={{ fontSize: 9 }}>Master / Captain</div>
+                        <div style={{ fontSize: 8, color: '#555' }}>License: MM-2015-04421</div>
+                        <div style={{ fontSize: 9, marginTop: 4 }}>Date: ___________________</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div style={{ textAlign: 'center', fontSize: 7, color: '#999', borderTop: '1px solid #eee', paddingTop: 6 }}>
+                    Generated by F and S Marine Transport Inc. Booking System · Powered by Powerbyte I.T. Solutions
+                    <br />This document is system-generated. Signatures must be original (wet ink).
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </div>
