@@ -8147,41 +8147,62 @@ function AdminAuditScreen({ setScreen }) {
 // staff at Calatagan can only book BAT-CAL sailings. Cash and card-at-counter.
 // ============================================================================
 function StaffWalkinScreen({ setScreen }) {
-  const [step, setStep] = useState(1); // 1: sailing, 2: passengers, 3: payment, 4: confirmation
-  const [selectedSailing, setSelectedSailing] = useState(null);
+  const [step, setStep] = useState(1); // 1: sailing+class, 2: passengers+seats, 3: payment, 4: receipt
   const [selectedClass, setSelectedClass] = useState('aircon');
-  const [paxCount, setPaxCount] = useState(2);
+  const [paxCount, setPaxCount] = useState(1);
   const [passengers, setPassengers] = useState([
-    { name: '', age: '', idType: 'National ID', idNumber: '' },
-    { name: '', age: '', idType: 'National ID', idNumber: '' },
+    { name: '', age: '', sex: 'M', idType: 'National ID', idNumber: '', passengerType: 'Adult', seat: '' },
   ]);
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [cashTendered, setCashTendered] = useState('');
   const [bookingRef, setBookingRef] = useState('');
+  const [ticketNumbers, setTicketNumbers] = useState([]);
 
-  // Staff session context (would come from auth) — this terminal is locked to Nasugbu
-  const staffContext = {
-    name: 'Marisol Hidalgo',
-    port: 'BAT-NAS',
-    portName: 'Nasugbu Port',
-  };
+  // Staff session — terminal locked to Nasugbu Port
+  const staff = { name: 'Marisol Hidalgo', port: 'BAT-NAS', portName: 'Nasugbu Port' };
 
-  // Only sailings from staff's port are visible — Calatagan sailings are hidden
+  // Today's sailings from this port — manifest status determines availability
   const sailings = [
-    { id: 's1', time: '06:00', vessel: 'MV Our Lady of St Therese', seats: { openair: 42, aircon: 28, vip: 9 }, status: 'On time' },
-    { id: 's2', time: '11:30', vessel: 'MV Our Lady of St Therese', seats: { openair: 22, aircon: 14, vip: 4 }, status: 'Filling up' },
-    { id: 's3', time: '16:00', vessel: 'MV Our Lady of St Therese', seats: { openair: 50, aircon: 30, vip: 10 }, status: 'On time' },
+    { id: 's1', time: '06:00', vessel: 'MV Our Lady of St Therese', manifestDeclared: true, departed: true,
+      seats: { openair: 0, aircon: 0, vip: 0 } },
+    { id: 's2', time: '11:30', vessel: 'MV Our Lady of St Therese', manifestDeclared: false, departed: false,
+      seats: { openair: 22, aircon: 14, vip: 4 }, status: 'Boarding now' },
+    { id: 's3', time: '16:00', vessel: 'MV Our Lady of St Therese', manifestDeclared: false, departed: false,
+      seats: { openair: 50, aircon: 30, vip: 10 }, status: 'Next sailing' },
   ];
+
+  // Auto-select the first sailing that hasn't departed and whose manifest isn't declared
+  const activeSailing = sailings.find(s => !s.departed && !s.manifestDeclared);
+  const nextSailing = sailings.find(s => !s.departed && !s.manifestDeclared && s.id !== activeSailing?.id);
+  // Staff can only book for activeSailing. nextSailing is shown as locked until manifest is declared.
 
   const fares = { openair: 350, aircon: 550, vip: 850 };
   const subtotal = fares[selectedClass] * paxCount;
   const change = paymentMethod === 'cash' && cashTendered ? Math.max(0, Number(cashTendered) - subtotal) : 0;
 
+  // Seat grids per class
+  const seatGrid = selectedClass === 'openair'
+    ? { rows: 10, cols: 8, prefix: 'O', colLabels: 'ABCDEFGH'.split('') }
+    : selectedClass === 'aircon'
+    ? { rows: 10, cols: 5, prefix: 'A', colLabels: 'ABCDE'.split('') }
+    : { rows: 3, cols: 4, prefix: 'V', colLabels: 'ABCD'.split('') };
+
+  // Mock taken seats (pseudo-random based on class)
+  const takenSeats = new Set();
+  const seed = selectedClass === 'openair' ? 3 : selectedClass === 'aircon' ? 7 : 2;
+  for (let r = 1; r <= seatGrid.rows; r++) {
+    for (let c = 0; c < seatGrid.cols; c++) {
+      if ((r * (c + 1) * seed) % 5 === 0) {
+        takenSeats.add(`${seatGrid.prefix}${String(r).padStart(2, '0')}-${seatGrid.colLabels[c]}`);
+      }
+    }
+  }
+
   const updatePaxCount = (n) => {
     setPaxCount(n);
     const newPax = [];
     for (let i = 0; i < n; i++) {
-      newPax.push(passengers[i] || { name: '', age: '', idType: 'National ID', idNumber: '' });
+      newPax.push(passengers[i] || { name: '', age: '', sex: 'M', idType: 'National ID', idNumber: '', passengerType: 'Adult', seat: '' });
     }
     setPassengers(newPax);
   };
@@ -8192,478 +8213,431 @@ function StaffWalkinScreen({ setScreen }) {
     setPassengers(newPax);
   };
 
+  const assignSeat = (i, seatId) => {
+    // Unassign if clicking already-assigned seat for this passenger
+    if (passengers[i].seat === seatId) {
+      updatePassenger(i, 'seat', '');
+      return;
+    }
+    // Don't allow if taken by another passenger in this booking
+    const takenByOther = passengers.some((p, j) => j !== i && p.seat === seatId);
+    if (takenByOther || takenSeats.has(seatId)) return;
+    updatePassenger(i, 'seat', seatId);
+  };
+
+  const [assigningPaxIndex, setAssigningPaxIndex] = useState(0);
+
   const handleConfirm = () => {
     const refDate = '0519';
     const refRand = Math.random().toString(36).substring(2, 6).toUpperCase();
     setBookingRef(`BR-2026-${refDate}-${refRand}`);
+    const tickets = passengers.map(() => {
+      const tRand = Math.random().toString(36).substring(2, 6).toUpperCase();
+      return `BTN-2026-${refDate}-${tRand}`;
+    });
+    setTicketNumbers(tickets);
     setStep(4);
   };
 
   const reset = () => {
     setStep(1);
-    setSelectedSailing(null);
-    setPaxCount(2);
-    setPassengers([
-      { name: '', age: '', idType: 'National ID', idNumber: '' },
-      { name: '', age: '', idType: 'National ID', idNumber: '' },
-    ]);
+    setPaxCount(1);
+    setPassengers([{ name: '', age: '', sex: 'M', idType: 'National ID', idNumber: '', passengerType: 'Adult', seat: '' }]);
     setCashTendered('');
     setBookingRef('');
+    setTicketNumbers([]);
+    setAssigningPaxIndex(0);
   };
 
   return (
     <div>
       <MobileBadge strategy="Mobile First" />
 
-      {/* Staff context bar — port lock indicator */}
-      <div
-        className="rounded-2xl p-4 mb-4 flex items-center justify-between gap-3 flex-wrap"
-        style={{ background: '#FFE5E9', border: `1px solid ${COLORS.primary}` }}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0"
-            style={{ background: 'white', color: COLORS.primary }}
-          >
-            MH
-          </div>
+      {/* POS header bar */}
+      <div className="rounded-xl p-3 mb-3 flex items-center justify-between gap-2" style={{ background: COLORS.ink, color: 'white' }}>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: COLORS.primary }}>MH</div>
           <div>
-            <div className="font-semibold text-sm" style={{ color: COLORS.ink }}>{staffContext.name}</div>
-            <div className="text-xs flex items-center gap-1.5" style={{ color: COLORS.primary }}>
-              <Lock size={11} /> Terminal locked to <span className="font-mono font-semibold">{staffContext.port}</span> · {staffContext.portName}
+            <div className="text-xs font-semibold">{staff.name}</div>
+            <div className="text-[10px] opacity-70 flex items-center gap-1">
+              <Lock size={9} /> {staff.port} · {staff.portName}
             </div>
           </div>
         </div>
-        <div className="text-xs font-mono" style={{ color: COLORS.inkMuted }}>
-          May 19, 2026 · 14:32
+        <div className="text-right">
+          <div className="text-[10px] opacity-70">Walk-in POS Terminal</div>
+          <div className="text-xs font-mono">May 19, 2026 · 14:32</div>
         </div>
       </div>
 
+      {/* Active sailing — locked, no date selection */}
+      {activeSailing && (
+        <div className="rounded-xl p-3 mb-3 border-2" style={{ background: '#FFE5E9', borderColor: COLORS.primary }}>
+          <div className="flex items-center justify-between mb-1">
+            <div className="text-xs font-bold uppercase" style={{ color: COLORS.primary }}>
+              Active Sailing — booking locked to this departure
+            </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: '#DCFCE7', color: '#166534' }}>
+              {activeSailing.status}
+            </span>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-xl font-bold" style={{ color: COLORS.ink }}>{activeSailing.time}</span>
+            <ArrowRight size={14} style={{ color: COLORS.inkMuted }} />
+            <span className="text-sm font-mono" style={{ color: COLORS.inkMuted }}>MIN-TIL</span>
+          </div>
+          <div className="text-xs" style={{ color: COLORS.inkMuted }}>{activeSailing.vessel} · Today</div>
+          <div className="flex gap-1.5 mt-1.5">
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#DBEAFE', color: '#1E40AF' }}>OA {activeSailing.seats.openair}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#FFE5E9', color: COLORS.primary }}>AC {activeSailing.seats.aircon}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#FEF3C7', color: '#A16207' }}>VIP {activeSailing.seats.vip}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Departed/declared sailings — info only */}
+      {sailings.filter(s => s.departed || s.manifestDeclared).length > 0 && (
+        <div className="rounded-lg p-2 mb-3 text-[10px]" style={{ background: COLORS.bgMuted, color: COLORS.inkMuted }}>
+          {sailings.filter(s => s.departed).map(s => (
+            <div key={s.id} className="flex items-center gap-1">
+              <span>⛴️ {s.time} — Departed · manifest declared ✓</span>
+            </div>
+          ))}
+          {nextSailing && (
+            <div className="flex items-center gap-1 mt-1" style={{ color: COLORS.ink }}>
+              <Clock size={10} />
+              <span>Next: {nextSailing.time} — available after {activeSailing?.time} manifest is declared</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Step indicator */}
-      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+      <div className="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1">
         {[
-          { n: 1, label: 'Sailing + class' },
+          { n: 1, label: 'Class' },
           { n: 2, label: 'Passengers' },
           { n: 3, label: 'Payment' },
           { n: 4, label: 'Receipt' },
         ].map((s, i) => (
-          <div key={s.n} className="flex items-center gap-2 flex-shrink-0">
-            <div
-              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{
-                background: step >= s.n ? COLORS.primary : COLORS.bgMuted,
-                color: step >= s.n ? 'white' : COLORS.inkMuted,
-              }}
-            >
-              {step > s.n ? <Check size={14} /> : s.n}
+          <div key={s.n} className="flex items-center gap-1.5 flex-shrink-0">
+            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
+              style={{ background: step >= s.n ? COLORS.primary : COLORS.bgMuted, color: step >= s.n ? 'white' : COLORS.inkMuted }}>
+              {step > s.n ? <Check size={12} /> : s.n}
             </div>
-            <span
-              className="text-xs font-semibold"
-              style={{ color: step >= s.n ? COLORS.ink : COLORS.inkMuted }}
-            >
-              {s.label}
-            </span>
-            {i < 3 && <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />}
+            <span className="text-[10px] font-semibold" style={{ color: step >= s.n ? COLORS.ink : COLORS.inkMuted }}>{s.label}</span>
+            {i < 3 && <ChevronRight size={12} style={{ color: COLORS.inkMuted }} />}
           </div>
         ))}
       </div>
 
-      {/* STEP 1 — Sailing + class */}
+      {/* STEP 1 — Class + pax count */}
       {step === 1 && (
         <>
-          <h2 className="text-xl font-bold mb-1" style={{ color: COLORS.ink }}>Pick a sailing</h2>
-          <p className="text-xs mb-4" style={{ color: COLORS.inkMuted }}>
-            Today · only sailings departing from {staffContext.portName} are shown
-          </p>
-
-          <div className="space-y-2 mb-4">
-            {sailings.map((s) => {
-              const isSelected = selectedSailing?.id === s.id;
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => setSelectedSailing(s)}
-                  className="w-full text-left rounded-2xl p-4 transition-all border-2"
-                  style={{
-                    background: 'white',
-                    borderColor: isSelected ? COLORS.primary : COLORS.border,
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold" style={{ color: COLORS.ink }}>{s.time}</span>
-                      <ArrowRight size={14} style={{ color: COLORS.inkMuted }} />
-                      <span className="text-sm font-mono" style={{ color: COLORS.inkMuted }}>MIN-TIL</span>
-                    </div>
-                    <span
-                      className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                      style={{
-                        background: s.status === 'On time' ? '#DCFCE7' : '#FEF3C7',
-                        color: s.status === 'On time' ? COLORS.success : COLORS.warning,
-                      }}
-                    >
-                      {s.status}
-                    </span>
-                  </div>
-                  <div className="text-xs mb-2" style={{ color: COLORS.inkMuted }}>{s.vessel}</div>
-                  <div className="flex gap-1.5 flex-wrap">
-                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#DBEAFE', color: '#1E40AF' }}>
-                      OA · {s.seats.openair}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#FFE5E9', color: COLORS.primary }}>
-                      AC · {s.seats.aircon}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#FEF3C7', color: '#A16207' }}>
-                      VIP · {s.seats.vip}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
+          <h2 className="text-lg font-bold mb-1" style={{ color: COLORS.ink }}>Select class</h2>
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {[
+              { id: 'openair', name: 'Open Air', color: '#1E40AF', bg: '#DBEAFE', fare: 350 },
+              { id: 'aircon', name: 'Aircon', color: COLORS.primary, bg: '#FFE5E9', fare: 550 },
+              { id: 'vip', name: 'VIP', color: '#A16207', bg: '#FEF3C7', fare: 850 },
+            ].map((c) => (
+              <button key={c.id} onClick={() => setSelectedClass(c.id)}
+                className="rounded-xl p-2.5 border-2 text-center"
+                style={{ background: c.bg, borderColor: selectedClass === c.id ? c.color : 'transparent' }}>
+                <div className="text-[10px] font-semibold" style={{ color: c.color }}>{c.name}</div>
+                <div className="text-base font-bold font-mono" style={{ color: c.color }}>₱{c.fare}</div>
+              </button>
+            ))}
           </div>
 
-          {selectedSailing && (
-            <>
-              <h3 className="font-semibold text-sm mb-2" style={{ color: COLORS.ink }}>Class</h3>
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                {[
-                  { id: 'openair', name: 'Open Air', color: '#1E40AF', bg: '#DBEAFE', fare: 350 },
-                  { id: 'aircon', name: 'Aircon', color: COLORS.primary, bg: '#FFE5E9', fare: 550 },
-                  { id: 'vip', name: 'VIP', color: '#A16207', bg: '#FEF3C7', fare: 850 },
-                ].map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => setSelectedClass(c.id)}
-                    className="rounded-xl p-3 border-2 text-center"
-                    style={{
-                      background: c.bg,
-                      borderColor: selectedClass === c.id ? c.color : 'transparent',
-                    }}
-                  >
-                    <div className="text-xs font-semibold mb-0.5" style={{ color: c.color }}>{c.name}</div>
-                    <div className="text-lg font-bold font-mono" style={{ color: c.color }}>₱{c.fare}</div>
-                  </button>
-                ))}
-              </div>
+          <h3 className="text-sm font-semibold mb-2" style={{ color: COLORS.ink }}>How many passengers?</h3>
+          <div className="rounded-xl p-3 mb-4 bg-white border flex items-center justify-between" style={{ borderColor: COLORS.border }}>
+            <button onClick={() => updatePaxCount(Math.max(1, paxCount - 1))}
+              className="w-10 h-10 rounded-full text-xl font-bold border" style={{ borderColor: COLORS.border, color: COLORS.ink }}>−</button>
+            <div className="text-center">
+              <div className="text-2xl font-bold" style={{ color: COLORS.ink }}>{paxCount}</div>
+              <div className="text-[10px]" style={{ color: COLORS.inkMuted }}>pax × ₱{fares[selectedClass]} = ₱{subtotal.toLocaleString()}</div>
+            </div>
+            <button onClick={() => updatePaxCount(Math.min(10, paxCount + 1))}
+              className="w-10 h-10 rounded-full text-xl font-bold border" style={{ borderColor: COLORS.border, color: COLORS.ink }}>+</button>
+          </div>
 
-              <h3 className="font-semibold text-sm mb-2" style={{ color: COLORS.ink }}>Passengers</h3>
-              <div
-                className="rounded-2xl p-4 mb-4 bg-white border flex items-center justify-between"
-                style={{ borderColor: COLORS.border }}
-              >
-                <button
-                  onClick={() => updatePaxCount(Math.max(1, paxCount - 1))}
-                  className="w-12 h-12 rounded-full text-2xl font-bold border-2"
-                  style={{ borderColor: COLORS.border, color: COLORS.ink }}
-                >
-                  −
-                </button>
-                <div className="text-center">
-                  <div className="text-3xl font-bold" style={{ color: COLORS.ink }}>{paxCount}</div>
-                  <div className="text-xs" style={{ color: COLORS.inkMuted }}>passengers</div>
-                </div>
-                <button
-                  onClick={() => updatePaxCount(Math.min(10, paxCount + 1))}
-                  className="w-12 h-12 rounded-full text-2xl font-bold border-2"
-                  style={{ borderColor: COLORS.border, color: COLORS.ink }}
-                >
-                  +
-                </button>
-              </div>
-
-              <PrimaryButton onClick={() => setStep(2)} size="md" className="w-full">
-                Continue — ₱{subtotal.toLocaleString()} total →
-              </PrimaryButton>
-            </>
-          )}
+          <PrimaryButton onClick={() => setStep(2)} size="md" className="w-full">
+            Continue — {paxCount} pax · ₱{subtotal.toLocaleString()} →
+          </PrimaryButton>
         </>
       )}
 
-      {/* STEP 2 — Passenger details */}
+      {/* STEP 2 — Passenger details + seat assignment */}
       {step === 2 && (
         <>
-          <h2 className="text-xl font-bold mb-1" style={{ color: COLORS.ink }}>Passenger details</h2>
-          <p className="text-xs mb-4" style={{ color: COLORS.inkMuted }}>
-            One valid ID required per adult passenger
+          <h2 className="text-lg font-bold mb-1" style={{ color: COLORS.ink }}>Passenger details + seats</h2>
+          <p className="text-[10px] mb-3" style={{ color: COLORS.inkMuted }}>
+            Enter each passenger's info, then tap "Pick seat" to assign from the map below
           </p>
 
-          <div className="space-y-3 mb-4">
+          <div className="space-y-2 mb-4">
             {passengers.map((p, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-2xl p-4 border"
-                style={{ borderColor: COLORS.border }}
-              >
-                <div className="text-xs font-semibold mb-2" style={{ color: COLORS.primary }}>
-                  Passenger {i + 1}
+              <div key={i} className="bg-white rounded-xl p-3 border" style={{
+                borderColor: assigningPaxIndex === i ? COLORS.primary : COLORS.border,
+                boxShadow: assigningPaxIndex === i ? `0 0 0 1px ${COLORS.primary}` : 'none',
+              }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold" style={{ color: COLORS.primary }}>Passenger {i + 1}</span>
+                  {p.seat ? (
+                    <span className="font-mono text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: '#FFE5E9', color: COLORS.primary }}>
+                      Seat {p.seat} ✓
+                    </span>
+                  ) : (
+                    <button onClick={() => setAssigningPaxIndex(i)}
+                      className="text-[10px] font-semibold px-2 py-0.5 rounded"
+                      style={{ background: COLORS.primary, color: 'white' }}>
+                      Pick seat ↓
+                    </button>
+                  )}
                 </div>
-
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    value={p.name}
-                    onChange={(e) => updatePassenger(i, 'name', e.target.value)}
-                    placeholder="Full name (as on ID)"
-                    className="w-full h-11 px-3 rounded-lg border outline-none text-sm"
-                    style={{ borderColor: COLORS.border, color: COLORS.ink }}
-                  />
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <input
-                      type="number"
-                      value={p.age}
-                      onChange={(e) => updatePassenger(i, 'age', e.target.value)}
-                      placeholder="Age"
-                      className="h-11 px-3 rounded-lg border outline-none text-sm"
-                      style={{ borderColor: COLORS.border, color: COLORS.ink }}
-                    />
-                    <select
-                      value={p.idType}
-                      onChange={(e) => updatePassenger(i, 'idType', e.target.value)}
-                      className="col-span-2 h-11 px-3 rounded-lg border outline-none text-sm bg-white"
-                      style={{ borderColor: COLORS.border, color: COLORS.ink }}
-                    >
-                      <option>National ID</option>
-                      <option>Driver License</option>
-                      <option>UMID</option>
-                      <option>SSS</option>
-                      <option>PhilHealth</option>
-                      <option>Passport</option>
-                      <option>Senior Citizen ID</option>
-                      <option>PWD ID</option>
-                      <option>Student ID</option>
-                      <option>PSA Birth Cert (minor)</option>
-                    </select>
-                  </div>
-
-                  <input
-                    type="text"
-                    value={p.idNumber}
-                    onChange={(e) => updatePassenger(i, 'idNumber', e.target.value)}
-                    placeholder="ID number"
-                    className="w-full h-11 px-3 rounded-lg border outline-none text-sm font-mono"
-                    style={{ borderColor: COLORS.border, color: COLORS.ink }}
-                  />
+                <input type="text" value={p.name} onChange={(e) => updatePassenger(i, 'name', e.target.value)}
+                  placeholder="Full name (as on ID)"
+                  className="w-full h-9 px-2.5 rounded-lg border outline-none text-xs mb-1.5"
+                  style={{ borderColor: COLORS.border, color: COLORS.ink }} />
+                <div className="flex gap-1.5 mb-1.5">
+                  <input type="number" value={p.age} onChange={(e) => updatePassenger(i, 'age', e.target.value)}
+                    placeholder="Age" className="w-14 h-9 px-2 rounded-lg border outline-none text-xs"
+                    style={{ borderColor: COLORS.border, color: COLORS.ink }} />
+                  <select value={p.sex} onChange={(e) => updatePassenger(i, 'sex', e.target.value)}
+                    className="w-14 h-9 px-1 rounded-lg border outline-none text-xs bg-white"
+                    style={{ borderColor: COLORS.border, color: COLORS.ink }}>
+                    <option value="M">M</option><option value="F">F</option>
+                  </select>
+                  <select value={p.passengerType} onChange={(e) => updatePassenger(i, 'passengerType', e.target.value)}
+                    className="flex-1 h-9 px-2 rounded-lg border outline-none text-xs bg-white"
+                    style={{ borderColor: COLORS.border, color: COLORS.ink }}>
+                    <option>Adult</option><option>Senior (20%)</option><option>PWD (20%)</option>
+                    <option>Student (20%)</option><option>Child 3-12 (50%)</option><option>Infant 0-3 (free)</option>
+                  </select>
+                </div>
+                <div className="flex gap-1.5">
+                  <select value={p.idType} onChange={(e) => updatePassenger(i, 'idType', e.target.value)}
+                    className="flex-1 h-9 px-2 rounded-lg border outline-none text-xs bg-white"
+                    style={{ borderColor: COLORS.border, color: COLORS.ink }}>
+                    <option>National ID</option><option>Driver License</option><option>UMID</option><option>SSS</option>
+                    <option>PhilHealth</option><option>Passport</option><option>Senior ID</option><option>PWD ID</option>
+                    <option>Student ID</option><option>PSA Birth Cert</option>
+                  </select>
+                  <input type="text" value={p.idNumber} onChange={(e) => updatePassenger(i, 'idNumber', e.target.value)}
+                    placeholder="ID number" className="flex-1 h-9 px-2 rounded-lg border outline-none text-xs font-mono"
+                    style={{ borderColor: COLORS.border, color: COLORS.ink }} />
                 </div>
               </div>
             ))}
           </div>
 
+          {/* Inline seat map */}
+          <div className="bg-white rounded-xl p-3 border mb-4" style={{ borderColor: COLORS.border }}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-xs font-bold" style={{ color: COLORS.ink }}>
+                Seat map — {selectedClass === 'openair' ? 'Open Air' : selectedClass === 'aircon' ? 'Aircon' : 'VIP'}
+              </div>
+              <div className="text-[10px]" style={{ color: COLORS.inkMuted }}>
+                Assigning for: <span className="font-semibold" style={{ color: COLORS.primary }}>Pax {assigningPaxIndex + 1}</span>
+              </div>
+            </div>
+            <div className="flex gap-2 mb-2 text-[9px]" style={{ color: COLORS.inkMuted }}>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded border" style={{ borderColor: COLORS.border }}></span>Free</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded" style={{ background: COLORS.primary }}></span>Your pick</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded" style={{ background: '#E5E7EB' }}></span>Taken</span>
+            </div>
+            <div className="overflow-x-auto">
+              <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${seatGrid.cols}, 28px)` }}>
+                {Array.from({ length: seatGrid.rows }).map((_, r) =>
+                  Array.from({ length: seatGrid.cols }).map((_, c) => {
+                    const seatId = `${seatGrid.prefix}${String(r + 1).padStart(2, '0')}-${seatGrid.colLabels[c]}`;
+                    const isTaken = takenSeats.has(seatId);
+                    const assignedTo = passengers.findIndex(p => p.seat === seatId);
+                    const isMyPick = assignedTo >= 0;
+                    return (
+                      <button key={seatId}
+                        onClick={() => !isTaken && assignSeat(assigningPaxIndex, seatId)}
+                        disabled={isTaken}
+                        className="w-7 h-7 rounded text-[8px] font-bold flex items-center justify-center"
+                        style={{
+                          background: isMyPick ? COLORS.primary : isTaken ? '#E5E7EB' : 'white',
+                          color: isMyPick ? 'white' : isTaken ? '#9CA3AF' : COLORS.ink,
+                          border: `1px solid ${isMyPick ? COLORS.primary : '#D1D5DB'}`,
+                          cursor: isTaken ? 'not-allowed' : 'pointer',
+                        }}>
+                        {isMyPick ? `P${assignedTo + 1}` : seatGrid.colLabels[c]}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="flex gap-2">
             <OutlineButton onClick={() => setStep(1)} className="flex-1">← Back</OutlineButton>
             <PrimaryButton onClick={() => setStep(3)} size="md" className="flex-[2]">
-              Continue to payment →
+              Payment →
             </PrimaryButton>
           </div>
         </>
       )}
 
-      {/* STEP 3 — Payment */}
+      {/* STEP 3 — Payment (POS) */}
       {step === 3 && (
         <>
-          <h2 className="text-xl font-bold mb-1" style={{ color: COLORS.ink }}>Payment</h2>
-          <p className="text-xs mb-4" style={{ color: COLORS.inkMuted }}>
-            Walk-in only · Cash or card-at-counter accepted
-          </p>
-
-          {/* Total summary */}
-          <div
-            className="rounded-2xl p-5 mb-4 text-white"
-            style={{ background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.primaryHover} 100%)` }}
-          >
-            <div className="text-xs opacity-80 mb-1">Total due</div>
-            <div className="text-4xl font-bold mb-2 font-mono">₱{subtotal.toLocaleString()}.00</div>
-            <div className="text-xs opacity-90">
+          <div className="rounded-xl p-4 mb-3 text-white" style={{ background: COLORS.ink }}>
+            <div className="text-[10px] opacity-70 mb-0.5">Total due</div>
+            <div className="text-3xl font-bold font-mono">₱{subtotal.toLocaleString()}.00</div>
+            <div className="text-xs opacity-80">
               {paxCount} × {selectedClass === 'openair' ? 'Open Air' : selectedClass === 'aircon' ? 'Aircon' : 'VIP'} · ₱{fares[selectedClass]} each
             </div>
           </div>
 
-          {/* Method selector */}
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            <button
-              onClick={() => setPaymentMethod('cash')}
-              className="rounded-2xl p-4 border-2 text-left"
-              style={{
-                background: 'white',
-                borderColor: paymentMethod === 'cash' ? COLORS.primary : COLORS.border,
-              }}
-            >
-              <Banknote size={24} style={{ color: paymentMethod === 'cash' ? COLORS.primary : COLORS.ink }} />
-              <div className="font-semibold mt-2" style={{ color: COLORS.ink }}>Cash</div>
-              <div className="text-xs" style={{ color: COLORS.inkMuted }}>PHP only</div>
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <button onClick={() => setPaymentMethod('cash')}
+              className="rounded-xl p-3 border-2 text-left" style={{ background: 'white', borderColor: paymentMethod === 'cash' ? COLORS.primary : COLORS.border }}>
+              <Banknote size={20} style={{ color: paymentMethod === 'cash' ? COLORS.primary : COLORS.ink }} />
+              <div className="font-semibold text-sm mt-1" style={{ color: COLORS.ink }}>Cash</div>
             </button>
-            <button
-              onClick={() => setPaymentMethod('card')}
-              className="rounded-2xl p-4 border-2 text-left"
-              style={{
-                background: 'white',
-                borderColor: paymentMethod === 'card' ? COLORS.primary : COLORS.border,
-              }}
-            >
-              <CreditCard size={24} style={{ color: paymentMethod === 'card' ? COLORS.primary : COLORS.ink }} />
-              <div className="font-semibold mt-2" style={{ color: COLORS.ink }}>Card at counter</div>
-              <div className="text-xs" style={{ color: COLORS.inkMuted }}>POS terminal</div>
+            <button onClick={() => setPaymentMethod('card')}
+              className="rounded-xl p-3 border-2 text-left" style={{ background: 'white', borderColor: paymentMethod === 'card' ? COLORS.primary : COLORS.border }}>
+              <CreditCard size={20} style={{ color: paymentMethod === 'card' ? COLORS.primary : COLORS.ink }} />
+              <div className="font-semibold text-sm mt-1" style={{ color: COLORS.ink }}>Card POS</div>
             </button>
           </div>
 
           {paymentMethod === 'cash' && (
-            <div className="bg-white rounded-2xl p-5 mb-4 border" style={{ borderColor: COLORS.border }}>
-              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.ink }}>
-                Cash tendered
-              </label>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl font-bold" style={{ color: COLORS.ink }}>₱</span>
-                <input
-                  type="number"
-                  value={cashTendered}
-                  onChange={(e) => setCashTendered(e.target.value)}
-                  placeholder="0"
-                  className="flex-1 h-14 px-3 rounded-lg border-2 text-2xl font-bold font-mono text-right outline-none"
-                  style={{ borderColor: COLORS.border, color: COLORS.ink }}
-                />
+            <div className="bg-white rounded-xl p-3 mb-3 border" style={{ borderColor: COLORS.border }}>
+              <label className="block text-xs font-semibold mb-1" style={{ color: COLORS.ink }}>Cash tendered</label>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl font-bold" style={{ color: COLORS.ink }}>₱</span>
+                <input type="number" value={cashTendered} onChange={(e) => setCashTendered(e.target.value)}
+                  placeholder="0" className="flex-1 h-12 px-3 rounded-lg border-2 text-xl font-bold font-mono text-right outline-none"
+                  style={{ borderColor: COLORS.border, color: COLORS.ink }} />
               </div>
-
-              {/* Quick tender buttons */}
-              <div className="grid grid-cols-4 gap-2 mb-3">
-                {[1000, 2000, 5000, subtotal].map((v, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCashTendered(String(v))}
-                    className="py-2 text-sm font-semibold rounded-lg border bg-white"
-                    style={{ color: COLORS.ink, borderColor: COLORS.border }}
-                  >
+              <div className="grid grid-cols-4 gap-1.5 mb-2">
+                {[500, 1000, 2000, subtotal].map((v, i) => (
+                  <button key={i} onClick={() => setCashTendered(String(v))}
+                    className="py-1.5 text-xs font-semibold rounded-lg border bg-white"
+                    style={{ color: COLORS.ink, borderColor: COLORS.border }}>
                     ₱{v.toLocaleString()}
                   </button>
                 ))}
               </div>
-
               {cashTendered && Number(cashTendered) >= subtotal && (
-                <div
-                  className="rounded-xl p-3 flex items-center justify-between"
-                  style={{ background: '#DCFCE7' }}
-                >
-                  <span className="text-sm font-semibold" style={{ color: '#166534' }}>Change due</span>
-                  <span className="text-xl font-bold font-mono" style={{ color: '#166534' }}>
-                    ₱{change.toLocaleString()}.00
-                  </span>
+                <div className="rounded-lg p-2.5 flex items-center justify-between" style={{ background: '#DCFCE7' }}>
+                  <span className="text-xs font-semibold" style={{ color: '#166534' }}>Change</span>
+                  <span className="text-lg font-bold font-mono" style={{ color: '#166534' }}>₱{change.toLocaleString()}.00</span>
                 </div>
               )}
               {cashTendered && Number(cashTendered) < subtotal && (
-                <div
-                  className="rounded-xl p-3 flex items-center justify-between"
-                  style={{ background: '#FEF2F2' }}
-                >
-                  <span className="text-sm font-semibold" style={{ color: '#7F1D1D' }}>Short by</span>
-                  <span className="text-xl font-bold font-mono" style={{ color: '#7F1D1D' }}>
-                    ₱{(subtotal - Number(cashTendered)).toLocaleString()}
-                  </span>
+                <div className="rounded-lg p-2.5 flex items-center justify-between" style={{ background: '#FEF2F2' }}>
+                  <span className="text-xs font-semibold" style={{ color: '#7F1D1D' }}>Short</span>
+                  <span className="text-lg font-bold font-mono" style={{ color: '#7F1D1D' }}>₱{(subtotal - Number(cashTendered)).toLocaleString()}</span>
                 </div>
               )}
             </div>
           )}
 
           {paymentMethod === 'card' && (
-            <div
-              className="bg-white rounded-2xl p-5 mb-4 border-2 border-dashed text-center"
-              style={{ borderColor: COLORS.border }}
-            >
-              <CreditCard size={32} className="mx-auto mb-2" style={{ color: COLORS.inkMuted }} />
-              <div className="text-sm font-semibold mb-1" style={{ color: COLORS.ink }}>
-                Tap or insert card on POS terminal
-              </div>
-              <div className="text-xs" style={{ color: COLORS.inkMuted }}>
-                Tap "Confirm payment" below once the POS terminal shows approved
-              </div>
+            <div className="bg-white rounded-xl p-4 mb-3 border-2 border-dashed text-center" style={{ borderColor: COLORS.border }}>
+              <CreditCard size={28} className="mx-auto mb-1" style={{ color: COLORS.inkMuted }} />
+              <div className="text-xs font-semibold" style={{ color: COLORS.ink }}>Tap or insert card on POS terminal</div>
+              <div className="text-[10px]" style={{ color: COLORS.inkMuted }}>Tap "Confirm" once POS shows approved</div>
             </div>
           )}
 
           <div className="flex gap-2">
             <OutlineButton onClick={() => setStep(2)} className="flex-1">← Back</OutlineButton>
-            <PrimaryButton
-              onClick={handleConfirm}
-              size="md"
-              className="flex-[2]"
-              disabled={paymentMethod === 'cash' && Number(cashTendered) < subtotal}
-            >
+            <PrimaryButton onClick={handleConfirm} size="md" className="flex-[2]"
+              disabled={paymentMethod === 'cash' && Number(cashTendered) < subtotal}>
               Confirm payment →
             </PrimaryButton>
           </div>
         </>
       )}
 
-      {/* STEP 4 — Receipt */}
+      {/* STEP 4 — Receipt with BTN ticket numbers */}
       {step === 4 && (
         <>
-          <div className="text-center mb-4">
-            <div
-              className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center"
-              style={{ background: '#DCFCE7' }}
-            >
-              <CheckCircle2 size={32} style={{ color: COLORS.success }} />
+          <div className="text-center mb-3">
+            <div className="w-14 h-14 rounded-full mx-auto mb-2 flex items-center justify-center" style={{ background: '#DCFCE7' }}>
+              <CheckCircle2 size={28} style={{ color: COLORS.success }} />
             </div>
-            <h2 className="text-2xl font-bold mb-1" style={{ color: COLORS.ink }}>Booking confirmed</h2>
-            <p className="text-sm" style={{ color: COLORS.inkMuted }}>
-              Print or hand the booking reference to the passenger
-            </p>
+            <h2 className="text-xl font-bold" style={{ color: COLORS.ink }}>Booking confirmed</h2>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 mb-4 border" style={{ borderColor: COLORS.border }}>
-            <div className="text-center py-3 border-b mb-3" style={{ borderColor: COLORS.border }}>
-              <div className="text-xs mb-1" style={{ color: COLORS.inkMuted }}>Booking reference</div>
-              <div className="text-2xl font-bold font-mono" style={{ color: COLORS.primary }}>
-                {bookingRef}
-              </div>
+          <div className="bg-white rounded-xl p-4 mb-3 border" style={{ borderColor: COLORS.border }}>
+            {/* Booking ref */}
+            <div className="text-center pb-3 border-b mb-3" style={{ borderColor: COLORS.border }}>
+              <div className="text-[10px]" style={{ color: COLORS.inkMuted }}>Booking Reference (shared)</div>
+              <div className="text-xl font-bold font-mono" style={{ color: COLORS.primary }}>{bookingRef}</div>
             </div>
 
-            <div className="space-y-2 text-sm">
+            {/* Trip info */}
+            <div className="space-y-1 text-xs mb-3">
               <div className="flex justify-between">
                 <span style={{ color: COLORS.inkMuted }}>Sailing</span>
-                <span className="font-semibold" style={{ color: COLORS.ink }}>
-                  {selectedSailing?.time} · {staffContext.port} → MIN-TIL
-                </span>
+                <span className="font-semibold" style={{ color: COLORS.ink }}>{activeSailing?.time} · {staff.port} → MIN-TIL</span>
               </div>
               <div className="flex justify-between">
                 <span style={{ color: COLORS.inkMuted }}>Vessel</span>
-                <span className="font-semibold" style={{ color: COLORS.ink }}>{selectedSailing?.vessel}</span>
+                <span className="font-semibold" style={{ color: COLORS.ink }}>{activeSailing?.vessel}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Passengers</span>
-                <span className="font-semibold" style={{ color: COLORS.ink }}>
-                  {paxCount} × {selectedClass === 'openair' ? 'Open Air' : selectedClass === 'aircon' ? 'Aircon' : 'VIP'}
-                </span>
-              </div>
-              <div className="flex justify-between pt-2 border-t" style={{ borderColor: COLORS.border }}>
                 <span style={{ color: COLORS.inkMuted }}>Payment</span>
-                <span className="font-semibold font-mono" style={{ color: COLORS.ink }}>
-                  {paymentMethod === 'cash' ? 'Cash' : 'Card'} · ₱{subtotal.toLocaleString()}
-                </span>
+                <span className="font-semibold font-mono" style={{ color: COLORS.ink }}>{paymentMethod === 'cash' ? 'Cash' : 'Card'} · ₱{subtotal.toLocaleString()}</span>
               </div>
               {paymentMethod === 'cash' && change > 0 && (
                 <div className="flex justify-between">
                   <span style={{ color: COLORS.success }}>Change given</span>
-                  <span className="font-semibold font-mono" style={{ color: COLORS.success }}>
-                    ₱{change.toLocaleString()}.00
-                  </span>
+                  <span className="font-semibold font-mono" style={{ color: COLORS.success }}>₱{change.toLocaleString()}.00</span>
                 </div>
               )}
             </div>
+
+            {/* Per-passenger ticket numbers */}
+            <div className="pt-3 border-t" style={{ borderColor: COLORS.border }}>
+              <div className="text-[10px] font-semibold uppercase mb-2" style={{ color: COLORS.inkMuted }}>
+                Booking Ticket Numbers (one per passenger)
+              </div>
+              <div className="space-y-2">
+                {passengers.map((p, i) => (
+                  <div key={i} className="rounded-lg p-2.5 border" style={{ borderColor: COLORS.border }}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold" style={{ color: COLORS.ink }}>
+                        {i + 1}. {p.name || `Passenger ${i + 1}`}
+                      </span>
+                      {p.seat && (
+                        <span className="font-mono text-[10px] font-semibold px-1.5 py-0.5 rounded"
+                          style={{ background: '#FFE5E9', color: COLORS.primary }}>{p.seat}</span>
+                      )}
+                    </div>
+                    <div className="text-sm font-mono font-bold mt-0.5" style={{ color: COLORS.primary }}>
+                      {ticketNumbers[i]}
+                    </div>
+                    <div className="text-[10px]" style={{ color: COLORS.inkMuted }}>
+                      {p.passengerType} · Show this ticket at counter + gangway
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="grid grid-cols-2 gap-2 mb-2">
             <OutlineButton>
-              <span className="flex items-center justify-center gap-1.5">
-                <FileText size={16} /> Print receipt
-              </span>
+              <span className="flex items-center justify-center gap-1 text-xs"><FileText size={14} /> Print</span>
             </OutlineButton>
             <OutlineButton>
-              <span className="flex items-center justify-center gap-1.5">
-                <Mail size={16} /> SMS to phone
-              </span>
+              <span className="flex items-center justify-center gap-1 text-xs"><Mail size={14} /> SMS tickets</span>
             </OutlineButton>
           </div>
 
           <PrimaryButton onClick={reset} size="md" className="w-full">
-            Start new booking
+            New walk-in booking
           </PrimaryButton>
         </>
       )}
