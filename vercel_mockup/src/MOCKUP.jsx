@@ -228,8 +228,8 @@ function LandingScreen({ setScreen }) {
         </PrimaryButton>
       </div>
 
-      {/* TRUST GRID */}
-      <div className="grid md:grid-cols-4 gap-4 mt-12 mb-12">
+      {/* TRUST GRID — 2×2 on phone, 4-col on wider */}
+      <div className="grid grid-cols-2 gap-3 mt-8 mb-8">
         {[
           { icon: Shield, label: 'MARINA-licensed', sub: 'Cert. PSL-2019-04287' },
           { icon: Star, label: '4.8 average rating', sub: '12,847 reviews' },
@@ -245,21 +245,21 @@ function LandingScreen({ setScreen }) {
       </div>
 
       {/* CLASS SHOWCASE */}
-      <h2 className="text-2xl font-bold mb-5" style={{ color: COLORS.ink }}>Three ways to sail</h2>
-      <div className="grid md:grid-cols-3 gap-4 mb-12">
+      <h2 className="text-xl font-bold mb-4" style={{ color: COLORS.ink }}>Three ways to sail</h2>
+      <div className="space-y-3 mb-8">
         {[
-          { name: 'Open Air', from: '₱350', desc: 'Outdoor deck. Sea breeze, mountain views. Backpacker favorite.', bg: '#E0F2FE' },
-          { name: 'Aircon', from: '₱550', desc: 'Climate-controlled cabin with reclining seats and USB charging.', bg: '#FFE5E9' },
-          { name: 'VIP', from: '₱850', desc: 'Private lounge. Refreshments, expedited boarding, prime window seats.', bg: '#FEF3C7' },
+          { name: 'Open Air', from: '₱350', desc: 'Outdoor deck. Sea breeze, mountain views. Backpacker favorite.', bg: '#E0F2FE', color: '#1E40AF' },
+          { name: 'Aircon', from: '₱550', desc: 'Climate-controlled cabin with reclining seats and USB charging.', bg: '#FFE5E9', color: COLORS.primary },
+          { name: 'VIP', from: '₱850', desc: 'Private lounge. Refreshments, expedited boarding, prime window seats.', bg: '#FEF3C7', color: '#A16207' },
         ].map((c, i) => (
-          <div key={i} className="rounded-2xl overflow-hidden border" style={{ borderColor: COLORS.border }}>
-            <div className="h-40 flex items-center justify-center text-6xl" style={{ background: c.bg }}>🚢</div>
-            <div className="p-5">
-              <div className="flex items-baseline justify-between mb-2">
-                <h3 className="text-xl font-bold" style={{ color: COLORS.ink }}>{c.name}</h3>
-                <span className="text-sm" style={{ color: COLORS.inkMuted }}>from <span className="font-bold" style={{ color: COLORS.primary }}>{c.from}</span></span>
+          <div key={i} className="rounded-xl overflow-hidden border flex" style={{ borderColor: COLORS.border, background: 'white' }}>
+            <div className="w-20 flex-shrink-0 flex items-center justify-center text-3xl" style={{ background: c.bg }}>🚢</div>
+            <div className="p-3 flex-1 min-w-0">
+              <div className="flex items-baseline justify-between mb-0.5">
+                <h3 className="text-base font-bold" style={{ color: COLORS.ink }}>{c.name}</h3>
+                <span className="text-xs flex-shrink-0 ml-2" style={{ color: COLORS.inkMuted }}>from <span className="font-bold" style={{ color: c.color }}>{c.from}</span></span>
               </div>
-              <p className="text-sm" style={{ color: COLORS.inkMuted }}>{c.desc}</p>
+              <p className="text-xs" style={{ color: COLORS.inkMuted }}>{c.desc}</p>
             </div>
           </div>
         ))}
@@ -855,7 +855,7 @@ function PassengersScreen({ setScreen }) {
               </div>
             )}
 
-            <div className="grid md:grid-cols-2 gap-3 mb-3">
+            <div className="grid grid-cols-1 gap-2 mb-3">
               <div>
                 <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>Last Name</label>
                 <input
@@ -1105,12 +1105,12 @@ function ReviewScreen({ setScreen }) {
         <span style={{ color: COLORS.inkMuted }}>6. Pay</span>
       </div>
 
-      <h1 className="text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>Review and pay</h1>
-      <p className="mb-6" style={{ color: COLORS.inkMuted }}>One last look before payment.</p>
+      <h1 className="text-2xl font-bold mb-1" style={{ color: COLORS.ink }}>Review and pay</h1>
+      <p className="text-sm mb-4" style={{ color: COLORS.inkMuted }}>One last look before payment.</p>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="space-y-4">
         {/* MAIN */}
-        <div className="md:col-span-2 space-y-4">
+        <div className="space-y-4">
           {/* TRIP */}
           <div className="bg-white rounded-2xl p-6 border" style={{ borderColor: COLORS.border }}>
             <div className="flex items-start gap-4">
@@ -1175,34 +1175,33 @@ function ReviewScreen({ setScreen }) {
           <div className="bg-white rounded-2xl p-6 border" style={{ borderColor: COLORS.border }}>
             <h3 className="font-bold text-lg mb-4" style={{ color: COLORS.ink }}>Payment method</h3>
             <p className="text-xs mb-4" style={{ color: COLORS.inkMuted }}>Powered by Xendit · secure payment processing</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {[
                 { name: 'GCash', icon: '💚', selected: true },
                 { name: 'Maya', icon: '🟢' },
                 { name: 'GrabPay', icon: '🟩' },
-                { name: 'Credit / Debit Card', icon: '💳' },
-                { name: 'Online Banking', icon: '🏦' },
-                { name: 'Over-the-counter', icon: '🏪' },
+                { name: 'Card', icon: '💳' },
+                { name: 'Banking', icon: '🏦' },
+                { name: 'OTC', icon: '🏪' },
               ].map((p, i) => (
                 <button
                   key={i}
-                  className="h-16 rounded-xl border-2 flex items-center gap-2 px-3 hover:bg-gray-50"
+                  className="h-14 rounded-xl border-2 flex flex-col items-center justify-center gap-0.5"
                   style={{
                     borderColor: p.selected ? COLORS.ink : COLORS.border,
                     background: p.selected ? COLORS.bgMuted : 'white',
                   }}
                 >
-                  <span className="text-xl">{p.icon}</span>
-                  <span className="text-sm font-semibold" style={{ color: COLORS.ink }}>{p.name}</span>
+                  <span className="text-lg">{p.icon}</span>
+                  <span className="text-[10px] font-semibold" style={{ color: COLORS.ink }}>{p.name}</span>
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* SIDEBAR — PRICE BREAKDOWN */}
-        <div>
-          <div className="bg-white rounded-2xl p-6 border sticky top-24" style={{ borderColor: COLORS.border }}>
+        {/* PRICE BREAKDOWN — stacked below on mobile */}
+          <div className="bg-white rounded-2xl p-5 border" style={{ borderColor: COLORS.border }}>
             <h3 className="font-bold text-lg mb-4" style={{ color: COLORS.ink }}>Price details</h3>
             <div className="space-y-2 text-sm pb-4 border-b" style={{ borderColor: COLORS.border }}>
               <div className="flex justify-between">
@@ -1233,10 +1232,9 @@ function ReviewScreen({ setScreen }) {
               By proceeding you agree to our terms and cancellation policy.
             </p>
           </div>
-        </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <OutlineButton onClick={() => setScreen('seatSelection')}>← Back to seats</OutlineButton>
       </div>
     </div>
@@ -1764,8 +1762,8 @@ function ConfirmationScreen({ setScreen }) {
           </div>
         </div>
 
-        <div className="p-6 grid md:grid-cols-3 gap-6">
-          <div className="md:col-span-2">
+        <div className="p-5">
+            {/* Route */}
             <div className="flex items-end gap-2 mb-4">
               <div>
                 <div className="text-xs font-semibold uppercase" style={{ color: COLORS.inkMuted }}>From</div>
@@ -1780,6 +1778,7 @@ function ConfirmationScreen({ setScreen }) {
               </div>
             </div>
 
+            {/* Trip details */}
             <div className="grid grid-cols-2 gap-3 text-sm mb-4">
               <div>
                 <div className="text-xs font-semibold uppercase" style={{ color: COLORS.inkMuted }}>Date</div>
@@ -1799,6 +1798,7 @@ function ConfirmationScreen({ setScreen }) {
               </div>
             </div>
 
+            {/* Passenger list */}
             <div className="pt-3 border-t" style={{ borderColor: COLORS.border }}>
               <div className="text-xs font-semibold uppercase mb-1" style={{ color: COLORS.inkMuted }}>Passengers</div>
               <div className="text-sm space-y-0.5" style={{ color: COLORS.ink }}>
@@ -1816,15 +1816,15 @@ function ConfirmationScreen({ setScreen }) {
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex flex-col items-center justify-center bg-white rounded-xl p-4" style={{ background: COLORS.bgMuted }}>
-            <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center mb-2 border" style={{ borderColor: COLORS.border }}>
-              <QrCode size={96} style={{ color: COLORS.ink }} />
+            {/* QR Code — below passenger list */}
+            <div className="flex flex-col items-center justify-center rounded-xl p-4 mt-4" style={{ background: COLORS.bgMuted }}>
+              <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center mb-2 border" style={{ borderColor: COLORS.border }}>
+                <QrCode size={96} style={{ color: COLORS.ink }} />
+              </div>
+              <div className="text-xs font-mono text-center" style={{ color: COLORS.inkMuted }}>FSM-2026-0518-7K2A</div>
+              <div className="text-xs text-center mt-1" style={{ color: COLORS.inkMuted }}>Show at boarding</div>
             </div>
-            <div className="text-xs font-mono text-center" style={{ color: COLORS.inkMuted }}>FSM-2026-0518-7K2A</div>
-            <div className="text-xs text-center mt-1" style={{ color: COLORS.inkMuted }}>Show at boarding</div>
-          </div>
         </div>
 
         <div className="px-6 py-3 text-xs flex items-center justify-between" style={{ background: COLORS.bgMuted, color: COLORS.inkMuted }}>
@@ -3096,7 +3096,7 @@ function ClassPickerScreen({ setScreen }) {
         MV Our Lady of St Therese · 06:00 from Nasugbu Port · Fri, May 22, 2026
       </p>
 
-      <div className="grid md:grid-cols-3 gap-4 mb-6">
+      <div className="space-y-3 mb-6">
         {classes.map((c) => {
           const Icon = c.icon;
           const isSelected = selectedClass === c.id;
@@ -3106,7 +3106,7 @@ function ClassPickerScreen({ setScreen }) {
               key={c.id}
               onClick={() => !isFull && setSelectedClass(c.id)}
               disabled={isFull}
-              className="text-left rounded-2xl p-5 transition-all border-2 relative"
+              className="w-full text-left rounded-xl p-4 transition-all border-2 relative flex gap-4 items-start"
               style={{
                 background: 'white',
                 borderColor: isSelected ? c.color : COLORS.border,
@@ -3119,46 +3119,35 @@ function ClassPickerScreen({ setScreen }) {
             >
               {c.recommended && (
                 <div
-                  className="absolute -top-2 left-4 text-xs font-semibold px-2 py-0.5 rounded-full"
+                  className="absolute -top-2 left-4 text-[10px] font-semibold px-2 py-0.5 rounded-full"
                   style={{ background: c.color, color: 'white' }}
                 >
                   Most picked
                 </div>
               )}
               <div
-                className="w-14 h-14 rounded-full flex items-center justify-center mb-3"
+                className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
                 style={{ background: c.bg }}
               >
-                <Icon size={28} style={{ color: c.color }} />
+                <Icon size={22} style={{ color: c.color }} />
               </div>
-              <div className="text-xl font-bold mb-1" style={{ color: COLORS.ink }}>
-                {c.name}
-              </div>
-              <div className="text-sm mb-3" style={{ color: COLORS.inkMuted }}>
-                {c.tagline}
-              </div>
-              <div className="flex items-baseline gap-1 mb-3">
-                <span className="text-2xl font-bold" style={{ color: c.color }}>
-                  ₱{c.fare.toLocaleString()}
-                </span>
-                <span className="text-xs" style={{ color: COLORS.inkMuted }}>
-                  per pax
-                </span>
-              </div>
-              <div className="text-xs" style={{ color: COLORS.inkMuted }}>
-                {c.seats} of {c.capacity} seats available
-              </div>
-              <div
-                className="w-full h-1.5 rounded-full mt-1.5 overflow-hidden"
-                style={{ background: COLORS.bgMuted }}
-              >
-                <div
-                  className="h-full rounded-full"
-                  style={{
-                    width: `${(c.seats / c.capacity) * 100}%`,
-                    background: c.color,
-                  }}
-                />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline justify-between mb-0.5">
+                  <div className="text-lg font-bold" style={{ color: COLORS.ink }}>{c.name}</div>
+                  <div className="flex items-baseline gap-1 flex-shrink-0 ml-2">
+                    <span className="text-lg font-bold" style={{ color: c.color }}>₱{c.fare.toLocaleString()}</span>
+                    <span className="text-[10px]" style={{ color: COLORS.inkMuted }}>/ pax</span>
+                  </div>
+                </div>
+                <div className="text-xs mb-2" style={{ color: COLORS.inkMuted }}>{c.tagline}</div>
+                <div className="flex items-center gap-2">
+                  <div className="text-xs" style={{ color: COLORS.inkMuted }}>
+                    {c.seats} of {c.capacity} seats
+                  </div>
+                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: COLORS.bgMuted }}>
+                    <div className="h-full rounded-full" style={{ width: `${(c.seats / c.capacity) * 100}%`, background: c.color }} />
+                  </div>
+                </div>
               </div>
             </button>
           );
@@ -11679,142 +11668,12 @@ function StaffBoardingScreen({ setScreen }) {
 // Renders a stylized phone silhouette around its children so the PWA preview
 // looks like it's running on a real device.
 // ============================================================================
-function PhoneFrame({ children, appName, signal = 4, battery = 87, time = '14:32', color }) {
-  return (
-    <div
-      className="mx-auto"
-      style={{
-        width: 360,
-        maxWidth: '100%',
-        background: '#0a0a0a',
-        borderRadius: 44,
-        padding: 12,
-        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.05)',
-      }}
-    >
-      {/* Inner screen */}
-      <div
-        className="relative overflow-hidden"
-        style={{
-          background: '#fff',
-          borderRadius: 32,
-          height: 720,
-        }}
-      >
-        {/* Status bar */}
-        <div
-          className="flex items-center justify-between px-7 pt-2 pb-1.5 relative z-10"
-          style={{ background: 'white', color: COLORS.ink, fontSize: 12, fontWeight: 600 }}
-        >
-          <span>{time}</span>
-          {/* Notch (Dynamic Island style) */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 6,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 95,
-              height: 26,
-              background: '#0a0a0a',
-              borderRadius: 16,
-            }}
-          />
-          <div className="flex items-center gap-1.5">
-            {/* Signal bars */}
-            <div className="flex items-end gap-0.5">
-              {[1, 2, 3, 4].map((b) => (
-                <div
-                  key={b}
-                  style={{
-                    width: 3,
-                    height: 3 + b * 1.5,
-                    background: b <= signal ? COLORS.ink : '#D1D5DB',
-                    borderRadius: 1,
-                  }}
-                />
-              ))}
-            </div>
-            <span style={{ fontSize: 10 }}>5G</span>
-            {/* Battery */}
-            <div
-              className="flex items-center"
-              style={{
-                width: 22,
-                height: 11,
-                border: `1px solid ${COLORS.ink}`,
-                borderRadius: 3,
-                position: 'relative',
-                padding: 1,
-              }}
-            >
-              <div
-                style={{
-                  width: `${battery}%`,
-                  height: '100%',
-                  background: COLORS.ink,
-                  borderRadius: 1,
-                }}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  right: -3,
-                  top: 3,
-                  width: 2,
-                  height: 5,
-                  background: COLORS.ink,
-                  borderRadius: 1,
-                }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* App title bar */}
-        {appName && (
-          <div
-            className="px-4 py-3 flex items-center gap-2 border-b"
-            style={{ background: color, color: 'white', borderColor: COLORS.border }}
-          >
-            <Ship size={16} />
-            <div className="font-bold text-sm flex-1">{appName}</div>
-          </div>
-        )}
-
-        {/* App content */}
-        <div
-          className="overflow-y-auto"
-          style={{ height: `${720 - 36 - (appName ? 44 : 0) - 10}px`, background: '#F9FAFB' }}
-        >
-          {children}
-        </div>
-
-        {/* Home indicator */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 8,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 120,
-            height: 4,
-            background: COLORS.ink,
-            borderRadius: 2,
-            opacity: 0.8,
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
 // ============================================================================
-// TIER 1: NATIVE APP / PWA PREVIEW (Batch 9)
-// Visual mockup of the two PWAs (Counter Check-in + Boarding Officer) inside
-// phone-frame device chrome. These are PWAs — installed from Safari/Chrome to
-// home screen — not native apps. Phone frame is a visual aid; actual scanner
-// is a faux camera. The real PWA would use getUserMedia() at runtime.
+// TIER 1: NATIVE APP / PWA PREVIEW (Batch 9, revised Batch 18)
+// Two PWA app previews rendered as full-width stacked cards (not phone frames
+// since the mockup itself is already inside a device frame). Counter PWA in
+// coral, Boarding PWA in purple. Each shows live scanning state, manifest
+// counts, and recent scan logs.
 // ============================================================================
 function NativeAppPreviewScreen({ setScreen }) {
   // Counter PWA local state (independent from web staffCheckin)
@@ -11875,21 +11734,29 @@ function NativeAppPreviewScreen({ setScreen }) {
         </div>
       </div>
 
-      {/* Two phone frames — side by side on desktop, stacked on mobile */}
-      <div className="grid lg:grid-cols-2 gap-8 mb-8 justify-items-center">
+      {/* Two PWA app previews — full-width stacked cards (no phone frames since we're already inside a device frame) */}
+      <div className="space-y-6 mb-6">
         {/* === COUNTER PWA === */}
-        <div className="w-full max-w-md">
-          <div className="text-center mb-3">
-            <div className="text-xs font-semibold mb-0.5 font-mono" style={{ color: COLORS.primary }}>
-              counter.fandsmarine.ph
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: COLORS.primary }}>
+              <Ship size={16} style={{ color: 'white' }} />
             </div>
-            <h3 className="font-bold" style={{ color: COLORS.ink }}>Counter Check-in PWA</h3>
-            <div className="text-xs" style={{ color: COLORS.inkMuted }}>
-              For Ticketing Staff · terminal counter
+            <div>
+              <div className="font-bold text-sm" style={{ color: COLORS.ink }}>F&S Counter</div>
+              <div className="text-[10px] font-mono" style={{ color: COLORS.primary }}>counter.fandsmarine.ph</div>
             </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-full ml-auto font-semibold" style={{ background: '#DCFCE7', color: '#166534' }}>● Online</span>
           </div>
 
-          <PhoneFrame appName="F&S Counter" color={COLORS.primary}>
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: COLORS.primary }}>
+            {/* App bar */}
+            <div className="px-3 py-2" style={{ background: COLORS.primary, color: 'white' }}>
+              <div className="flex items-center justify-between text-xs">
+                <div className="font-bold">Counter Check-in · Ticketing Staff</div>
+                <div className="font-mono text-[10px] opacity-80">BAT-NAS</div>
+              </div>
+            </div>
             {/* Voyage header */}
             <div
               className="px-3 py-2 text-xs"
@@ -12036,39 +11903,42 @@ function NativeAppPreviewScreen({ setScreen }) {
                 <span style={{ fontSize: 9 }}>Account</span>
               </div>
             </div>
-          </PhoneFrame>
+          </div>
 
-          {/* Below-frame caption */}
-          <div
-            className="mt-4 rounded-xl p-3 text-xs"
-            style={{ background: '#FFE5E9', border: `1px solid #FCA5A5` }}
-          >
-            <div className="font-semibold mb-1" style={{ color: COLORS.primary }}>
-              Counter PWA workflow
-            </div>
+          {/* Counter PWA workflow */}
+          <div className="rounded-lg p-3 mt-2 text-xs" style={{ background: '#FFE5E9', border: `1px solid #FCA5A5` }}>
+            <div className="font-semibold mb-1" style={{ color: COLORS.primary }}>Counter PWA workflow</div>
             <ol className="space-y-0.5 list-decimal list-inside" style={{ color: '#7F1D1D' }}>
-              <li>Ticketing Staff logs in at the counter terminal</li>
-              <li>Picks today's voyage (port-locked to their assignment)</li>
-              <li>Scans each arriving passenger's QR ticket</li>
-              <li>System marks them <span className="font-semibold">checked-in at counter</span> and assigns/confirms seat</li>
-              <li>Manifest syncs to admin web app + Boarding PWA in real time</li>
+              <li>Staff logs in at counter (port-locked)</li>
+              <li>Picks today's voyage</li>
+              <li>Scans each passenger's QR ticket</li>
+              <li>Marks <span className="font-semibold">checked-in</span> + confirms seat</li>
+              <li>Manifest syncs to web + Boarding PWA</li>
             </ol>
           </div>
         </div>
 
         {/* === BOARDING PWA === */}
-        <div className="w-full max-w-md">
-          <div className="text-center mb-3">
-            <div className="text-xs font-semibold mb-0.5 font-mono" style={{ color: '#7C3AED' }}>
-              boarding.fandsmarine.ph
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#7C3AED' }}>
+              <Ship size={16} style={{ color: 'white' }} />
             </div>
-            <h3 className="font-bold" style={{ color: COLORS.ink }}>Boarding Officer PWA</h3>
-            <div className="text-xs" style={{ color: COLORS.inkMuted }}>
-              For Boarding Officer · dockside gangway
+            <div>
+              <div className="font-bold text-sm" style={{ color: COLORS.ink }}>F&S Boarding</div>
+              <div className="text-[10px] font-mono" style={{ color: '#7C3AED' }}>boarding.fandsmarine.ph</div>
             </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-full ml-auto font-semibold" style={{ background: '#FEF3C7', color: '#92400E' }}>Offline · queued</span>
           </div>
 
-          <PhoneFrame appName="F&S Boarding" color="#7C3AED">
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: '#7C3AED' }}>
+            {/* App bar */}
+            <div className="px-3 py-2" style={{ background: '#7C3AED', color: 'white' }}>
+              <div className="flex items-center justify-between text-xs">
+                <div className="font-bold">Boarding Officer · Gangway</div>
+                <div className="font-mono text-[10px] opacity-80">BAT-NAS</div>
+              </div>
+            </div>
             {/* Voyage header */}
             <div
               className="px-3 py-2 text-xs"
@@ -12259,30 +12129,25 @@ function NativeAppPreviewScreen({ setScreen }) {
                 <span style={{ fontSize: 9 }}>Account</span>
               </div>
             </div>
-          </PhoneFrame>
+          </div>
 
-          {/* Below-frame caption */}
-          <div
-            className="mt-4 rounded-xl p-3 text-xs"
-            style={{ background: '#EDE9FE', border: `1px solid #C4B5FD` }}
-          >
-            <div className="font-semibold mb-1" style={{ color: '#7C3AED' }}>
-              Boarding PWA workflow
-            </div>
+          {/* Boarding PWA workflow */}
+          <div className="rounded-lg p-3 mt-2 text-xs" style={{ background: '#EDE9FE', border: `1px solid #C4B5FD` }}>
+            <div className="font-semibold mb-1" style={{ color: '#7C3AED' }}>Boarding PWA workflow</div>
             <ol className="space-y-0.5 list-decimal list-inside" style={{ color: '#5B21B6' }}>
-              <li>Boarding Officer logs in dockside (port-locked)</li>
-              <li>Picks current voyage · loads counter-checked manifest</li>
-              <li>Scans each passenger's QR again at the gangway</li>
-              <li>App tracks counter-checked vs boarded delta</li>
-              <li>Officer resolves anomalies (walk-ups, no-shows)</li>
-              <li>When all boarded, hands off to admin web app for signing</li>
+              <li>Officer logs in dockside (port-locked)</li>
+              <li>Picks voyage · loads checked manifest</li>
+              <li>Rescans QR at gangway</li>
+              <li>Tracks checked vs boarded delta</li>
+              <li>Resolves anomalies</li>
+              <li>Hands off to web for MC-180 signing</li>
             </ol>
           </div>
         </div>
       </div>
 
-      {/* Technical notes panel */}
-      <div className="grid lg:grid-cols-3 gap-4 mb-6">
+      {/* Technical notes */}
+      <div className="space-y-3 mb-6">
         {/* Install instructions */}
         <div className="bg-white rounded-2xl p-5 border" style={{ borderColor: COLORS.border }}>
           <div className="flex items-center gap-2 mb-3">
@@ -13691,16 +13556,43 @@ function CustomerReschedulePreScreen({ setScreen }) {
   const rescheduleFeePercent = 50;
   const rescheduleFee = Math.round(booking.total * (rescheduleFeePercent / 100));
 
-  // Available sailings (mock — same vessel, same class, same Batangas port)
-  // Each carries a fare delta vs the original ₱1,285 so the customer can see
-  // how the gap is settled if the new sailing's fare differs.
-  const availableDates = [
-    { d: 'May 24', dow: 'Sun', avail: 28 },
-    { d: 'May 25', dow: 'Mon', avail: 42 },
-    { d: 'May 27', dow: 'Wed', avail: 36 },
-    { d: 'May 29', dow: 'Fri', avail: 14 },
-    { d: 'May 31', dow: 'Sun', avail: 49 },
-  ];
+  // Horizontal scrolling calendar — 30-day window from today
+  const TODAY = new Date(2026, 4, 19); // May 19, 2026 (mockup "today")
+  const MAX_DAYS_AHEAD = 30;
+  const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const DOW_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Build the 30-day window of selectable dates
+  const rescheduleCalendar = [];
+  for (let i = 0; i <= MAX_DAYS_AHEAD; i++) {
+    const dt = new Date(TODAY.getTime() + i * 86400000);
+    const key = `${MONTH_NAMES_SHORT[dt.getMonth()]} ${dt.getDate()}`;
+    // Pseudo-random availability per date (stable based on day)
+    const seed = dt.getDate() * 7 + dt.getMonth() * 31;
+    const avail = Math.max(4, Math.floor(20 + Math.sin(seed * 1.3) * 18));
+    // Block some specific dates (May 24 typhoon, May 26 drydock — same as main calendar)
+    const blocked = dt.getFullYear() === 2026 && dt.getMonth() === 4 && (dt.getDate() === 24 || dt.getDate() === 26);
+    // Can't reschedule to the original booking date (May 22)
+    const isOriginal = dt.getFullYear() === 2026 && dt.getMonth() === 4 && dt.getDate() === 22;
+    rescheduleCalendar.push({
+      key,
+      date: dt.getDate(),
+      month: dt.getMonth(),
+      monthLabel: MONTH_NAMES_SHORT[dt.getMonth()],
+      dow: DOW_NAMES[dt.getDay()],
+      avail: blocked || isOriginal ? 0 : avail,
+      blocked,
+      isOriginal,
+      isToday: i === 0,
+    });
+  }
+
+  // Group by month for the month selector
+  const calendarMonths = [...new Set(rescheduleCalendar.map(d => d.month))];
+  const [viewMonth, setViewMonth] = useState(TODAY.getMonth());
+  const daysInViewMonth = rescheduleCalendar.filter(d => d.month === viewMonth);
+
+  // Available sailings — times for the selected date
   const availableTimes = [
     { t: '06:00', fare: 1285, label: 'Sunrise', icon: Sunrise },
     { t: '08:00', fare: 1285, label: 'Morning', icon: Sun },
@@ -13872,27 +13764,90 @@ function CustomerReschedulePreScreen({ setScreen }) {
             <label className="block text-xs font-semibold mb-1.5" style={{ color: COLORS.ink }}>
               New departure date
             </label>
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4">
-              {availableDates.map((day) => (
-                <button
-                  key={day.d}
-                  onClick={() => setNewSailingDate(day.d)}
-                  className="px-2 py-2 rounded-lg border text-center transition-all"
-                  style={{
-                    background: newSailingDate === day.d ? '#FFE5E9' : 'white',
-                    borderColor: newSailingDate === day.d ? COLORS.primary : COLORS.border,
-                    color: newSailingDate === day.d ? COLORS.primary : COLORS.ink,
-                  }}
-                >
-                  <div className="text-[10px] font-semibold uppercase" style={{ color: COLORS.inkMuted }}>
-                    {day.dow}
-                  </div>
-                  <div className="text-sm font-bold">{day.d}</div>
-                  <div className="text-[10px]" style={{ color: COLORS.inkMuted }}>
-                    {day.avail} seats
-                  </div>
-                </button>
-              ))}
+
+            {/* Month selector */}
+            <div className="flex items-center justify-between mb-2">
+              <button
+                onClick={() => {
+                  const idx = calendarMonths.indexOf(viewMonth);
+                  if (idx > 0) setViewMonth(calendarMonths[idx - 1]);
+                }}
+                disabled={calendarMonths.indexOf(viewMonth) === 0}
+                className="w-8 h-8 rounded-full flex items-center justify-center border"
+                style={{
+                  borderColor: COLORS.border,
+                  opacity: calendarMonths.indexOf(viewMonth) === 0 ? 0.3 : 1,
+                  cursor: calendarMonths.indexOf(viewMonth) === 0 ? 'not-allowed' : 'pointer',
+                }}
+              >
+                <ChevronLeft size={16} style={{ color: COLORS.ink }} />
+              </button>
+              <div className="text-sm font-bold" style={{ color: COLORS.ink }}>
+                {MONTH_NAMES_SHORT[viewMonth]} 2026
+              </div>
+              <button
+                onClick={() => {
+                  const idx = calendarMonths.indexOf(viewMonth);
+                  if (idx < calendarMonths.length - 1) setViewMonth(calendarMonths[idx + 1]);
+                }}
+                disabled={calendarMonths.indexOf(viewMonth) === calendarMonths.length - 1}
+                className="w-8 h-8 rounded-full flex items-center justify-center border"
+                style={{
+                  borderColor: COLORS.border,
+                  opacity: calendarMonths.indexOf(viewMonth) === calendarMonths.length - 1 ? 0.3 : 1,
+                  cursor: calendarMonths.indexOf(viewMonth) === calendarMonths.length - 1 ? 'not-allowed' : 'pointer',
+                }}
+              >
+                <ChevronRight size={16} style={{ color: COLORS.ink }} />
+              </button>
+            </div>
+
+            {/* Horizontal scrollable day cards */}
+            <div
+              className="flex gap-2 overflow-x-auto pb-2 mb-4"
+              style={{ scrollbarWidth: 'thin', WebkitOverflowScrolling: 'touch' }}
+            >
+              {daysInViewMonth.map((day) => {
+                const isSelected = newSailingDate === day.key;
+                const disabled = day.avail === 0;
+                return (
+                  <button
+                    key={day.key}
+                    onClick={() => !disabled && setNewSailingDate(day.key)}
+                    disabled={disabled}
+                    className="flex-shrink-0 w-16 px-1 py-2 rounded-xl border-2 text-center transition-all"
+                    style={{
+                      background: isSelected ? '#FFE5E9' : disabled ? COLORS.bgMuted : 'white',
+                      borderColor: isSelected ? COLORS.primary : COLORS.border,
+                      color: isSelected ? COLORS.primary : disabled ? COLORS.inkMuted : COLORS.ink,
+                      opacity: disabled ? 0.4 : 1,
+                      cursor: disabled ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    <div className="text-[9px] font-semibold uppercase" style={{ color: COLORS.inkMuted }}>
+                      {day.dow}
+                    </div>
+                    <div className="text-lg font-bold leading-tight">{day.date}</div>
+                    {day.blocked ? (
+                      <div className="text-[9px] font-semibold" style={{ color: COLORS.destructive }}>Blocked</div>
+                    ) : day.isOriginal ? (
+                      <div className="text-[9px] font-semibold" style={{ color: COLORS.inkMuted }}>Original</div>
+                    ) : (
+                      <div className="text-[9px]" style={{ color: isSelected ? COLORS.primary : COLORS.inkMuted }}>
+                        {day.avail} seats
+                      </div>
+                    )}
+                    {day.isToday && (
+                      <div className="w-1 h-1 rounded-full mx-auto mt-0.5" style={{ background: COLORS.primary }} />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="text-[10px] mb-3 flex items-center gap-1" style={{ color: COLORS.inkMuted }}>
+              <Clock size={10} />
+              Rescheduling allowed up to 30 days from today · swipe to see more dates
             </div>
 
             <label className="block text-xs font-semibold mb-1.5" style={{ color: COLORS.ink }}>
