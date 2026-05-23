@@ -10648,14 +10648,6 @@ function CustomerRefundScreen({ setScreen }) {
 }
 
 // ============================================================================
-// SIGNATURE PAD HELPER (Batch 8)
-// HTML5 canvas with Pointer Events — works for stylus, finger, and mouse.
-// Parent receives the data URL via onChange when the user lifts the pointer.
-// ============================================================================
-// SignaturePad removed — manifest uses blank wet-ink signature lines instead.
-// Print the manifest and have both parties sign with pen before PCG/MARINA submission.
-
-// ============================================================================
 // TIER 1: BOARDING OFFICER — GANGWAY SCAN + FINAL MANIFEST (Batch 8)
 // Three modes:
 //   A. Gangway scanning   — QR rescan as people physically board
@@ -10725,7 +10717,7 @@ function StaffBoardingScreen({ setScreen, onShowManifest }) {
     { name: 'Maricel Bagatsing', role: 'Stewardess', license: 'PCG-CREW-2021-08812' },
   ];
 
-  // Signatures captured as data URLs
+  // Manifest submission state
   const [submitted, setSubmitted] = useState(false);
 
   // Counters
@@ -12267,7 +12259,7 @@ function NativeAppPreviewScreen({ setScreen }) {
             The web app at <span className="font-mono text-xs px-1 rounded" style={{ background: 'white' }}>fandsmarine.ph</span> remains
             the home for everything that needs a full screen or a desktop browser:
             customer booking, admin operations, finance, reports, the signed final manifest with
-            the master/captain's signature pad, and PCG/MARINA submission.
+            the final manifest with wet-ink signatures, and PCG/MARINA submission.
           </p>
           <p>
             The two PWAs (<span className="font-mono text-xs px-1 rounded" style={{ background: 'white' }}>counter.fandsmarine.ph</span>
@@ -12276,8 +12268,8 @@ function NativeAppPreviewScreen({ setScreen }) {
             but their UI is stripped down to the single repeated task each role does dozens of times per voyage.
           </p>
           <p>
-            Finalize + signatures + submission stays in the web app because (a) it happens once per voyage, not dozens of times,
-            (b) the signature canvases want a tablet-or-larger screen, and (c) the audit trail is cleaner when the legal record is generated server-side from a desktop session.
+            Finalize + submission stays in the web app because (a) it happens once per voyage, not dozens of times,
+            (b) the manifest needs to be printed for wet-ink signing by both Boarding Officer and Master/Captain, and (c) the audit trail is cleaner when the legal record is generated server-side from a desktop session.
           </p>
         </div>
       </div>
