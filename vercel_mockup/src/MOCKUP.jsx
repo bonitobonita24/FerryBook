@@ -16380,7 +16380,11 @@ export default function FandSMarineMockup() {
                     background: COLORS.bgMuted,
                   }}
                 >
-                  <div className="px-4 py-4">
+                  <div style={{
+                    padding: viewMode === 'desktop' ? '24px 48px' : viewMode === 'tablet' ? '20px 32px' : '16px 16px',
+                    maxWidth: viewMode === 'desktop' ? 960 : viewMode === 'tablet' ? 640 : '100%',
+                    margin: '0 auto',
+                  }}>
                     {content}
                   </div>
                   <footer className="text-center py-4 text-[10px]" style={{ color: COLORS.inkMuted }}>
