@@ -1,0 +1,41 @@
+{
+  "scannedAt": "2026-05-24",
+  "techStack": ["React 18", "Vite 5", "JavaScript (JSX)", "lucide-react", "recharts", "Vercel"],
+  "projectType": "frontend-mockup",
+  "installedSkills": [
+    {
+      "name": "design-auditor",
+      "category": "Design & UI",
+      "tier": "T4",
+      "reason": "40-screen Vite/React mockup needs design scoring against 17 rules; complements ui-ux-pro-max plugin (generation vs. audit)"
+    },
+    {
+      "name": "awesome-design-md",
+      "category": "Design & UI",
+      "tier": "T4",
+      "reason": "31 DESIGN.md references for production-grade UI patterns; useful for client-facing prototype polish"
+    },
+    {
+      "name": "microcopy-writer",
+      "category": "Content & Copywriting",
+      "tier": "T4",
+      "reason": "New MeetingMinutesApp UI + 40 mockup screens have buttons/tooltips/empty states needing microcopy"
+    }
+  ],
+  "excludedGlobals": [],
+  "resolvedConflicts": [],
+  "recommendedPlugins": [],
+  "skippedOptional": [],
+  "specDriven": {
+    "detected": false
+  },
+  "skippedReasons": {
+    "frontend-design": "covered by frontend-design plugin + document-skills:frontend-design",
+    "planning-with-files": "covered by planning-with-files plugin",
+    "vercel-agent-skills": "covered by vercel-plugin + vercel-plugin:react-best-practices",
+    "superpowers-subskills": "covered by superpowers plugin bundle (TDD, debugging, git-worktrees, brainstorming, finishing-branch)",
+    "playwright-skill": "covered by document-skills:webapp-testing + fullstack-dev-skills:playwright-expert; project has no tests",
+    "owasp-security": "no API/auth/DB in mockup",
+    "oiloil-ui-ux-guide": "Design guidance group rule: ui-ux-pro-max plugin already covers UX"
+  }
+}
