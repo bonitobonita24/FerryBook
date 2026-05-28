@@ -1520,3 +1520,107 @@ _**Agent (claude-opus-4-7 2026-05-28 15:45:51Z)**_
 Live (HTTP 200).
 
 **Change**: Added a clarifying info box inside the Vehicle Declared card on the Review & Pay screen — "**How the FREE ride works:** The free ride is applied to the highest-priced ticket in this booking (usually the regular adult fare). That ticket's fare amount is deducted from the vehicle fee at the port when the Check-in Officer collects payment." Tagalog translation included.
+
+---
+
+_**User (2026-05-28 17:25:55Z)**_
+
+save session
+
+---
+
+_**Agent (claude-opus-4-7 2026-05-28 17:26:04Z)**_
+
+_**Agent (claude-opus-4-7 2026-05-28 17:26:07Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+List existing memory files
+
+`ls /home/me/.claude/projects/-home-me-UbuntuDevFiles-1-COMPANY-DEV-FerryBook-SAAS-FerryBook/memory/`
+
+```text
+MEMORY.md
+feedback_meeting_minutes_no_mobile_frame.md
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-05-28 17:26:13Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `/home/me/.claude/projects/-home-me-UbuntuDevFiles-1-COMPANY-DEV-FerryBook-SAAS-FerryBook/memory/MEMORY.md`
+
+```text
+
+1	- [Meeting minutes — no mobile/phone frame](feedback_meeting_minutes_no_mobile_frame.md) — render `/meetings/<slug>` natively responsive; never wrap in iPhone shell or force 390px width
+2
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-05-28 17:26:31Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```md
+---
+name: project-vercel-mockup-layout
+description: The FerryBook mockup Vercel app lives at docs/vercel_mockup/, not the repo root; the Vercel project's Root Directory is set to that path
+metadata:
+  type: project
+---
+
+The deployed mockup at https://fandsbookingapp-mockup.vercel.app/ is built from `docs/vercel_mockup/` (Vite + React app, main file `src/MOCKUP.jsx`). The repo root has no `package.json` and no app code.
+
+The Vercel project `fandsbookingapp-mockup` (id `prj_0WF5MHE0LKQuTgW9WZL7TDr9OpEM`) now has:
+- **Root Directory**: `docs/vercel_mockup`
+- **Framework**: `vite`
+- Linked to GitHub repo `bonitobonita24/FerryBook`, production branch `main`
+
+**Why:** Before this was set, every `git push` to main triggered a GitHub auto-build from the repo root, which had no app — it produced an empty/broken deployment that got auto-promoted to production and served HTTP 404 on the public alias. That caused the recurring "Vercel deployment is 404 again" incidents (see prior memory observations 4737, 5606, 5616, 5693 and the May 28 fix at 11pm GMT+8).
+
+**How to apply:**
+- For CLI deploys with the Root Directory set, run `npx vercel --prod` from the **repo root** (with the project's `.vercel/` linked there), NOT from inside `docs/vercel_mockup/`. Running from inside the subdir stacks the paths and yields `docs/vercel_mockup/docs/vercel_mockup does not exist`.
+- The `.vercel/project.json` lives at `docs/vercel_mockup/.vercel/project.json`. To deploy from repo root, temporarily copy `.vercel/` up, deploy, then remove it: `cp -r docs/vercel_mockup/.vercel .vercel && npx vercel --prod --yes && rm -rf .vercel`.
+- If the production alias returns 404 again despite a "Ready" deployment, run a fresh `vercel --prod` — past incidents have shown stale/corrupt aliased deployments serving 404 even when marked Ready.
+- Related: [[feedback-meeting-minutes-no-mobile-frame]] (other constraints on mockup screens).
+
+```
+
+```text
+File created successfully at: /home/me/.claude/projects/-home-me-UbuntuDevFiles-1-COMPANY-DEV-FerryBook-SAAS-FerryBook/memory/project_vercel_mockup_layout.md (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-05-28 17:26:39Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /home/me/.claude/projects/-home-me-UbuntuDevFiles-1-COMPANY-DEV-FerryBook-SAAS-FerryBook/memory/MEMORY.md has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-05-28 17:26:46Z)**_
+
+Session saved. New memory: `project_vercel_mockup_layout.md` — captures that the mockup lives at `docs/vercel_mockup/`, the Vercel Root Directory fix that ended the recurring 404 loop, and the CLI gotcha (deploy from repo root, not from inside the subdir, to avoid path stacking).
+
+This session's product work (vehicle block move, "Others" ID type, FREE-ride clarification) is now in git/code, not memory — per the rules, code changes belong in the diff not the memory store.
+
+---
+
+_**User (2026-05-28 17:27:31Z)**_
+
+<command-name>/exit</command-name>
+            <command-message>exit</command-message>
+            <command-args></command-args>
+
+_**User (2026-05-28 17:27:31Z)**_
+
+<local-command-stdout>See ya!</local-command-stdout>
+
+_**User (2026-05-28 17:27:31Z)**_
+
+<local-command-caveat>Caveat: The messages below were generated by the user while running local commands. DO NOT respond to these messages or otherwise consider them in your response unless the user explicitly asks you to.</local-command-caveat>
