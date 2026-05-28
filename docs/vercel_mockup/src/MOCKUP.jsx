@@ -753,6 +753,8 @@ function PassengersScreen({ setScreen, t = T.en }) {
   const [sameContact, setSameContact] = useState({ 2: true, 3: true });
   const [withVehicle, setWithVehicle] = useState(false);
   const [vehicleType, setVehicleType] = useState('');
+  const [idTypes, setIdTypes] = useState({ 1: 'Driver License', 2: 'PhilHealth', 3: 'Senior ID' });
+  const [otherIdLabels, setOtherIdLabels] = useState({});
 
   return (
     <div>
@@ -806,6 +808,67 @@ function PassengersScreen({ setScreen, t = T.en }) {
           <strong>{t.alreadyHaveAccount}</strong> {t.signInAutoFill}
         </div>
         <OutlineButton onClick={() => setScreen('login')}>{t.signIn}</OutlineButton>
+      </div>
+
+      {/* VEHICLE RESERVATION (RORO) — surfaced early so travelers notice it before filling out passenger forms */}
+      <div className="bg-white rounded-2xl p-5 border mb-5" style={{ borderColor: withVehicle ? '#1E40AF' : COLORS.border, borderWidth: withVehicle ? 2 : 1 }}>
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={withVehicle}
+            onChange={(e) => { setWithVehicle(e.target.checked); if (!e.target.checked) setVehicleType(''); }}
+            className="w-5 h-5 rounded mt-0.5 flex-shrink-0"
+            style={{ accentColor: '#1E40AF' }}
+          />
+          <div className="flex-1">
+            <div className="font-semibold flex items-center gap-2" style={{ color: COLORS.ink }}>
+              🚗 {t.bringVehicle}
+              <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: '#DBEAFE', color: '#1E40AF' }}>
+                RORO
+              </span>
+            </div>
+            <div className="text-xs mt-0.5" style={{ color: COLORS.inkMuted }}>
+              {t.vehicleReserveOnly}
+            </div>
+          </div>
+        </label>
+
+        {withVehicle && (
+          <div className="mt-4 space-y-3">
+            <div>
+              <label className="text-xs font-semibold mb-1.5 block" style={{ color: COLORS.ink }}>{t.vehicleType}</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {[
+                  { id: 'motorcycle', label: 'Motorcycle', icon: '🏍️' },
+                  { id: 'sedan', label: 'Sedan', icon: '🚗' },
+                  { id: 'suv', label: 'SUV', icon: '🚙' },
+                  { id: 'van', label: 'Van', icon: '🚐' },
+                  { id: 'light-truck', label: 'Light Truck', icon: '🛻' },
+                ].map(v => (
+                  <button
+                    key={v.id}
+                    onClick={() => setVehicleType(v.id)}
+                    className="rounded-xl border-2 p-3 text-center transition-all"
+                    style={{
+                      background: vehicleType === v.id ? '#DBEAFE' : 'white',
+                      borderColor: vehicleType === v.id ? '#1E40AF' : COLORS.border,
+                    }}
+                  >
+                    <div className="text-xl mb-1">{v.icon}</div>
+                    <div className="text-xs font-semibold" style={{ color: vehicleType === v.id ? '#1E40AF' : COLORS.ink }}>{v.label}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-xl p-3 text-xs flex items-start gap-2" style={{ background: '#EFF6FF', color: '#1E40AF' }}>
+              <Info size={12} className="flex-shrink-0 mt-0.5" />
+              <div>
+                <strong>{t.reservationOnly}</strong> {t.reservationOnlyDesc}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* PASSENGER FORMS */}
@@ -913,7 +976,8 @@ function PassengersScreen({ setScreen, t = T.en }) {
               <div>
                 <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>{t.validIdType}</label>
                 <select
-                  defaultValue={s.id}
+                  value={idTypes[n] || s.id}
+                  onChange={(e) => setIdTypes({ ...idTypes, [n]: e.target.value })}
                   className="w-full h-12 px-3 rounded-xl border-2 text-sm focus:outline-none bg-white"
                   style={{ borderColor: COLORS.border }}
                 >
@@ -927,7 +991,18 @@ function PassengersScreen({ setScreen, t = T.en }) {
                   <option>Senior ID</option>
                   <option>PWD ID</option>
                   <option>Student ID</option>
+                  <option value="Others">{t.others}</option>
                 </select>
+                {idTypes[n] === 'Others' && (
+                  <input
+                    type="text"
+                    value={otherIdLabels[n] || ''}
+                    onChange={(e) => setOtherIdLabels({ ...otherIdLabels, [n]: e.target.value })}
+                    placeholder={t.specifyIdType}
+                    className="w-full h-12 px-3 rounded-xl border-2 text-sm focus:outline-none mt-2"
+                    style={{ borderColor: COLORS.border }}
+                  />
+                )}
               </div>
               <div>
                 <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>{t.idNumber}</label>
@@ -1067,67 +1142,6 @@ function PassengersScreen({ setScreen, t = T.en }) {
         </div>
       </div>
 
-      {/* VEHICLE RESERVATION (RORO) */}
-      <div className="bg-white rounded-2xl p-5 border mt-5" style={{ borderColor: withVehicle ? '#1E40AF' : COLORS.border, borderWidth: withVehicle ? 2 : 1 }}>
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={withVehicle}
-            onChange={(e) => { setWithVehicle(e.target.checked); if (!e.target.checked) setVehicleType(''); }}
-            className="w-5 h-5 rounded mt-0.5 flex-shrink-0"
-            style={{ accentColor: '#1E40AF' }}
-          />
-          <div className="flex-1">
-            <div className="font-semibold flex items-center gap-2" style={{ color: COLORS.ink }}>
-              🚗 {t.bringVehicle}
-              <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: '#DBEAFE', color: '#1E40AF' }}>
-                RORO
-              </span>
-            </div>
-            <div className="text-xs mt-0.5" style={{ color: COLORS.inkMuted }}>
-              {t.vehicleReserveOnly}
-            </div>
-          </div>
-        </label>
-
-        {withVehicle && (
-          <div className="mt-4 space-y-3">
-            <div>
-              <label className="text-xs font-semibold mb-1.5 block" style={{ color: COLORS.ink }}>{t.vehicleType}</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {[
-                  { id: 'motorcycle', label: 'Motorcycle', icon: '🏍️' },
-                  { id: 'sedan', label: 'Sedan', icon: '🚗' },
-                  { id: 'suv', label: 'SUV', icon: '🚙' },
-                  { id: 'van', label: 'Van', icon: '🚐' },
-                  { id: 'light-truck', label: 'Light Truck', icon: '🛻' },
-                ].map(v => (
-                  <button
-                    key={v.id}
-                    onClick={() => setVehicleType(v.id)}
-                    className="rounded-xl border-2 p-3 text-center transition-all"
-                    style={{
-                      background: vehicleType === v.id ? '#DBEAFE' : 'white',
-                      borderColor: vehicleType === v.id ? '#1E40AF' : COLORS.border,
-                    }}
-                  >
-                    <div className="text-xl mb-1">{v.icon}</div>
-                    <div className="text-xs font-semibold" style={{ color: vehicleType === v.id ? '#1E40AF' : COLORS.ink }}>{v.label}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-xl p-3 text-xs flex items-start gap-2" style={{ background: '#EFF6FF', color: '#1E40AF' }}>
-              <Info size={12} className="flex-shrink-0 mt-0.5" />
-              <div>
-                <strong>{t.reservationOnly}</strong> {t.reservationOnlyDesc}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
       <div className="flex gap-3 mt-6">
         <OutlineButton onClick={() => setScreen('sailings')} className="flex-1">{t.changeSailing}</OutlineButton>
         <PrimaryButton onClick={() => setScreen('seatSelection')} size="md" className="flex-[2]">
@@ -1236,6 +1250,12 @@ function ReviewScreen({ setScreen, t = T.en }) {
               <div className="font-semibold text-sm" style={{ color: '#1E40AF' }}>{t.vehicleDeclared} — SUV</div>
               <div className="text-xs mt-1" style={{ color: '#1E40AF' }}>
                 {t.vehicleReservConf} <strong>{t.freeRide}</strong>
+              </div>
+              <div className="rounded-lg p-2.5 mt-2 text-[11px] flex items-start gap-2" style={{ background: '#DBEAFE', color: '#1E3A8A' }}>
+                <Info size={12} className="flex-shrink-0 mt-0.5" />
+                <div>
+                  <strong>{t.freeRideRule}</strong> {t.freeRideRuleDesc}
+                </div>
               </div>
               <div className="text-[10px] font-semibold mt-1.5 px-2 py-0.5 rounded-full inline-block" style={{ background: '#DBEAFE', color: '#1E40AF' }}>
                 {t.payAtCounter}
@@ -16267,6 +16287,8 @@ const T = {
     dateOfBirth: 'Date of Birth',
     passengerType: 'Passenger Type',
     validIdType: 'Valid ID Type',
+    others: 'Others (please specify)',
+    specifyIdType: 'Specify ID type (e.g., Company ID, Postal ID)',
     idNumber: 'ID Number',
     validIdPhoto: 'Valid ID Photo',
     requiredForBoarding: 'required for boarding',
@@ -16317,6 +16339,8 @@ const T = {
     payAtCounter: 'Pay at counter on check-in',
     vehicleReservConf: 'Reservation confirmed for this sailing. Vehicle fee will be assessed and collected by check-in staff at the port.',
     freeRide: '1 passenger ride is FREE',
+    freeRideRule: 'How the FREE ride works:',
+    freeRideRuleDesc: 'The free ride is applied to the highest-priced ticket in this booking (usually the regular adult fare). That ticket\'s fare amount is deducted from the vehicle fee at the port when the Check-in Officer collects payment.',
     // Confirmation Method
     paymentReceived: 'Payment received',
     howSendTicket: 'How should we send your ticket?',
@@ -16926,6 +16950,8 @@ const T = {
     dateOfBirth: 'Petsa ng Kapanganakan',
     passengerType: 'Uri ng Pasahero',
     validIdType: 'Uri ng Valid ID',
+    others: 'Iba pa (pakitukoy)',
+    specifyIdType: 'Tukuyin ang uri ng ID (hal., Company ID, Postal ID)',
     idNumber: 'ID Number',
     validIdPhoto: 'Larawan ng Valid ID',
     requiredForBoarding: 'kailangan para sa boarding',
@@ -16976,6 +17002,8 @@ const T = {
     payAtCounter: 'Magbayad sa counter sa check-in',
     vehicleReservConf: 'Nakumpirma ang reserbasyon para sa biyaheng ito. Ang bayad sa sasakyan ay sinisingil at kokolektahin ng check-in staff sa pier.',
     freeRide: '1 pasahero ang LIBRE',
+    freeRideRule: 'Paano gumagana ang LIBRENG sakay:',
+    freeRideRuleDesc: 'Ang libreng sakay ay ibibigay sa pasaherong may pinakamataas na presyo ng tiket sa booking na ito (kadalasan ang regular adult fare). Ang halaga ng tiket na iyon ay ibabawas sa bayad ng sasakyan sa daungan kapag sinisingil ng Check-in Officer.',
     // Confirmation Method
     paymentReceived: 'Natanggap ang bayad',
     howSendTicket: 'Paano namin ipapadala ang iyong ticket?',
