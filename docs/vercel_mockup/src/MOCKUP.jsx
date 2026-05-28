@@ -124,7 +124,7 @@ function StatusBadge({ status }) {
 // ============================================================================
 // TIER 1: LANDING PAGE
 // ============================================================================
-function LandingScreen({ setScreen }) {
+function LandingScreen({ setScreen, t = T.en }) {
   const [tripType, setTripType] = useState('OneWay');
   const [direction, setDirection] = useState('outbound'); // 'outbound' = Batangas→Tilik, 'return' = Tilik→Batangas
   const fromLabel = direction === 'outbound' ? 'Batangas (any port)' : 'Tilik Port, Lubang';
@@ -148,13 +148,13 @@ function LandingScreen({ setScreen }) {
         />
         <div className="relative max-w-xl">
           <div className="text-xs font-semibold mb-3 px-3 py-1 inline-block rounded-full bg-white/80 backdrop-blur" style={{ color: COLORS.primary }}>
-            🚢 Batangas ↔ Lubang Island · Daily Departures
+            {t.heroTag}
           </div>
           <h1 className="text-2xl font-bold leading-tight mb-2" style={{ color: COLORS.ink }}>
-            Book your trip to Lubang Island in just a minute.
+            {t.bookTrip}
           </h1>
           <p className="text-sm mb-4" style={{ color: COLORS.ink }}>
-            Pick your date, see live seat availability, book secure with GCash, Maya, or card.
+            {t.pickDate}
           </p>
         </div>
       </div>
@@ -174,7 +174,7 @@ function LandingScreen({ setScreen }) {
               border: `2px solid ${tripType === 'OneWay' ? COLORS.ink : COLORS.border}`,
             }}
           >
-            One-way
+            {t.oneWay}
           </button>
           <button
             onClick={() => setTripType('RoundTrip')}
@@ -185,13 +185,13 @@ function LandingScreen({ setScreen }) {
               border: `2px solid ${tripType === 'RoundTrip' ? COLORS.ink : COLORS.border}`,
             }}
           >
-            Round-trip · save 10%
+            {t.roundTrip}
           </button>
         </div>
         {/* FROM + SWAP + TO row */}
         <div className="relative flex items-center gap-2 mb-3">
           <div className="flex-1 p-3 rounded-xl border-2" style={{ borderColor: COLORS.border }}>
-            <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.inkMuted }}>From</div>
+            <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.inkMuted }}>{t.from}</div>
             <div className="font-semibold mt-1 flex items-center gap-1">
               <MapPin size={16} style={{ color: COLORS.primary }} /> {fromLabel}
             </div>
@@ -206,7 +206,7 @@ function LandingScreen({ setScreen }) {
             <ArrowRightLeft size={18} />
           </button>
           <div className="flex-1 p-3 rounded-xl border-2" style={{ borderColor: COLORS.border }}>
-            <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.inkMuted }}>To</div>
+            <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.inkMuted }}>{t.to}</div>
             <div className="font-semibold mt-1 flex items-center gap-1">
               <MapPin size={16} style={{ color: COLORS.primary }} /> {toLabel}
             </div>
@@ -218,39 +218,39 @@ function LandingScreen({ setScreen }) {
           className="w-full text-left p-3 rounded-xl border-2 mb-4 bg-white transition-all hover:border-foreground"
           style={{ borderColor: COLORS.border }}
         >
-          <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.inkMuted }}>Depart</div>
+          <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.inkMuted }}>{t.depart}</div>
           <div className="font-semibold mt-1 flex items-center gap-1">
-            <Calendar size={16} style={{ color: COLORS.primary }} /> Pick a date
+            <Calendar size={16} style={{ color: COLORS.primary }} /> {t.pickADate}
           </div>
         </button>
         <PrimaryButton onClick={() => setScreen('calendar')} size="lg" className="w-full">
-          Search available trips →
+          {t.searchTrips}
         </PrimaryButton>
       </div>
 
       {/* TRUST GRID — 2×2 on phone, 4-col on wider */}
       <div className="grid grid-cols-2 gap-3 mt-8 mb-8">
         {[
-          { icon: Shield, label: 'MARINA-licensed', sub: 'Cert. PSL-2019-04287' },
-          { icon: Star, label: '4.8 average rating', sub: '12,847 reviews' },
-          { icon: Users, label: '180,000+ passengers', sub: 'served in 2025' },
-          { icon: Anchor, label: '12 years operating', sub: 'since 2013' },
-        ].map((t, i) => (
+          { icon: Shield, label: t.marinaLicensed, sub: t.cert },
+          { icon: Star, label: t.avgRating, sub: t.reviews },
+          { icon: Users, label: t.paxServed, sub: t.servedIn },
+          { icon: Anchor, label: t.yearsOp, sub: t.since },
+        ].map((item, i) => (
           <div key={i} className="p-5 rounded-xl bg-white border" style={{ borderColor: COLORS.border }}>
-            <t.icon size={28} style={{ color: COLORS.primary }} className="mb-3" />
-            <div className="font-semibold" style={{ color: COLORS.ink }}>{t.label}</div>
-            <div className="text-sm mt-0.5" style={{ color: COLORS.inkMuted }}>{t.sub}</div>
+            <item.icon size={28} style={{ color: COLORS.primary }} className="mb-3" />
+            <div className="font-semibold" style={{ color: COLORS.ink }}>{item.label}</div>
+            <div className="text-sm mt-0.5" style={{ color: COLORS.inkMuted }}>{item.sub}</div>
           </div>
         ))}
       </div>
 
       {/* CLASS SHOWCASE */}
-      <h2 className="text-xl font-bold mb-4" style={{ color: COLORS.ink }}>Three ways to sail</h2>
+      <h2 className="text-xl font-bold mb-4" style={{ color: COLORS.ink }}>{t.threeWays}</h2>
       <div className="space-y-3 mb-8">
         {[
-          { name: 'Open Air', from: '₱350', desc: 'Outdoor deck. Sea breeze, mountain views. Backpacker favorite.', bg: '#E0F2FE', color: '#1E40AF', Icon: Wind },
-          { name: 'Aircon', from: '₱550', desc: 'Climate-controlled cabin with reclining seats and USB charging.', bg: '#FFE5E9', color: COLORS.primary, Icon: Snowflake },
-          { name: 'VIP', from: '₱850', desc: 'Private lounge. Refreshments, expedited boarding, prime window seats.', bg: '#FEF3C7', color: '#A16207', Icon: Crown },
+          { name: 'Open Air', from: '₱350', desc: t.openAirDesc, bg: '#E0F2FE', color: '#1E40AF', Icon: Wind },
+          { name: 'Aircon', from: '₱550', desc: t.airconDesc, bg: '#FFE5E9', color: COLORS.primary, Icon: Snowflake },
+          { name: 'VIP', from: '₱850', desc: t.vipDesc, bg: '#FEF3C7', color: '#A16207', Icon: Crown },
         ].map((c, i) => (
           <div key={i} className="rounded-xl overflow-hidden border flex" style={{ borderColor: COLORS.border, background: 'white' }}>
             <div className="w-16 flex-shrink-0 flex items-center justify-center" style={{ background: c.bg }}>
@@ -273,7 +273,7 @@ function LandingScreen({ setScreen }) {
 // ============================================================================
 // TIER 1: CALENDAR + AVAILABILITY
 // ============================================================================
-function CalendarScreen({ setScreen }) {
+function CalendarScreen({ setScreen, t = T.en }) {
   const today = { year: 2026, month: 4, day: 19 }; // month is 0-indexed (4 = May)
 
   // The month being viewed (default to today's month)
@@ -373,22 +373,22 @@ function CalendarScreen({ setScreen }) {
 
       {/* Step indicator — 6 steps: Date · Sailing · Passengers · Seats · Review · Pay */}
       <div className="flex items-center gap-2 mb-6 text-sm flex-wrap">
-        <span className="font-semibold" style={{ color: COLORS.primary }}>1. Date</span>
+        <span className="font-semibold" style={{ color: COLORS.primary }}>1. {t.stepDate}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>2. Sailing</span>
+        <span style={{ color: COLORS.inkMuted }}>2. {t.stepSailing}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>3. Passengers</span>
+        <span style={{ color: COLORS.inkMuted }}>3. {t.stepPassengers}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>4. Seats</span>
+        <span style={{ color: COLORS.inkMuted }}>4. {t.stepSeats}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>5. Review</span>
+        <span style={{ color: COLORS.inkMuted }}>5. {t.stepReview}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>6. Pay</span>
+        <span style={{ color: COLORS.inkMuted }}>6. {t.stepPay}</span>
       </div>
 
-      <h1 className="text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>Pick your departure date</h1>
+      <h1 className="text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>{t.pickDepartDate}</h1>
       <p className="mb-6" style={{ color: COLORS.inkMuted }}>
-        Batangas → Lubang Island · One-way · Each date shows aggregate seats across all sailings.
+        {t.calendarSub}
       </p>
 
       {/* CALENDAR */}
@@ -427,10 +427,10 @@ function CalendarScreen({ setScreen }) {
 
         {/* LEGEND */}
         <div className="flex flex-wrap gap-3 mb-4 text-xs" style={{ color: COLORS.inkMuted }}>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: COLORS.success }}></span>Available</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: COLORS.warning }}></span>Filling up</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: COLORS.destructive }}></span>Almost full</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: COLORS.bgMuted, border: `1px solid ${COLORS.border}` }}></span>Unavailable</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: COLORS.success }}></span>{t.available}</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: COLORS.warning }}></span>{t.fillingUp}</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: COLORS.destructive }}></span>{t.almostFull}</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: COLORS.bgMuted, border: `1px solid ${COLORS.border}` }}></span>{t.unavailable}</span>
         </div>
 
         <div className="grid grid-cols-7 gap-2">
@@ -479,7 +479,7 @@ function CalendarScreen({ setScreen }) {
                   />
                 )}
                 {d.blocked && (
-                  <span className="text-[8px] font-semibold mt-0.5" style={{ color: isSelected ? 'rgba(255,255,255,0.7)' : COLORS.destructive }}>Blocked</span>
+                  <span className="text-[8px] font-semibold mt-0.5" style={{ color: isSelected ? 'rgba(255,255,255,0.7)' : COLORS.destructive }}>{t.blocked}</span>
                 )}
               </button>
             );
@@ -491,12 +491,12 @@ function CalendarScreen({ setScreen }) {
       <div className="bg-white rounded-2xl p-6 border-2 mb-6" style={{ borderColor: COLORS.primary }}>
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.inkMuted }}>Selected</div>
+            <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.inkMuted }}>{t.selected}</div>
             <h3 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{selectedFormatted}</h3>
-            <div className="text-xs mt-1" style={{ color: COLORS.inkMuted }}>Total availability across all sailings operating today</div>
+            <div className="text-xs mt-1" style={{ color: COLORS.inkMuted }}>{t.totalAvail}</div>
           </div>
           <div className="text-right">
-            <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.inkMuted }}>Sailings operating</div>
+            <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.inkMuted }}>{t.sailingsOp}</div>
             <div className="text-lg font-bold" style={{ color: COLORS.ink }}>{selSailings} sailings · {selPorts} port{selPorts === 1 ? '' : 's'}</div>
           </div>
         </div>
@@ -504,25 +504,25 @@ function CalendarScreen({ setScreen }) {
           <div className="p-3 rounded-xl" style={{ background: '#DBEAFE' }}>
             <div className="text-xs font-semibold" style={{ color: '#1E40AF' }}>Open Air</div>
             <div className="text-2xl font-bold" style={{ color: '#1E40AF' }}>{selOpenAir}</div>
-            <div className="text-xs" style={{ color: '#1E40AF' }}>seats from ₱350</div>
+            <div className="text-xs" style={{ color: '#1E40AF' }}>{t.seatsFrom} ₱350</div>
           </div>
           <div className="p-3 rounded-xl" style={{ background: '#FFE5E9' }}>
             <div className="text-xs font-semibold" style={{ color: COLORS.primary }}>Aircon</div>
             <div className="text-2xl font-bold" style={{ color: COLORS.primary }}>{selAircon}</div>
-            <div className="text-xs" style={{ color: COLORS.primary }}>seats from ₱550</div>
+            <div className="text-xs" style={{ color: COLORS.primary }}>{t.seatsFrom} ₱550</div>
           </div>
           <div className="p-3 rounded-xl" style={{ background: '#FEF3C7' }}>
             <div className="text-xs font-semibold" style={{ color: '#A16207' }}>VIP</div>
             <div className="text-2xl font-bold" style={{ color: '#A16207' }}>{selVip}</div>
-            <div className="text-xs" style={{ color: '#A16207' }}>seats from ₱850</div>
+            <div className="text-xs" style={{ color: '#A16207' }}>{t.seatsFrom} ₱850</div>
           </div>
         </div>
       </div>
 
       <div className="flex gap-3">
-        <OutlineButton onClick={() => setScreen('landing')} className="flex-1">← Back</OutlineButton>
+        <OutlineButton onClick={() => setScreen('landing')} className="flex-1">{t.back}</OutlineButton>
         <PrimaryButton onClick={() => setScreen('sailings')} size="md" className="flex-[2]">
-          See sailings on {selectedShort} →
+          {t.seeSailingsOn} {selectedShort} →
         </PrimaryButton>
       </div>
     </div>
@@ -532,7 +532,7 @@ function CalendarScreen({ setScreen }) {
 // ============================================================================
 // TIER 1: TODAY'S SAILINGS LIST (after date selection)
 // ============================================================================
-function SailingsListScreen({ setScreen }) {
+function SailingsListScreen({ setScreen, t = T.en }) {
   const [selectedSailing, setSelectedSailing] = useState('sail-1');
   const [selectedClass, setSelectedClass] = useState('aircon');
 
@@ -591,26 +591,26 @@ function SailingsListScreen({ setScreen }) {
       <MobileBadge strategy="Mobile First" />
 
       <div className="flex items-center gap-2 mb-6 text-sm flex-wrap">
-        <span style={{ color: COLORS.inkMuted }}>1. Date ✓</span>
+        <span style={{ color: COLORS.inkMuted }}>1. {t.stepDate} ✓</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span className="font-semibold" style={{ color: COLORS.primary }}>2. Sailing</span>
+        <span className="font-semibold" style={{ color: COLORS.primary }}>2. {t.stepSailing}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>3. Passengers</span>
+        <span style={{ color: COLORS.inkMuted }}>3. {t.stepPassengers}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>4. Seats</span>
+        <span style={{ color: COLORS.inkMuted }}>4. {t.stepSeats}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>5. Review</span>
+        <span style={{ color: COLORS.inkMuted }}>5. {t.stepReview}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>6. Pay</span>
+        <span style={{ color: COLORS.inkMuted }}>6. {t.stepPay}</span>
       </div>
 
-      <h1 className="text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>Today's sailings to Tilik</h1>
+      <h1 className="text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>{t.todaysSailings}</h1>
       <p className="mb-2" style={{ color: COLORS.inkMuted }}>
-        Friday, May 22 · 3 sailings available · Tap a sailing to see classes and prices
+        Friday, May 22 · 3 {t.sailingsSub}
       </p>
       <p className="mb-6 text-xs flex items-start gap-2 p-3 rounded-xl" style={{ background: '#EFF6FF', color: '#1E40AF' }}>
         <Anchor size={14} className="mt-0.5 flex-shrink-0" />
-        <span>Each sailing departs from a specific Batangas port. The port is shown clearly below — no need to choose; it's determined by the vessel's schedule for that day.</span>
+        <span>{t.portInfo}</span>
       </p>
 
       {/* SAILING CARDS */}
@@ -649,14 +649,14 @@ function SailingsListScreen({ setScreen }) {
                         style={{ background: portBg, color: portFg }}
                       >
                         <MapPin size={11} className="inline -mt-0.5 mr-1" />
-                        Departing from {s.batangasPort}
+                        {t.departingFrom} {s.batangasPort}
                       </span>
                       {s.hasOverride && (
                         <span
                           className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                           style={{ background: '#FEF3C7', color: '#A16207' }}
                         >
-                          PORT SURCHARGE
+                          {t.portSurcharge}
                         </span>
                       )}
                     </div>
@@ -695,7 +695,7 @@ function SailingsListScreen({ setScreen }) {
               {isSelected && (
                 <div className="p-5" style={{ background: 'white' }}>
                   <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: COLORS.inkMuted }}>
-                    Pick your class
+                    {t.pickYourClass}
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {s.classes.map((c) => {
@@ -722,7 +722,7 @@ function SailingsListScreen({ setScreen }) {
                             )}
                           </div>
                           <div className="text-xs mt-0.5" style={{ color: COLORS.inkMuted }}>
-                            {c.seats} left
+                            {c.seats} {t.left}
                           </div>
                         </button>
                       );
@@ -736,9 +736,9 @@ function SailingsListScreen({ setScreen }) {
       </div>
 
       <div className="flex gap-3">
-        <OutlineButton onClick={() => setScreen('calendar')} className="flex-1">← Change date</OutlineButton>
+        <OutlineButton onClick={() => setScreen('calendar')} className="flex-1">{t.changeDate}</OutlineButton>
         <PrimaryButton onClick={() => setScreen('passengers')} size="md" className="flex-[2]">
-          Continue with selected sailing →
+          {t.continueWithSailing}
         </PrimaryButton>
       </div>
     </div>
@@ -748,29 +748,31 @@ function SailingsListScreen({ setScreen }) {
 // ============================================================================
 // TIER 1: PASSENGER FORMS
 // ============================================================================
-function PassengersScreen({ setScreen }) {
+function PassengersScreen({ setScreen, t = T.en }) {
   const [paxCount, setPaxCount] = useState(3);
   const [sameContact, setSameContact] = useState({ 2: true, 3: true });
+  const [withVehicle, setWithVehicle] = useState(false);
+  const [vehicleType, setVehicleType] = useState('');
 
   return (
     <div>
       <MobileBadge strategy="Mobile First" />
 
       <div className="flex items-center gap-2 mb-6 text-sm flex-wrap">
-        <span style={{ color: COLORS.inkMuted }}>1. Date ✓</span>
+        <span style={{ color: COLORS.inkMuted }}>1. {t.stepDate} ✓</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>2. Sailing ✓</span>
+        <span style={{ color: COLORS.inkMuted }}>2. {t.stepSailing} ✓</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span className="font-semibold" style={{ color: COLORS.primary }}>3. Passengers</span>
+        <span className="font-semibold" style={{ color: COLORS.primary }}>3. {t.stepPassengers}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>4. Seats</span>
+        <span style={{ color: COLORS.inkMuted }}>4. {t.stepSeats}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>5. Review</span>
+        <span style={{ color: COLORS.inkMuted }}>5. {t.stepReview}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>6. Pay</span>
+        <span style={{ color: COLORS.inkMuted }}>6. {t.stepPay}</span>
       </div>
 
-      <h1 className="text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>Who's sailing?</h1>
+      <h1 className="text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>{t.whosSailing}</h1>
       <p className="mb-6" style={{ color: COLORS.inkMuted }}>
         Fri, May 22 · 08:00 · Nasugbu → Tilik · MV Our Lady of St Therese · Aircon
       </p>
@@ -779,8 +781,8 @@ function PassengersScreen({ setScreen }) {
       <div className="bg-white rounded-2xl p-5 border mb-5" style={{ borderColor: COLORS.border }}>
         <div className="flex items-center justify-between">
           <div>
-            <div className="font-semibold" style={{ color: COLORS.ink }}>Total passengers</div>
-            <div className="text-xs" style={{ color: COLORS.inkMuted }}>Adults, seniors, PWDs, students, and children</div>
+            <div className="font-semibold" style={{ color: COLORS.ink }}>{t.totalPax}</div>
+            <div className="text-xs" style={{ color: COLORS.inkMuted }}>{t.totalPaxSub}</div>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -801,9 +803,9 @@ function PassengersScreen({ setScreen }) {
       {/* BOOKING CREATOR LOGIN PROMPT */}
       <div className="rounded-2xl p-4 mb-5 border-2 flex items-center justify-between" style={{ background: '#FFF5F7', borderColor: COLORS.primary }}>
         <div className="text-sm" style={{ color: COLORS.ink }}>
-          <strong>Already have an account?</strong> Sign in to auto-fill your details.
+          <strong>{t.alreadyHaveAccount}</strong> {t.signInAutoFill}
         </div>
-        <OutlineButton onClick={() => setScreen('login')}>Sign in</OutlineButton>
+        <OutlineButton onClick={() => setScreen('login')}>{t.signIn}</OutlineButton>
       </div>
 
       {/* PASSENGER FORMS */}
@@ -822,13 +824,13 @@ function PassengersScreen({ setScreen }) {
           <div key={n} className="bg-white rounded-2xl p-6 border mb-4" style={{ borderColor: isCreator ? COLORS.primary : COLORS.border, borderWidth: isCreator ? 2 : 1 }}>
             <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: COLORS.ink }}>
-                Passenger {n}
+                {t.passenger} {n}
                 {isCreator && (
                   <span
                     className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
                     style={{ background: '#FFE5E9', color: COLORS.primary }}
                   >
-                    Account owner
+                    {t.accountOwner}
                   </span>
                 )}
               </h3>
@@ -842,14 +844,14 @@ function PassengersScreen({ setScreen }) {
               >
                 <Info size={12} className="flex-shrink-0 mt-0.5" />
                 <div>
-                  This name plus your contact phone number identifies your account. If a phone number you enter below is already linked to an F&S Marine account, this booking will attach to that account automatically — no separate sign-in needed. After payment, all e-tickets are sent to that phone via SMS (and to your email if you provide one).
+                  {t.creatorInfo}
                 </div>
               </div>
             )}
 
             <div className="grid grid-cols-1 gap-2 mb-3">
               <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>Last Name</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>{t.lastName}</label>
                 <input
                   type="text"
                   defaultValue={s.ln}
@@ -858,7 +860,7 @@ function PassengersScreen({ setScreen }) {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>First Name</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>{t.firstName}</label>
                 <input
                   type="text"
                   defaultValue={s.fn}
@@ -867,7 +869,7 @@ function PassengersScreen({ setScreen }) {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>Middle Name</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>{t.middleName}</label>
                 <input
                   type="text"
                   defaultValue={s.mn}
@@ -876,7 +878,7 @@ function PassengersScreen({ setScreen }) {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>Suffix <span className="font-normal" style={{ color: COLORS.inkMuted }}>(optional)</span></label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>{t.suffix} <span className="font-normal" style={{ color: COLORS.inkMuted }}>({t.optional})</span></label>
                 <input
                   type="text"
                   placeholder="Jr. / Sr. / III"
@@ -885,7 +887,7 @@ function PassengersScreen({ setScreen }) {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>Date of Birth</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>{t.dateOfBirth}</label>
                 <input
                   type="date"
                   defaultValue={s.dob}
@@ -894,7 +896,7 @@ function PassengersScreen({ setScreen }) {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>Passenger Type</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>{t.passengerType}</label>
                 <select
                   defaultValue={s.type}
                   className="w-full h-12 px-3 rounded-xl border-2 text-sm focus:outline-none bg-white"
@@ -909,7 +911,7 @@ function PassengersScreen({ setScreen }) {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>Valid ID Type</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>{t.validIdType}</label>
                 <select
                   defaultValue={s.id}
                   className="w-full h-12 px-3 rounded-xl border-2 text-sm focus:outline-none bg-white"
@@ -928,7 +930,7 @@ function PassengersScreen({ setScreen }) {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>ID Number</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>{t.idNumber}</label>
                 <input
                   type="text"
                   defaultValue={s.idn}
@@ -941,8 +943,8 @@ function PassengersScreen({ setScreen }) {
             {/* ID PHOTO CAPTURE — REQUIRED PER PASSENGER */}
             <div className="border-t pt-3 mt-3" style={{ borderColor: COLORS.border }}>
               <label className="text-xs font-semibold mb-2 block" style={{ color: COLORS.ink }}>
-                Valid ID Photo <span style={{ color: COLORS.destructive }}>*</span>
-                <span className="font-normal ml-1" style={{ color: COLORS.inkMuted }}>— required for boarding</span>
+                {t.validIdPhoto} <span style={{ color: COLORS.destructive }}>*</span>
+                <span className="font-normal ml-1" style={{ color: COLORS.inkMuted }}>— {t.requiredForBoarding}</span>
               </label>
               <div className="flex items-center gap-3">
                 <div
@@ -952,7 +954,7 @@ function PassengersScreen({ setScreen }) {
                   {n === 1 ? (
                     <div className="text-center">
                       <CheckCircle2 size={20} style={{ color: COLORS.success }} className="mx-auto" />
-                      <div className="text-[10px] font-semibold mt-1" style={{ color: COLORS.success }}>Captured</div>
+                      <div className="text-[10px] font-semibold mt-1" style={{ color: COLORS.success }}>{t.captured}</div>
                     </div>
                   ) : (
                     <Camera size={28} style={{ color: COLORS.inkMuted }} />
@@ -968,7 +970,7 @@ function PassengersScreen({ setScreen }) {
                         border: `2px solid ${COLORS.ink}`,
                       }}
                     >
-                      <Camera size={16} /> {n === 1 ? 'Retake' : 'Take photo'}
+                      <Camera size={16} /> {n === 1 ? t.retake : t.takePhoto}
                     </button>
                     <button
                       className="h-11 px-3 rounded-xl text-sm font-semibold border-2 flex items-center gap-1 hover:bg-gray-50"
@@ -979,7 +981,7 @@ function PassengersScreen({ setScreen }) {
                     </button>
                   </div>
                   <div className="text-xs flex items-center gap-1" style={{ color: COLORS.inkMuted }}>
-                    <Lock size={11} /> Encrypted · auto-deleted 90 days after voyage
+                    <Lock size={11} /> {t.encrypted}
                   </div>
                 </div>
               </div>
@@ -996,12 +998,12 @@ function PassengersScreen({ setScreen }) {
                     className="w-4 h-4 rounded"
                     style={{ accentColor: COLORS.primary }}
                   />
-                  <span className="text-sm" style={{ color: COLORS.ink }}>Use same contact as booking creator</span>
+                  <span className="text-sm" style={{ color: COLORS.ink }}>{t.useSameContact}</span>
                 </label>
               )}
               <div>
                 <label className="text-xs font-semibold mb-1 block" style={{ color: COLORS.ink }}>
-                  Contact Number {isCreator && <span className="font-normal" style={{ color: COLORS.inkMuted }}>· also used for SMS recovery</span>}
+                  {t.contactNumber} {isCreator && <span className="font-normal" style={{ color: COLORS.inkMuted }}>· {t.smsRecovery}</span>}
                 </label>
                 <input
                   type="text"
@@ -1020,7 +1022,7 @@ function PassengersScreen({ setScreen }) {
                   >
                     <ShieldCheck size={12} className="flex-shrink-0" />
                     <span>
-                      <strong>This number is already linked to an account.</strong> We'll attach this booking to it automatically — no sign-in needed.
+                      <strong>{t.accountLinked}</strong> {t.autoAttach}
                     </span>
                   </div>
                 )}
@@ -1043,9 +1045,9 @@ function PassengersScreen({ setScreen }) {
             <ShieldCheck size={18} style={{ color: 'white' }} />
           </div>
           <div className="flex-1 text-sm" style={{ color: '#92400E' }}>
-            <div className="font-bold mb-1">Bring the right ID for each passenger</div>
+            <div className="font-bold mb-1">{t.bringRightId}</div>
             <div className="text-xs">
-              Discount claims (Senior, PWD, Student, Child, Infant) require specific IDs at the counter. The booking discount is forfeited if the matching original ID isn't shown — staff are required to verify before letting the passenger board.
+              {t.discountClaims}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-2.5 text-xs" style={{ color: COLORS.ink }}>
               <div>• <span className="font-semibold">Senior</span> → OSCA Senior Citizen ID <span style={{ color: COLORS.inkMuted }}>(RA 9994)</span></div>
@@ -1058,17 +1060,78 @@ function PassengersScreen({ setScreen }) {
             <div className="text-[11px] mt-2 flex items-start gap-1" style={{ color: '#92400E' }}>
               <Info size={10} className="flex-shrink-0 mt-0.5" />
               <span>
-                We'll send this checklist with your e-ticket so the right person brings the right ID on travel day.
+                {t.weWillSend}
               </span>
             </div>
           </div>
         </div>
       </div>
 
+      {/* VEHICLE RESERVATION (RORO) */}
+      <div className="bg-white rounded-2xl p-5 border mt-5" style={{ borderColor: withVehicle ? '#1E40AF' : COLORS.border, borderWidth: withVehicle ? 2 : 1 }}>
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={withVehicle}
+            onChange={(e) => { setWithVehicle(e.target.checked); if (!e.target.checked) setVehicleType(''); }}
+            className="w-5 h-5 rounded mt-0.5 flex-shrink-0"
+            style={{ accentColor: '#1E40AF' }}
+          />
+          <div className="flex-1">
+            <div className="font-semibold flex items-center gap-2" style={{ color: COLORS.ink }}>
+              🚗 {t.bringVehicle}
+              <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: '#DBEAFE', color: '#1E40AF' }}>
+                RORO
+              </span>
+            </div>
+            <div className="text-xs mt-0.5" style={{ color: COLORS.inkMuted }}>
+              {t.vehicleReserveOnly}
+            </div>
+          </div>
+        </label>
+
+        {withVehicle && (
+          <div className="mt-4 space-y-3">
+            <div>
+              <label className="text-xs font-semibold mb-1.5 block" style={{ color: COLORS.ink }}>{t.vehicleType}</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {[
+                  { id: 'motorcycle', label: 'Motorcycle', icon: '🏍️' },
+                  { id: 'sedan', label: 'Sedan', icon: '🚗' },
+                  { id: 'suv', label: 'SUV', icon: '🚙' },
+                  { id: 'van', label: 'Van', icon: '🚐' },
+                  { id: 'light-truck', label: 'Light Truck', icon: '🛻' },
+                ].map(v => (
+                  <button
+                    key={v.id}
+                    onClick={() => setVehicleType(v.id)}
+                    className="rounded-xl border-2 p-3 text-center transition-all"
+                    style={{
+                      background: vehicleType === v.id ? '#DBEAFE' : 'white',
+                      borderColor: vehicleType === v.id ? '#1E40AF' : COLORS.border,
+                    }}
+                  >
+                    <div className="text-xl mb-1">{v.icon}</div>
+                    <div className="text-xs font-semibold" style={{ color: vehicleType === v.id ? '#1E40AF' : COLORS.ink }}>{v.label}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-xl p-3 text-xs flex items-start gap-2" style={{ background: '#EFF6FF', color: '#1E40AF' }}>
+              <Info size={12} className="flex-shrink-0 mt-0.5" />
+              <div>
+                <strong>{t.reservationOnly}</strong> {t.reservationOnlyDesc}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="flex gap-3 mt-6">
-        <OutlineButton onClick={() => setScreen('sailings')} className="flex-1">← Change sailing</OutlineButton>
+        <OutlineButton onClick={() => setScreen('sailings')} className="flex-1">{t.changeSailing}</OutlineButton>
         <PrimaryButton onClick={() => setScreen('seatSelection')} size="md" className="flex-[2]">
-          Pick seats →
+          {t.pickSeats}
         </PrimaryButton>
       </div>
     </div>
@@ -1078,27 +1141,27 @@ function PassengersScreen({ setScreen }) {
 // ============================================================================
 // TIER 1: REVIEW + PAYMENT
 // ============================================================================
-function ReviewScreen({ setScreen }) {
+function ReviewScreen({ setScreen, t = T.en }) {
   return (
     <div>
       <MobileBadge strategy="Mobile First" />
 
       <div className="flex items-center gap-2 mb-6 text-sm flex-wrap">
-        <span style={{ color: COLORS.inkMuted }}>1. Date ✓</span>
+        <span style={{ color: COLORS.inkMuted }}>1. {t.stepDate} ✓</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>2. Sailing ✓</span>
+        <span style={{ color: COLORS.inkMuted }}>2. {t.stepSailing} ✓</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>3. Passengers ✓</span>
+        <span style={{ color: COLORS.inkMuted }}>3. {t.stepPassengers} ✓</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>4. Seats ✓</span>
+        <span style={{ color: COLORS.inkMuted }}>4. {t.stepSeats} ✓</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span className="font-semibold" style={{ color: COLORS.primary }}>5. Review</span>
+        <span className="font-semibold" style={{ color: COLORS.primary }}>5. {t.stepReview}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>6. Pay</span>
+        <span style={{ color: COLORS.inkMuted }}>6. {t.stepPay}</span>
       </div>
 
-      <h1 className="text-2xl font-bold mb-1" style={{ color: COLORS.ink }}>Review and pay</h1>
-      <p className="text-sm mb-4" style={{ color: COLORS.inkMuted }}>One last look before payment.</p>
+      <h1 className="text-2xl font-bold mb-1" style={{ color: COLORS.ink }}>{t.reviewPay}</h1>
+      <p className="text-sm mb-4" style={{ color: COLORS.inkMuted }}>{t.lastLook}</p>
 
       <div className="space-y-4">
         {/* MAIN */}
@@ -1137,7 +1200,7 @@ function ReviewScreen({ setScreen }) {
 
           {/* PASSENGERS */}
           <div className="bg-white rounded-2xl p-6 border" style={{ borderColor: COLORS.border }}>
-            <h3 className="font-bold text-lg mb-4" style={{ color: COLORS.ink }}>3 passengers</h3>
+            <h3 className="font-bold text-lg mb-4" style={{ color: COLORS.ink }}>3 {t.paxCount}</h3>
             {[
               { name: 'Maria Cristina B. Reyes', type: 'Adult', fare: 550, discount: 0, seat: 'A03-B', ticket: 'BTN-2026-0518-3B7K' },
               { name: 'Joaquin Miguel S. Reyes', type: 'Child (3–12)', fare: 550, discount: 275, seat: 'A03-C', ticket: 'BTN-2026-0518-4C8L' },
@@ -1166,9 +1229,23 @@ function ReviewScreen({ setScreen }) {
             ))}
           </div>
 
+          {/* VEHICLE DECLARATION */}
+          <div className="rounded-2xl p-4 border-2 flex items-start gap-3" style={{ background: '#EFF6FF', borderColor: '#1E40AF' }}>
+            <div className="text-xl flex-shrink-0 mt-0.5">🚙</div>
+            <div className="flex-1">
+              <div className="font-semibold text-sm" style={{ color: '#1E40AF' }}>{t.vehicleDeclared} — SUV</div>
+              <div className="text-xs mt-1" style={{ color: '#1E40AF' }}>
+                {t.vehicleReservConf} <strong>{t.freeRide}</strong>
+              </div>
+              <div className="text-[10px] font-semibold mt-1.5 px-2 py-0.5 rounded-full inline-block" style={{ background: '#DBEAFE', color: '#1E40AF' }}>
+                {t.payAtCounter}
+              </div>
+            </div>
+          </div>
+
           {/* PAYMENT METHOD */}
           <div className="bg-white rounded-2xl p-6 border" style={{ borderColor: COLORS.border }}>
-            <h3 className="font-bold text-lg mb-4" style={{ color: COLORS.ink }}>Payment method</h3>
+            <h3 className="font-bold text-lg mb-4" style={{ color: COLORS.ink }}>{t.paymentMethod}</h3>
             <p className="text-xs mb-4" style={{ color: COLORS.inkMuted }}>Powered by Xendit · secure payment processing</p>
             <div className="grid grid-cols-3 gap-2">
               {[
@@ -1197,40 +1274,40 @@ function ReviewScreen({ setScreen }) {
 
         {/* PRICE BREAKDOWN — stacked below on mobile */}
           <div className="bg-white rounded-2xl p-5 border" style={{ borderColor: COLORS.border }}>
-            <h3 className="font-bold text-lg mb-4" style={{ color: COLORS.ink }}>Price details</h3>
+            <h3 className="font-bold text-lg mb-4" style={{ color: COLORS.ink }}>{t.priceDetails}</h3>
             <div className="space-y-2 text-sm pb-4 border-b" style={{ borderColor: COLORS.border }}>
               <div className="flex justify-between">
                 <span style={{ color: COLORS.ink }}>3 × Aircon @ ₱550</span>
                 <span style={{ color: COLORS.ink }}>₱1,650</span>
               </div>
               <div className="flex justify-between" style={{ color: COLORS.success }}>
-                <span>Child discount (50%)</span>
+                <span>{t.childDiscount}</span>
                 <span>−₱275</span>
               </div>
               <div className="flex justify-between" style={{ color: COLORS.success }}>
-                <span>Senior discount (20%)</span>
+                <span>{t.seniorDiscount}</span>
                 <span>−₱110</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Booking fee</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.bookingFee}</span>
                 <span style={{ color: COLORS.ink }}>₱20</span>
               </div>
             </div>
             <div className="flex justify-between items-baseline py-4">
-              <span className="font-bold" style={{ color: COLORS.ink }}>Total</span>
+              <span className="font-bold" style={{ color: COLORS.ink }}>{t.total}</span>
               <span className="text-2xl font-bold" style={{ color: COLORS.primary }}>₱1,285</span>
             </div>
             <PrimaryButton onClick={() => setScreen('email')} size="lg" className="w-full">
-              Pay ₱1,285 with GCash →
+              {t.payWith} ₱1,285 with GCash →
             </PrimaryButton>
             <p className="text-xs text-center mt-3" style={{ color: COLORS.inkMuted }}>
-              By proceeding you agree to our terms and cancellation policy.
+              {t.agreeTerms}
             </p>
           </div>
       </div>
 
       <div className="mt-4">
-        <OutlineButton onClick={() => setScreen('seatSelection')}>← Back to seats</OutlineButton>
+        <OutlineButton onClick={() => setScreen('seatSelection')}>{t.backToSeats}</OutlineButton>
       </div>
     </div>
   );
@@ -1239,7 +1316,7 @@ function ReviewScreen({ setScreen }) {
 // ============================================================================
 // TIER 1: POST-PAYMENT EMAIL COLLECTION
 // ============================================================================
-function ConfirmationMethodScreen({ setScreen }) {
+function ConfirmationMethodScreen({ setScreen, t = T.en }) {
   const [method, setMethod] = useState('phone'); // 'email' or 'phone' — default phone for elder-friendly
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -1279,7 +1356,7 @@ function ConfirmationMethodScreen({ setScreen }) {
           <CheckCircle2 size={20} color="white" />
         </div>
         <div>
-          <div className="font-bold" style={{ color: COLORS.success }}>Payment received — ₱1,285 via GCash</div>
+          <div className="font-bold" style={{ color: COLORS.success }}>{t.paymentReceived} — ₱1,285 via GCash</div>
           <div className="text-xs" style={{ color: COLORS.ink }}>Transaction ID: xnd_payreq_8K4L9M2A1B · Fri, May 19, 2026 · 14:23</div>
         </div>
       </div>
@@ -1287,9 +1364,9 @@ function ConfirmationMethodScreen({ setScreen }) {
       <div className="max-w-xl mx-auto">
         <div className="text-center mb-6">
           <Send size={40} style={{ color: COLORS.primary }} className="mx-auto mb-3" />
-          <h1 className="text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>How should we send your ticket?</h1>
+          <h1 className="text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>{t.howSendTicket}</h1>
           <p style={{ color: COLORS.inkMuted }}>
-            Pick whichever is easier for you. Both options send the same booking reference.
+            {t.pickEasier}
           </p>
         </div>
 
@@ -1308,13 +1385,13 @@ function ConfirmationMethodScreen({ setScreen }) {
             }}
           >
             <Smartphone size={16} />
-            <span>Phone (SMS)</span>
+            <span>{t.phoneSms}</span>
             {method === 'phone' && (
               <span
                 className="text-xs px-1.5 py-0.5 rounded-full font-semibold"
                 style={{ background: '#FFE5E9', color: COLORS.primary, fontSize: 10 }}
               >
-                Easiest
+                {t.easiest}
               </span>
             )}
           </button>
@@ -1336,7 +1413,7 @@ function ConfirmationMethodScreen({ setScreen }) {
           {method === 'phone' ? (
             <>
               <label className="text-sm font-semibold mb-2 block" style={{ color: COLORS.ink }}>
-                Mobile number
+                {t.mobileNumber}
               </label>
               <input
                 type="tel"
@@ -1382,24 +1459,24 @@ function ConfirmationMethodScreen({ setScreen }) {
               {/* What happens next */}
               <div className="rounded-xl p-4 mb-5" style={{ background: COLORS.bgMuted }}>
                 <div className="text-xs font-semibold uppercase mb-2 tracking-wide" style={{ color: COLORS.inkMuted }}>
-                  What happens next
+                  {t.whatHappensNext}
                 </div>
                 <ul className="text-sm space-y-1.5" style={{ color: COLORS.ink }}>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 size={16} style={{ color: COLORS.success }} className="mt-0.5 flex-shrink-0" />
-                    We send a 6-digit code to your phone to verify ownership
+                    {t.weVerifyPhone}
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 size={16} style={{ color: COLORS.success }} className="mt-0.5 flex-shrink-0" />
-                    After verification, your booking reference is texted to this number
+                    {t.afterVerify}
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 size={16} style={{ color: COLORS.success }} className="mt-0.5 flex-shrink-0" />
-                    No email or password needed — log in any time with your phone + a new code
+                    {t.noEmailNeeded}
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 size={16} style={{ color: COLORS.success }} className="mt-0.5 flex-shrink-0" />
-                    Show the booking reference at the terminal counter or save the SMS
+                    {t.showRefAtTerminal}
                   </li>
                 </ul>
               </div>
@@ -1411,17 +1488,17 @@ function ConfirmationMethodScreen({ setScreen }) {
                 disabled={!phoneValid}
               >
                 <span className="flex items-center justify-center gap-2">
-                  <Send size={16} /> Send verification code
+                  <Send size={16} /> {t.sendVerificationCode}
                 </span>
               </PrimaryButton>
 
               <p className="text-xs text-center mt-3" style={{ color: COLORS.inkMuted }}>
-                Standard SMS rates may apply · powered by UniSMS
+                {t.smsRates}
               </p>
             </>
           ) : (
             <>
-              <label className="text-sm font-semibold mb-2 block" style={{ color: COLORS.ink }}>Email address</label>
+              <label className="text-sm font-semibold mb-2 block" style={{ color: COLORS.ink }}>{t.emailAddress}</label>
               <input
                 type="email"
                 value={email}
@@ -1434,30 +1511,30 @@ function ConfirmationMethodScreen({ setScreen }) {
               {/* What happens next */}
               <div className="rounded-xl p-4 mb-5" style={{ background: COLORS.bgMuted }}>
                 <div className="text-xs font-semibold uppercase mb-2 tracking-wide" style={{ color: COLORS.inkMuted }}>
-                  What happens next
+                  {t.whatHappensNext}
                 </div>
                 <ul className="text-sm space-y-1.5" style={{ color: COLORS.ink }}>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 size={16} style={{ color: COLORS.success }} className="mt-0.5 flex-shrink-0" />
-                    Your e-ticket with QR code is sent to this address
+                    {t.eticketWithQr}
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 size={16} style={{ color: COLORS.success }} className="mt-0.5 flex-shrink-0" />
-                    A F and S Marine Transport Inc. account is created — username = this email
+                    {t.accountCreatedEmail}
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 size={16} style={{ color: COLORS.success }} className="mt-0.5 flex-shrink-0" />
-                    A temporary password is included — you can change it on first sign-in
+                    {t.tempPasswordIncluded}
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 size={16} style={{ color: COLORS.success }} className="mt-0.5 flex-shrink-0" />
-                    Sign in any time to see active and past bookings
+                    {t.signInAnytime}
                   </li>
                 </ul>
               </div>
 
               <PrimaryButton onClick={() => setScreen('confirmation')} size="lg" className="w-full">
-                Send my e-ticket →
+                {t.sendEticket}
               </PrimaryButton>
 
               <p className="text-xs text-center mt-4" style={{ color: COLORS.inkMuted }}>
@@ -1481,7 +1558,7 @@ function ConfirmationMethodScreen({ setScreen }) {
 // incorrect. After success, customer continues to confirmation screen and
 // receives the booking ref via SMS.
 // ============================================================================
-function OtpVerifyScreen({ setScreen }) {
+function OtpVerifyScreen({ setScreen, t = T.en }) {
   const DEMO_CODE = '123456'; // mockup-only; real flow gets PIN from UniSMS API
   const phone = '+63 917 845 2103'; // would come from previous step state
   const refId = 'msg_84e8b93b-6315-46af-a686'; // UniSMS reference_id format
@@ -1545,7 +1622,7 @@ function OtpVerifyScreen({ setScreen }) {
         setTimeout(() => setScreen('confirmation'), 1500);
       } else {
         // Simulated 406 → UniSMS returns { code: 406, message: "Incorrect Pin." }
-        setError('Incorrect code. Please try again.');
+        setError(t.incorrectCode);
         setDigits(['', '', '', '', '', '']);
         inputsRef.current[0]?.focus();
       }
@@ -1575,7 +1652,7 @@ function OtpVerifyScreen({ setScreen }) {
           className="text-sm font-semibold flex items-center gap-1 mb-4"
           style={{ color: COLORS.primary }}
         >
-          <ChevronLeft size={16} /> Use a different number
+          <ChevronLeft size={16} /> {t.useDifferentNumber}
         </button>
 
         <div className="text-center mb-6">
@@ -1586,10 +1663,10 @@ function OtpVerifyScreen({ setScreen }) {
             <Smartphone size={28} style={{ color: COLORS.primary }} />
           </div>
           <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>
-            Enter your code
+            {t.enterYourCode}
           </h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
-            We sent a 6-digit code to{' '}
+            {t.weSentCode}{' '}
             <span className="font-mono font-semibold" style={{ color: COLORS.ink }}>{phone}</span>
           </p>
         </div>
@@ -1658,11 +1735,11 @@ function OtpVerifyScreen({ setScreen }) {
           {/* Status row */}
           {success ? (
             <div className="text-center text-sm font-semibold flex items-center justify-center gap-2" style={{ color: COLORS.success }}>
-              <CheckCircle2 size={16} /> Verified — sending you to your e-ticket…
+              <CheckCircle2 size={16} /> {t.verified}
             </div>
           ) : verifying ? (
             <div className="text-center text-sm flex items-center justify-center gap-2" style={{ color: COLORS.inkMuted }}>
-              <RefreshCw size={14} className="animate-spin" /> Verifying with UniSMS…
+              <RefreshCw size={14} className="animate-spin" /> {t.verifyingUniSMS}
             </div>
           ) : error ? (
             <div
@@ -1677,23 +1754,23 @@ function OtpVerifyScreen({ setScreen }) {
             </div>
           ) : (
             <div className="text-center text-xs" style={{ color: COLORS.inkMuted }}>
-              Code expires in <span className="font-mono font-semibold" style={{ color: validityTimer < 60 ? COLORS.warning : COLORS.ink }}>{formatTime(validityTimer)}</span>
+              {t.codeExpires} <span className="font-mono font-semibold" style={{ color: validityTimer < 60 ? COLORS.warning : COLORS.ink }}>{formatTime(validityTimer)}</span>
             </div>
           )}
         </div>
 
         {/* Resend */}
         <div className="text-center mb-4 text-sm" style={{ color: COLORS.inkMuted }}>
-          Didn't get the code?{' '}
+          {t.didntGetCode}{' '}
           {resendTimer > 0 ? (
-            <span>Resend in <span className="font-mono">{formatTime(resendTimer)}</span></span>
+            <span>{t.resendIn} <span className="font-mono">{formatTime(resendTimer)}</span></span>
           ) : (
             <button
               onClick={handleResend}
               className="font-semibold"
               style={{ color: COLORS.primary }}
             >
-              Resend code
+              {t.resendCode}
             </button>
           )}
         </div>
@@ -1704,7 +1781,7 @@ function OtpVerifyScreen({ setScreen }) {
           className="w-full text-center text-sm font-semibold py-3"
           style={{ color: COLORS.primary }}
         >
-          Use email instead →
+          {t.useEmailInstead}
         </button>
 
         {/* Reference ID — debug strip */}
@@ -1720,7 +1797,7 @@ function OtpVerifyScreen({ setScreen }) {
 // ============================================================================
 // TIER 1: E-TICKET CONFIRMATION
 // ============================================================================
-function ConfirmationScreen({ setScreen }) {
+function ConfirmationScreen({ setScreen, t = T.en }) {
   return (
     <div>
       <MobileBadge strategy="Mobile First" />
@@ -1732,12 +1809,12 @@ function ConfirmationScreen({ setScreen }) {
         >
           <CheckCircle2 size={40} color="white" />
         </div>
-        <h1 className="text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>You're booked, Maria!</h1>
+        <h1 className="text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>{t.youreBooked}</h1>
         <p style={{ color: COLORS.inkMuted }}>
-          We've sent your e-ticket and account details to <strong style={{ color: COLORS.ink }}>maria.reyes@gmail.com</strong>
+          {t.weSentEticket} <strong style={{ color: COLORS.ink }}>maria.reyes@gmail.com</strong>
         </p>
         <p className="text-sm mt-2" style={{ color: COLORS.inkMuted }}>
-          (If you booked with phone, you'll also receive an SMS with your booking reference.)
+          {t.ifBookedWithPhone}
         </p>
       </div>
 
@@ -1752,7 +1829,7 @@ function ConfirmationScreen({ setScreen }) {
             <span className="font-bold text-sm">F AND S MARINE TRANSPORT INC.</span>
           </div>
           <div className="text-[10px] text-right">
-            <div className="opacity-70">Booking Ref</div>
+            <div className="opacity-70">{t.bookingRef}</div>
             <div className="font-mono font-bold">BR-2026-0518-7K2A</div>
           </div>
         </div>
@@ -1831,8 +1908,8 @@ function ConfirmationScreen({ setScreen }) {
         </div>
 
         <div className="px-6 py-3 text-xs flex items-center justify-between" style={{ background: COLORS.bgMuted, color: COLORS.inkMuted }}>
-          <span>📋 Arrive 2 hours before departure with valid ID</span>
-          <span>20kg baggage included</span>
+          <span>📋 {t.arriveEarly}</span>
+          <span>{t.baggageIncl}</span>
         </div>
       </div>
 
@@ -1846,9 +1923,18 @@ function ConfirmationScreen({ setScreen }) {
             <ShieldCheck size={20} style={{ color: COLORS.warning }} />
           </div>
           <div>
-            <h3 className="font-bold" style={{ color: COLORS.ink }}>What to bring to the terminal</h3>
+            <h3 className="font-bold" style={{ color: COLORS.ink }}>{t.whatToBring}</h3>
+
+            {/* Vehicle declaration on e-ticket */}
+            <div className="rounded-xl p-3 mt-2 border-2 flex items-center gap-3" style={{ background: '#EFF6FF', borderColor: '#1E40AF' }}>
+              <span className="text-lg">🚙</span>
+              <div className="flex-1 text-xs" style={{ color: '#1E40AF' }}>
+                <span className="font-bold">{t.vehicleDeclaredEticket} — SUV</span>
+                <span className="block mt-0.5">{t.payVehicleFee}</span>
+              </div>
+            </div>
             <p className="text-xs" style={{ color: COLORS.inkMuted }}>
-              Counter staff will verify each passenger's physical ID against the booking. Discount claims (Senior, PWD, Student, Child, Infant) require the specific ID listed below — bring the original, not a photo.
+              {t.counterStaffVerify}
             </p>
           </div>
         </div>
@@ -1883,13 +1969,13 @@ function ConfirmationScreen({ setScreen }) {
                     {p.law && <span> · {p.law}</span>}
                   </div>
                   <div className="text-xs mt-1.5" style={{ color: COLORS.ink }}>
-                    <span className="font-semibold">Bring:</span> {p.required}
+                    <span className="font-semibold">{t.bring}:</span> {p.required}
                   </div>
                   {p.tone === 'warn' && (
                     <div className="text-[11px] mt-1 flex items-start gap-1" style={{ color: '#92400E' }}>
                       <AlertTriangle size={10} className="flex-shrink-0 mt-0.5" />
                       <span>
-                        Discount will be forfeited if the ID isn't presented or doesn't match — passenger may be asked to pay the regular fare difference at the counter.
+                        {t.discountForfeited}
                       </span>
                     </div>
                   )}
@@ -1905,7 +1991,7 @@ function ConfirmationScreen({ setScreen }) {
         >
           <Info size={12} className="flex-shrink-0 mt-0.5" />
           <span>
-            We've sent this checklist along with your e-ticket. You can also find it any time on this booking's detail page under My Bookings.
+            {t.checklistSent}
           </span>
         </div>
       </div>
@@ -1915,13 +2001,13 @@ function ConfirmationScreen({ setScreen }) {
         <div className="flex items-start gap-3">
           <Mail size={24} style={{ color: COLORS.primary }} className="mt-0.5" />
           <div className="flex-1">
-            <h3 className="font-bold mb-1" style={{ color: COLORS.ink }}>Your account is ready</h3>
+            <h3 className="font-bold mb-1" style={{ color: COLORS.ink }}>{t.accountReady}</h3>
             <p className="text-sm" style={{ color: COLORS.inkMuted }}>
               Username: <strong style={{ color: COLORS.ink }}>maria.reyes@gmail.com</strong>
               <br />
-              Temporary password sent to your email — change it on first sign-in.
+              {t.tempPassword}
               <br />
-              <span className="text-xs">(If you booked with phone, log in by phone + OTP — no password needed.)</span>
+              <span className="text-xs">{t.ifBookedPhone}</span>
             </p>
           </div>
         </div>
@@ -1931,8 +2017,8 @@ function ConfirmationScreen({ setScreen }) {
       <div className="mx-auto max-w-2xl mb-6">
         <div className="flex items-center gap-2 mb-3">
           <Phone size={16} style={{ color: COLORS.primary }} />
-          <h3 className="font-bold text-sm" style={{ color: COLORS.ink }}>SMS booking confirmation received</h3>
-          <span className="text-xs px-2 py-0.5 rounded-full font-mono" style={{ background: '#DCFCE7', color: '#166534' }}>Delivered</span>
+          <h3 className="font-bold text-sm" style={{ color: COLORS.ink }}>{t.smsConfirmation}</h3>
+          <span className="text-xs px-2 py-0.5 rounded-full font-mono" style={{ background: '#DCFCE7', color: '#166534' }}>{t.delivered}</span>
         </div>
 
         {/* Phone frame */}
@@ -1994,7 +2080,7 @@ function ConfirmationScreen({ setScreen }) {
 
             {/* Delivery status */}
             <div className="text-right text-[10px] mt-1 pr-1" style={{ color: COLORS.inkMuted }}>
-              Delivered ✓
+              {t.delivered} ✓
             </div>
 
             {/* Second SMS — per-passenger seat + ID reminder */}
@@ -2014,7 +2100,7 @@ function ConfirmationScreen({ setScreen }) {
               </div>
             </div>
             <div className="text-right text-[10px] mt-1 pr-1" style={{ color: COLORS.inkMuted }}>
-              Delivered ✓
+              {t.delivered} ✓
             </div>
           </div>
 
@@ -2032,9 +2118,9 @@ function ConfirmationScreen({ setScreen }) {
       </div>
 
       <div className="flex gap-3 max-w-2xl mx-auto">
-        <OutlineButton onClick={() => setScreen('landing')} className="flex-1">Book another trip</OutlineButton>
+        <OutlineButton onClick={() => setScreen('landing')} className="flex-1">{t.bookAnother}</OutlineButton>
         <PrimaryButton onClick={() => setScreen('dashboard')} size="md" className="flex-1">
-          View my bookings →
+          {t.viewMyBookings}
         </PrimaryButton>
       </div>
     </div>
@@ -2044,7 +2130,7 @@ function ConfirmationScreen({ setScreen }) {
 // ============================================================================
 // TIER 1: CUSTOMER DASHBOARD (BOOKINGS)
 // ============================================================================
-function DashboardScreen({ setScreen }) {
+function DashboardScreen({ setScreen, t = T.en }) {
   const [tab, setTab] = useState('active');
   const active = [
     { ref: 'BR-2026-0518-7K2A', date: 'Fri, May 22, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', pax: 3, total: 1285, status: 'Confirmed' },
@@ -2072,10 +2158,10 @@ function DashboardScreen({ setScreen }) {
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold" style={{ color: COLORS.ink }}>Welcome back, Maria</h1>
-          <p style={{ color: COLORS.inkMuted }}>Manage your trips and download e-tickets.</p>
+          <h1 className="text-3xl font-bold" style={{ color: COLORS.ink }}>{t.welcomeBack}</h1>
+          <p style={{ color: COLORS.inkMuted }}>{t.manageTripsSub}</p>
         </div>
-        <PrimaryButton onClick={() => setScreen('landing')}>+ Book new trip</PrimaryButton>
+        <PrimaryButton onClick={() => setScreen('landing')}>{t.bookNewTrip}</PrimaryButton>
       </div>
 
       {/* Travel-credit quick access — only shown when customer has active credit */}
@@ -2092,10 +2178,10 @@ function DashboardScreen({ setScreen }) {
         </div>
         <div className="flex-1 min-w-0">
           <div className="font-bold text-sm" style={{ color: '#5B21B6' }}>
-            ₱1,835 travel credit available
+            {t.travelCredit}
           </div>
           <div className="text-xs" style={{ color: '#5B21B6' }}>
-            2 active credits · use on any future booking
+            {t.activeCredits}
           </div>
         </div>
         <ChevronRight size={18} style={{ color: '#7C3AED' }} />
@@ -2111,7 +2197,7 @@ function DashboardScreen({ setScreen }) {
             borderColor: tab === 'active' ? COLORS.primary : 'transparent',
           }}
         >
-          Active ({active.length})
+          {t.active} ({active.length})
         </button>
         {actionNeeded.length > 0 && (
           <button
@@ -2123,7 +2209,7 @@ function DashboardScreen({ setScreen }) {
             }}
           >
             <AlertTriangle size={14} />
-            Action needed ({actionNeeded.length})
+            {t.actionNeeded} ({actionNeeded.length})
           </button>
         )}
         <button
@@ -2134,7 +2220,7 @@ function DashboardScreen({ setScreen }) {
             borderColor: tab === 'past' ? COLORS.primary : 'transparent',
           }}
         >
-          Past ({past.length})
+          {t.past} ({past.length})
         </button>
       </div>
 
@@ -2188,7 +2274,7 @@ function DashboardScreen({ setScreen }) {
                         className="text-sm font-semibold px-3 py-1.5 rounded-lg hover:bg-gray-100"
                         style={{ color: COLORS.destructive }}
                       >
-                        Cancel
+                        {t.cancel}
                       </button>
                     )}
                     {tab === 'action' && b.status === 'Emergency Cancelled' && (
@@ -2197,7 +2283,7 @@ function DashboardScreen({ setScreen }) {
                         className="text-sm font-semibold px-3 py-1.5 rounded-lg"
                         style={{ color: 'white', background: COLORS.destructive }}
                       >
-                        Pick recovery →
+                        {t.pickRecovery}
                       </button>
                     )}
                     {tab === 'action' && b.status === 'No-Show' && (
@@ -2206,7 +2292,7 @@ function DashboardScreen({ setScreen }) {
                         className="text-sm font-semibold px-3 py-1.5 rounded-lg"
                         style={{ color: 'white', background: COLORS.warning }}
                       >
-                        Refund or reschedule →
+                        {t.refundOrReschedule}
                       </button>
                     )}
                     <button
@@ -2214,7 +2300,7 @@ function DashboardScreen({ setScreen }) {
                       className="text-sm font-semibold px-3 py-1.5 rounded-lg"
                       style={{ color: COLORS.primary }}
                     >
-                      View details →
+                      {t.viewDetails}
                     </button>
                   </div>
                 </div>
@@ -2230,19 +2316,19 @@ function DashboardScreen({ setScreen }) {
 // ============================================================================
 // TIER 1: ADMIN OPS DASHBOARD
 // ============================================================================
-function AdminOpsScreen({ setScreen }) {
+function AdminOpsScreen({ setScreen, t = T.en }) {
   return (
     <div>
       <MobileBadge strategy="Mobile Ready" />
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>Operations Dashboard</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.opsDashboard}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>Tuesday, May 19, 2026 · 14:23</p>
         </div>
         <div className="flex gap-2">
-          <OutlineButton>Export today's manifest</OutlineButton>
-          <PrimaryButton size="sm">+ Block date</PrimaryButton>
+          <OutlineButton>{t.exportManifest}</OutlineButton>
+          <PrimaryButton size="sm">{t.blockDate}</PrimaryButton>
         </div>
       </div>
 
@@ -2417,7 +2503,7 @@ function AdminOpsScreen({ setScreen }) {
 // ============================================================================
 // TIER 1: ADMIN BOOKINGS LIST
 // ============================================================================
-function AdminBookingsScreen({ setScreen }) {
+function AdminBookingsScreen({ setScreen, t = T.en }) {
   const bookings = [
     { ref: 'BR-2026-0518-7K2A', creator: 'Maria Cristina Reyes', pax: 3, date: 'May 22, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', class: 'Aircon', total: 1285, status: 'Confirmed', payment: 'GCash' },
     { ref: 'BR-2026-0519-9M3B', creator: 'Juan Carlos Mendoza', pax: 2, date: 'Jun 14, 2026', time: '14:00', vessel: 'MV Our Mother of Perpetual Help', class: 'VIP', total: 1700, status: 'Confirmed', payment: 'Maya' },
@@ -2447,12 +2533,12 @@ function AdminBookingsScreen({ setScreen }) {
 
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>Bookings</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.bookingsList}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>{bookings.length} of 1,247 results</p>
         </div>
         <div className="flex gap-2">
-          <OutlineButton><Download size={16} className="inline mr-1" /> Export</OutlineButton>
-          <PrimaryButton size="sm">+ New booking</PrimaryButton>
+          <OutlineButton><Download size={16} className="inline mr-1" /> {t.export}</OutlineButton>
+          <PrimaryButton size="sm">{t.newBooking}</PrimaryButton>
         </div>
       </div>
 
@@ -2563,8 +2649,8 @@ function AdminBookingsScreen({ setScreen }) {
       {/* EMPTY STATE EXAMPLE */}
       <div className="mt-6 bg-white rounded-2xl p-8 border text-center" style={{ borderColor: COLORS.border }}>
         <FileText size={40} className="mx-auto mb-2" style={{ color: COLORS.inkMuted }} />
-        <div className="font-semibold" style={{ color: COLORS.ink }}>No flagged bookings</div>
-        <div className="text-sm" style={{ color: COLORS.inkMuted }}>Flagged bookings (suspicious activity, manual review needed) will appear here.</div>
+        <div className="font-semibold" style={{ color: COLORS.ink }}>{t.noFlagged}</div>
+        <div className="text-sm" style={{ color: COLORS.inkMuted }}>{t.flaggedDesc}</div>
       </div>
     </div>
   );
@@ -2574,7 +2660,7 @@ function AdminBookingsScreen({ setScreen }) {
 // TIER 1: ADMIN SCHEDULES — Vessel-Port-Time Assignment
 // Visual calendar paint mode + Quick assign form mode
 // ============================================================================
-function AdminSchedulesScreen({ setScreen }) {
+function AdminSchedulesScreen({ setScreen, t = T.en }) {
   const [mode, setMode] = useState('visual'); // 'visual' or 'form'
   const [selectedDates, setSelectedDates] = useState([5, 8, 12, 15, 19, 22, 26, 29]); // dates with assignments
   const [showAssignPopup, setShowAssignPopup] = useState(false);
@@ -2598,7 +2684,7 @@ function AdminSchedulesScreen({ setScreen }) {
 
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>Schedule — Vessel-Port-Time Assignment</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.schedule}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>Assign vessels to specific Batangas ports across date ranges. Paint on the calendar or use the quick-assign form.</p>
         </div>
         <PrimaryButton onClick={() => setShowAssignPopup(true)} size="sm">
@@ -2835,7 +2921,7 @@ function AdminSchedulesScreen({ setScreen }) {
 // Batangas port + date. Edge case: a vessel runs two trips from the same port
 // on the same day (e.g. Nasugbu 06:00 and 16:00). Customer picks the slot here.
 // ============================================================================
-function TimeSlotScreen({ setScreen }) {
+function TimeSlotScreen({ setScreen, t = T.en }) {
   const [selectedSlot, setSelectedSlot] = useState('slot-1');
 
   // Same vessel + same Batangas port + same date — only the time differs.
@@ -2880,23 +2966,22 @@ function TimeSlotScreen({ setScreen }) {
       <MobileBadge strategy="Mobile First" />
 
       <div className="flex items-center gap-2 mb-6 text-sm flex-wrap">
-        <span style={{ color: COLORS.inkMuted }}>1. Date ✓</span>
+        <span style={{ color: COLORS.inkMuted }}>1. {t.stepDate} ✓</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>2. Sailing ✓</span>
+        <span style={{ color: COLORS.inkMuted }}>2. {t.stepSailing} ✓</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span className="font-semibold" style={{ color: COLORS.primary }}>3. Time slot</span>
+        <span className="font-semibold" style={{ color: COLORS.primary }}>3. {t.stepTimeSlot}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>4. Class</span>
+        <span style={{ color: COLORS.inkMuted }}>4. {t.stepClass}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>5. Passengers</span>
+        <span style={{ color: COLORS.inkMuted }}>5. {t.stepPassengers}</span>
       </div>
 
       <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: COLORS.ink }}>
-        Pick your time
+        {t.timeSlotTitle}
       </h1>
       <p className="mb-6" style={{ color: COLORS.inkMuted }}>
-        MV Our Lady of St Therese runs three trips from Nasugbu Port on Sat, May 23, 2026.
-        Pick the one that fits your day.
+        {t.timeSlotSub}
       </p>
 
       <div
@@ -2905,8 +2990,7 @@ function TimeSlotScreen({ setScreen }) {
       >
         <Ship size={20} style={{ color: '#9A3412' }} />
         <div className="flex-1 text-sm" style={{ color: '#9A3412' }}>
-          <span className="font-semibold">Same vessel, same port.</span> Only the departure
-          time differs. All trips arrive at Tilik Port on Lubang Island.
+          <span className="font-semibold">{t.timeSlotBanner}</span> {t.timeSlotBannerSub}
         </div>
       </div>
 
@@ -2955,19 +3039,19 @@ function TimeSlotScreen({ setScreen }) {
                       className="text-xs px-2 py-0.5 rounded-full"
                       style={{ background: '#DBEAFE', color: '#1E40AF' }}
                     >
-                      Open Air · {s.seats.openair} left
+                      {t.openAirLabel} · {s.seats.openair} {t.left}
                     </span>
                     <span
                       className="text-xs px-2 py-0.5 rounded-full"
                       style={{ background: '#FFE5E9', color: COLORS.primary }}
                     >
-                      Aircon · {s.seats.aircon} left
+                      {t.airconLabel} · {s.seats.aircon} {t.left}
                     </span>
                     <span
                       className="text-xs px-2 py-0.5 rounded-full"
                       style={{ background: '#FEF3C7', color: '#A16207' }}
                     >
-                      VIP · {s.seats.vip} left
+                      {t.vipLabel} · {s.seats.vip} {t.left}
                     </span>
                   </div>
                   {s.note && (
@@ -2979,7 +3063,7 @@ function TimeSlotScreen({ setScreen }) {
                 </div>
                 <div className="flex-shrink-0 text-right">
                   <div className="text-xs mb-1" style={{ color: COLORS.inkMuted }}>
-                    {totalSeats(s)} seats
+                    {totalSeats(s)} {t.seatsLabel}
                   </div>
                   <div
                     className="w-6 h-6 rounded-full border-2 flex items-center justify-center"
@@ -2999,10 +3083,10 @@ function TimeSlotScreen({ setScreen }) {
 
       <div className="flex gap-3">
         <OutlineButton onClick={() => setScreen('sailings')} className="flex-1">
-          ← Back to sailings
+          {t.backToSailings}
         </OutlineButton>
         <PrimaryButton onClick={() => setScreen('classPicker')} size="md" className="flex-[2]">
-          Continue to class →
+          {t.continueToClass}
         </PrimaryButton>
       </div>
     </div>
@@ -3015,7 +3099,7 @@ function TimeSlotScreen({ setScreen }) {
 // picker becomes its own screen. In the normal case (multiple sailings), the
 // class picker is nested inline inside the Today's Sailings card.
 // ============================================================================
-function ClassPickerScreen({ setScreen }) {
+function ClassPickerScreen({ setScreen, t = T.en }) {
   const [selectedClass, setSelectedClass] = useState('aircon');
 
   const classes = [
@@ -3095,10 +3179,10 @@ function ClassPickerScreen({ setScreen }) {
       </div>
 
       <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: COLORS.ink }}>
-        Pick your travel class
+        {t.classPickerTitle}
       </h1>
       <p className="mb-6" style={{ color: COLORS.inkMuted }}>
-        MV Our Lady of St Therese · 06:00 from Nasugbu Port · Fri, May 22, 2026
+        {t.classPickerSub}
       </p>
 
       <div className="space-y-3 mb-6">
@@ -3127,7 +3211,7 @@ function ClassPickerScreen({ setScreen }) {
                   className="absolute -top-2 left-4 text-[10px] font-semibold px-2 py-0.5 rounded-full"
                   style={{ background: c.color, color: 'white' }}
                 >
-                  Most picked
+                  {t.mostPicked}
                 </div>
               )}
               <div
@@ -3141,13 +3225,13 @@ function ClassPickerScreen({ setScreen }) {
                   <div className="text-lg font-bold" style={{ color: COLORS.ink }}>{c.name}</div>
                   <div className="flex items-baseline gap-1 flex-shrink-0 ml-2">
                     <span className="text-lg font-bold" style={{ color: c.color }}>₱{c.fare.toLocaleString()}</span>
-                    <span className="text-[10px]" style={{ color: COLORS.inkMuted }}>/ pax</span>
+                    <span className="text-[10px]" style={{ color: COLORS.inkMuted }}>{t.perPax}</span>
                   </div>
                 </div>
                 <div className="text-xs mb-2" style={{ color: COLORS.inkMuted }}>{c.tagline}</div>
                 <div className="flex items-center gap-2">
                   <div className="text-xs" style={{ color: COLORS.inkMuted }}>
-                    {c.seats} of {c.capacity} seats
+                    {c.seats} {t.ofSeats} {c.capacity} {t.seatsLabel}
                   </div>
                   <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: COLORS.bgMuted }}>
                     <div className="h-full rounded-full" style={{ width: `${(c.seats / c.capacity) * 100}%`, background: c.color }} />
@@ -3167,7 +3251,7 @@ function ClassPickerScreen({ setScreen }) {
           <div className="flex items-center gap-2 mb-3">
             <selected.icon size={20} style={{ color: selected.color }} />
             <h3 className="font-semibold" style={{ color: COLORS.ink }}>
-              What's included in {selected.name}
+              {t.whatsIncluded} {selected.name}
             </h3>
           </div>
           <ul className="space-y-2">
@@ -3183,10 +3267,10 @@ function ClassPickerScreen({ setScreen }) {
 
       <div className="flex gap-3">
         <OutlineButton onClick={() => setScreen('sailings')} className="flex-1">
-          ← Back
+          {t.backBtn}
         </OutlineButton>
         <PrimaryButton onClick={() => setScreen('passengers')} size="md" className="flex-[2]">
-          Continue with {selected?.name} →
+          {t.continueWith} {selected?.name} →
         </PrimaryButton>
       </div>
     </div>
@@ -3198,7 +3282,7 @@ function ClassPickerScreen({ setScreen }) {
 // Email + password OR magic link. Returning customers reach this from the
 // booking flow header. Optional — booking can proceed as guest.
 // ============================================================================
-function LoginScreen({ setScreen }) {
+function LoginScreen({ setScreen, t = T.en }) {
   const [mode, setMode] = useState('phone'); // 'phone' | 'password' | 'magic' — phone default for elder-friendliness
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -3276,10 +3360,10 @@ function LoginScreen({ setScreen }) {
           <Ship size={28} style={{ color: COLORS.primary }} />
         </div>
         <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>
-          Welcome back
+          {t.welcomeBackLogin}
         </h1>
         <p className="text-sm" style={{ color: COLORS.inkMuted }}>
-          Log in to see your bookings and travel faster
+          {t.logInToSee}
         </p>
       </div>
 
@@ -3302,7 +3386,7 @@ function LoginScreen({ setScreen }) {
             }}
           >
             <Smartphone size={12} className="inline mr-1" style={{ marginTop: -2 }} />
-            Phone (OTP)
+            {t.phoneOtp}
           </button>
           <button
             onClick={() => { setMode('password'); resetAuxState(); }}
@@ -3314,7 +3398,7 @@ function LoginScreen({ setScreen }) {
             }}
           >
             <Lock size={12} className="inline mr-1" style={{ marginTop: -2 }} />
-            Password
+            {t.password}
           </button>
           <button
             onClick={() => { setMode('magic'); resetAuxState(); }}
@@ -3326,7 +3410,7 @@ function LoginScreen({ setScreen }) {
             }}
           >
             <KeyRound size={12} className="inline mr-1" style={{ marginTop: -2 }} />
-            Magic link
+            {t.magicLink}
           </button>
         </div>
 
@@ -3336,7 +3420,7 @@ function LoginScreen({ setScreen }) {
             {!otpSent ? (
               <>
                 <label className="block text-sm font-semibold mb-1.5" style={{ color: COLORS.ink }}>
-                  Mobile number
+                  {t.mobileNumber}
                 </label>
                 <div className="relative mb-2">
                   <Smartphone
@@ -3373,8 +3457,7 @@ function LoginScreen({ setScreen }) {
                 >
                   <Info size={12} className="flex-shrink-0 mt-0.5" />
                   <div>
-                    No password needed — we'll text you a 6-digit code via UniSMS.
-                    Your bookings are linked to this phone number.
+                    {t.noPasswordNeeded}
                   </div>
                 </div>
                 <PrimaryButton
@@ -3384,7 +3467,7 @@ function LoginScreen({ setScreen }) {
                   disabled={!phoneValid}
                 >
                   <span className="flex items-center justify-center gap-2">
-                    <Send size={16} /> Send login code
+                    <Send size={16} /> {t.sendLoginCode}
                   </span>
                 </PrimaryButton>
               </>
@@ -3393,10 +3476,10 @@ function LoginScreen({ setScreen }) {
                 {/* OTP entry sub-state */}
                 <div className="text-center mb-3">
                   <div className="font-semibold text-sm" style={{ color: COLORS.ink }}>
-                    Enter the 6-digit code
+                    {t.enterCode}
                   </div>
                   <div className="text-xs mt-0.5" style={{ color: COLORS.inkMuted }}>
-                    Sent to <span className="font-mono font-semibold">{phoneE164}</span>
+                    {t.sentTo} <span className="font-mono font-semibold">{phoneE164}</span>
                   </div>
                 </div>
 
@@ -3475,7 +3558,7 @@ function LoginScreen({ setScreen }) {
                   className="w-full text-center text-xs font-semibold py-2"
                   style={{ color: COLORS.primary }}
                 >
-                  ← Use a different number
+                  {t.useDifferentNumber}
                 </button>
               </>
             )}
@@ -3492,18 +3575,18 @@ function LoginScreen({ setScreen }) {
               <Mail size={24} style={{ color: COLORS.success }} />
             </div>
             <h3 className="font-semibold mb-1" style={{ color: COLORS.ink }}>
-              Check your inbox
+              {t.checkInbox}
             </h3>
             <p className="text-sm mb-4" style={{ color: COLORS.inkMuted }}>
-              We sent a sign-in link to <span className="font-medium" style={{ color: COLORS.ink }}>{email}</span>.
-              The link expires in 15 minutes.
+              {t.weSentLink} <span className="font-medium" style={{ color: COLORS.ink }}>{email}</span>.
+              {t.linkExpires}
             </p>
             <button
               onClick={() => setMagicSent(false)}
               className="text-sm font-semibold"
               style={{ color: COLORS.primary }}
             >
-              ← Use a different email
+              {t.useDifferentEmail}
             </button>
           </div>
         )}
@@ -3512,7 +3595,7 @@ function LoginScreen({ setScreen }) {
         {(mode === 'password' || (mode === 'magic' && !magicSent)) && (
           <>
             <label className="block text-sm font-semibold mb-1.5" style={{ color: COLORS.ink }}>
-              Email
+              {t.emailLabel}
             </label>
             <div className="relative mb-4">
               <Mail
@@ -3533,7 +3616,7 @@ function LoginScreen({ setScreen }) {
             {mode === 'password' && (
               <>
                 <label className="block text-sm font-semibold mb-1.5" style={{ color: COLORS.ink }}>
-                  Password
+                  {t.password}
                 </label>
                 <div className="relative mb-2">
                   <Lock
@@ -3559,7 +3642,7 @@ function LoginScreen({ setScreen }) {
                 </div>
                 <div className="flex justify-end mb-4">
                   <button className="text-xs font-semibold" style={{ color: COLORS.primary }}>
-                    Forgot password?
+                    {t.forgotPassword}
                   </button>
                 </div>
               </>
@@ -3575,11 +3658,11 @@ function LoginScreen({ setScreen }) {
             >
               {mode === 'magic' ? (
                 <span className="flex items-center justify-center gap-2">
-                  <Send size={16} /> Send magic link
+                  <Send size={16} /> {t.sendMagicLink}
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  <LogIn size={16} /> Log in
+                  <LogIn size={16} /> {t.logIn}
                 </span>
               )}
             </PrimaryButton>
@@ -3588,30 +3671,27 @@ function LoginScreen({ setScreen }) {
       </div>
 
       <div className="text-center text-sm mb-4" style={{ color: COLORS.inkMuted }}>
-        Don't have an account?{' '}
+        {t.dontHaveAccount}{' '}
         <button className="font-semibold" style={{ color: COLORS.primary }}>
-          Sign up
+          {t.signUp}
         </button>
       </div>
 
       <div className="flex items-center gap-3 mb-4">
         <div className="flex-1 h-px" style={{ background: COLORS.border }} />
-        <span className="text-xs" style={{ color: COLORS.inkMuted }}>or</span>
+        <span className="text-xs" style={{ color: COLORS.inkMuted }}>{t.or}</span>
         <div className="flex-1 h-px" style={{ background: COLORS.border }} />
       </div>
 
       <OutlineButton onClick={() => setScreen('landing')} className="w-full">
-        Continue as guest
+        {t.continueAsGuest}
       </OutlineButton>
 
       <div
         className="text-xs text-center mt-6 px-4"
         style={{ color: COLORS.inkMuted }}
       >
-        By logging in you agree to our{' '}
-        <span className="underline">Terms of Service</span> and{' '}
-        <span className="underline">Privacy Policy</span>. We never share your
-        information without your consent.
+        {t.loginTerms}
       </div>
     </div>
   );
@@ -3621,7 +3701,7 @@ function LoginScreen({ setScreen }) {
 // TIER 1: CUSTOMER PROFILE (Batch 1)
 // Customer edits name, contact, password. Account deletion request lives here.
 // ============================================================================
-function ProfileScreen({ setScreen }) {
+function ProfileScreen({ setScreen, t = T.en }) {
   const [fullName, setFullName] = useState('Maria Cristina Reyes');
   const [email, setEmail] = useState('maria.reyes@gmail.com');
   const [phone, setPhone] = useState('+63 917 234 5678');
@@ -3643,7 +3723,7 @@ function ProfileScreen({ setScreen }) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ color: COLORS.ink }}>
-            Account
+            {t.profileTitle}
           </h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             Update your details and preferences
@@ -3700,13 +3780,13 @@ function ProfileScreen({ setScreen }) {
         style={{ borderColor: COLORS.border }}
       >
         <h2 className="font-semibold mb-4" style={{ color: COLORS.ink }}>
-          Personal details
+          {t.personalInfo}
         </h2>
 
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1.5" style={{ color: COLORS.ink }}>
-              Full name
+              {t.fullName}
             </label>
             <input
               type="text"
@@ -3719,7 +3799,7 @@ function ProfileScreen({ setScreen }) {
 
           <div>
             <label className="block text-sm font-medium mb-1.5" style={{ color: COLORS.ink }}>
-              Email
+              {t.emailLabel}
             </label>
             <input
               type="email"
@@ -3735,7 +3815,7 @@ function ProfileScreen({ setScreen }) {
 
           <div>
             <label className="block text-sm font-medium mb-1.5" style={{ color: COLORS.ink }}>
-              Mobile number
+              {t.phoneLabel}
             </label>
             <input
               type="tel"
@@ -3753,7 +3833,7 @@ function ProfileScreen({ setScreen }) {
         <div className="flex justify-end mt-5">
           <PrimaryButton onClick={handleSave} size="md">
             <span className="flex items-center gap-2">
-              <Save size={16} /> Save changes
+              <Save size={16} /> {t.saveChanges}
             </span>
           </PrimaryButton>
         </div>
@@ -3819,14 +3899,14 @@ function ProfileScreen({ setScreen }) {
         style={{ borderColor: COLORS.border }}
       >
         <h2 className="font-semibold mb-4" style={{ color: COLORS.ink }}>
-          Notifications
+          {t.notifications}
         </h2>
 
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <div className="font-medium text-sm" style={{ color: COLORS.ink }}>
-                Booking SMS fallback
+                {t.smsReminders}
               </div>
               <div className="text-xs" style={{ color: COLORS.inkMuted }}>
                 Send booking confirmation by SMS if email fails
@@ -3847,7 +3927,7 @@ function ProfileScreen({ setScreen }) {
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <div className="font-medium text-sm" style={{ color: COLORS.ink }}>
-                Marketing emails
+                {t.emailPromos}
               </div>
               <div className="text-xs" style={{ color: COLORS.inkMuted }}>
                 Get promos, schedule changes, and travel tips
@@ -3873,11 +3953,10 @@ function ProfileScreen({ setScreen }) {
         style={{ borderColor: COLORS.destructive }}
       >
         <h2 className="font-semibold mb-1" style={{ color: COLORS.destructive }}>
-          Danger zone
+          {t.deleteAccount}
         </h2>
         <p className="text-sm mb-4" style={{ color: COLORS.inkMuted }}>
-          Request account deletion. Your booking history is retained for 5 years
-          per MARINA record-keeping requirements; personal identifiers are anonymized.
+          {t.deleteAccountDesc}
         </p>
 
         {!showDeleteConfirm ? (
@@ -3887,7 +3966,7 @@ function ProfileScreen({ setScreen }) {
             style={{ color: COLORS.destructive, borderColor: COLORS.destructive }}
           >
             <span className="flex items-center gap-2">
-              <Trash2 size={14} /> Request account deletion
+              <Trash2 size={14} /> {t.deleteAccount}
             </span>
           </button>
         ) : (
@@ -3895,9 +3974,7 @@ function ProfileScreen({ setScreen }) {
             <div className="flex items-start gap-2 mb-3">
               <AlertTriangle size={18} style={{ color: COLORS.destructive }} className="flex-shrink-0 mt-0.5" />
               <div className="text-sm" style={{ color: '#7F1D1D' }}>
-                <span className="font-semibold">This cannot be undone.</span>{' '}
-                Active bookings will be cancelled per our refund policy. The request
-                is reviewed within 7 days.
+                {t.deleteConfirm}
               </div>
             </div>
             <div className="flex gap-2">
@@ -3906,13 +3983,13 @@ function ProfileScreen({ setScreen }) {
                 className="text-sm font-semibold px-4 py-2 rounded-lg border bg-white"
                 style={{ color: COLORS.ink, borderColor: COLORS.border }}
               >
-                Cancel
+                {t.noKeep}
               </button>
               <button
                 className="text-sm font-semibold px-4 py-2 rounded-lg text-white"
                 style={{ background: COLORS.destructive }}
               >
-                Submit deletion request
+                {t.yesDelete}
               </button>
             </div>
           </div>
@@ -3935,7 +4012,7 @@ function ProfileScreen({ setScreen }) {
 // CRUD ports with code, side, address, GPS, contact, terminal photo, active.
 // Cannot delete a port that's referenced by an active schedule.
 // ============================================================================
-function AdminPortsScreen({ setScreen }) {
+function AdminPortsScreen({ setScreen, t = T.en }) {
   const [ports, setPorts] = useState([
     {
       id: 'p1', code: 'BAT-NAS', name: 'Nasugbu Port', side: 'Origin', region: 'Batangas mainland',
@@ -4000,7 +4077,7 @@ function AdminPortsScreen({ setScreen }) {
           <div className="text-sm font-semibold mb-1" style={{ color: COLORS.inkMuted }}>
             Admin · Operations Manager
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>Port Management</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.portManagement}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             {ports.length} ports · {ports.filter((p) => p.active).length} active
           </p>
@@ -4316,7 +4393,7 @@ function AdminPortsScreen({ setScreen }) {
 // Vessels are NOT pre-assigned to specific Batangas ports — port assignment is
 // per-sailing via Schedule Management.
 // ============================================================================
-function AdminVesselsScreen({ setScreen }) {
+function AdminVesselsScreen({ setScreen, t = T.en }) {
   const [vessels, setVessels] = useState([
     {
       id: 'v1', name: 'MV Our Lady of St Therese', registry: 'PHIL-MNL-2018-04421',
@@ -4373,7 +4450,7 @@ function AdminVesselsScreen({ setScreen }) {
           <div className="text-sm font-semibold mb-1" style={{ color: COLORS.inkMuted }}>
             Admin · Operations Manager
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>Vessel Management</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.vesselManagement}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             {vessels.length} vessels · {vessels.filter((v) => v.active).length} in service
           </p>
@@ -4670,7 +4747,7 @@ function AdminVesselsScreen({ setScreen }) {
 // only Calatagan Port closed for port repair). Optional time-window blocking.
 // Triggers mass-refund + customer notifications.
 // ============================================================================
-function AdminBlockedScreen({ setScreen }) {
+function AdminBlockedScreen({ setScreen, t = T.en }) {
   const [blocks, setBlocks] = useState([
     {
       id: 'b1', date: 'May 24, 2026', dateRange: 'Sat, May 24, 2026',
@@ -4731,7 +4808,7 @@ function AdminBlockedScreen({ setScreen }) {
           <div className="text-sm font-semibold mb-1" style={{ color: COLORS.inkMuted }}>
             Admin · Operations Manager
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>Date Blocking</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.dateBlocking}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             {blocks.length} blocks · upcoming and past
           </p>
@@ -5021,7 +5098,7 @@ function AdminBlockedScreen({ setScreen }) {
 // port, destination (Tilik), vessel, departure datetime, passenger list.
 // PDF + Excel. Auto-emailed T-2h.
 // ============================================================================
-function AdminManifestScreen({ setScreen }) {
+function AdminManifestScreen({ setScreen, t = T.en }) {
   const voyages = [
     { id: 'mv1', date: 'Tue, May 19, 2026', time: '06:00', vessel: 'MV Our Lady of St Therese', port: 'Nasugbu Port', portCode: 'BAT-NAS', pax: 68, status: 'Boarding', autoEmailed: true },
     { id: 'mv2', date: 'Tue, May 19, 2026', time: '08:00', vessel: 'MV Our Lady of St Therese', port: 'Nasugbu Port', portCode: 'BAT-NAS', pax: 54, status: 'Confirmed', autoEmailed: true },
@@ -5072,7 +5149,7 @@ function AdminManifestScreen({ setScreen }) {
           <div className="text-sm font-semibold mb-1" style={{ color: COLORS.inkMuted }}>
             Admin · Operations Manager
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>Passenger Manifest</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.manifestExport}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             MARINA-compliant · auto-emailed T-2h before departure
           </p>
@@ -5320,7 +5397,7 @@ function AdminManifestScreen({ setScreen }) {
 // discount, legally-mandated discounts (Senior/PWD/Student), fare change
 // history with port attribution.
 // ============================================================================
-function AdminFaresScreen({ setScreen }) {
+function AdminFaresScreen({ setScreen, t = T.en }) {
   const [globalFares, setGlobalFares] = useState({
     openair: 350, aircon: 550, vip: 850,
   });
@@ -5376,7 +5453,7 @@ function AdminFaresScreen({ setScreen }) {
           <div className="text-sm font-semibold mb-1" style={{ color: COLORS.inkMuted }}>
             Admin · Finance Manager
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>Fare + Port Overrides</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.fareOverrides}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             Base fares apply everywhere unless a port-specific override exists
           </p>
@@ -5664,7 +5741,7 @@ function AdminFaresScreen({ setScreen }) {
 // Create codes with type, value, validity window, usage cap, applicability,
 // redemption history.
 // ============================================================================
-function AdminPromosScreen({ setScreen }) {
+function AdminPromosScreen({ setScreen, t = T.en }) {
   const [promos, setPromos] = useState([
     { id: 'pr1', code: 'SUMMER2026', type: 'percent', value: 15, used: 124, cap: 500, validFrom: 'Apr 01, 2026', validTo: 'Jun 30, 2026', scope: 'All ports', class: 'All classes', status: 'Active' },
     { id: 'pr2', code: 'NASUGBU200', type: 'flat', value: 200, used: 47, cap: 200, validFrom: 'May 01, 2026', validTo: 'May 31, 2026', scope: 'BAT-NAS only', class: 'All classes', status: 'Active' },
@@ -5716,7 +5793,7 @@ function AdminPromosScreen({ setScreen }) {
           <div className="text-sm font-semibold mb-1" style={{ color: COLORS.inkMuted }}>
             Admin · Finance Manager
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>Promo Codes</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.promoCodes}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             {promos.filter((p) => p.status === 'Active').length} active · {promos.length} total
           </p>
@@ -5987,7 +6064,7 @@ function AdminPromosScreen({ setScreen }) {
 // Refund requests, refundable amount calculator, Xendit trigger, retry failed
 // refunds.
 // ============================================================================
-function AdminRefundsScreen({ setScreen }) {
+function AdminRefundsScreen({ setScreen, t = T.en }) {
   const [refunds, setRefunds] = useState([
     { id: 'rf1', ref: 'BR-2026-0519-3X9M', customer: 'Ramon Aquino Jr.', total: 350, refundable: 280, fee: 70, reason: 'Cancellation 48-72h before departure (20% fee)', requested: 'May 19 · 14:30', method: 'Card · BPI ****4421', status: 'Pending', port: 'BAT-NAS' },
     { id: 'rf2', ref: 'BR-2026-0518-9V2K', customer: 'Mariano Diokno III', total: 1100, refundable: 1100, fee: 0, reason: 'Vessel maintenance cancellation (full refund)', requested: 'May 18 · 09:15', method: 'GCash · 0917 ***1234', status: 'Pending', port: 'BAT-CAL' },
@@ -6032,7 +6109,7 @@ function AdminRefundsScreen({ setScreen }) {
           <div className="text-sm font-semibold mb-1" style={{ color: COLORS.inkMuted }}>
             Admin · Finance Manager
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>Refund Queue</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.refundQueue}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             Process refunds via Xendit · retry failed automatically up to 3 times
           </p>
@@ -6266,7 +6343,7 @@ function AdminRefundsScreen({ setScreen }) {
 // AND a Batangas-port filter. Per-vessel drill-in includes a port-distribution
 // chart showing how often each vessel departed from each Batangas port.
 // ============================================================================
-function AdminReportsScreen({ setScreen }) {
+function AdminReportsScreen({ setScreen, t = T.en }) {
   const [vesselFilter, setVesselFilter] = useState('all');
   const [portFilter, setPortFilter] = useState('all');
   const [dateRange, setDateRange] = useState('30d');
@@ -6337,7 +6414,7 @@ function AdminReportsScreen({ setScreen }) {
           <div className="text-sm font-semibold mb-1" style={{ color: COLORS.inkMuted }}>
             Admin · Finance Manager
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>Reports + Analytics</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.salesReports}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             Filter every chart by vessel and Batangas port
           </p>
@@ -6620,7 +6697,7 @@ function AdminReportsScreen({ setScreen }) {
 // TIER 1: USER MANAGEMENT (Batch 4 — Super Admin only)
 // CRUD admin users with role assignment. Block fraudulent customer accounts.
 // ============================================================================
-function AdminUsersScreen({ setScreen }) {
+function AdminUsersScreen({ setScreen, t = T.en }) {
   const [activeTab, setActiveTab] = useState('admins'); // 'admins' | 'customers'
 
   const [admins, setAdmins] = useState([
@@ -6696,7 +6773,7 @@ function AdminUsersScreen({ setScreen }) {
           <div className="text-sm font-semibold mb-1 flex items-center gap-1.5" style={{ color: COLORS.destructive }}>
             <ShieldCheck size={14} /> Super Admin only
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>User Management</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.userManagement}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             Manage admin accounts and customer flags
           </p>
@@ -7054,7 +7131,7 @@ function AdminUsersScreen({ setScreen }) {
 // Tabbed editor: ToS / Privacy / Cancellation policy / Email templates /
 // Notification settings.
 // ============================================================================
-function AdminSettingsScreen({ setScreen }) {
+function AdminSettingsScreen({ setScreen, t = T.en }) {
   const [tab, setTab] = useState('legal');
   const [savedToast, setSavedToast] = useState(null);
 
@@ -7133,7 +7210,7 @@ function AdminSettingsScreen({ setScreen }) {
           <div className="text-sm font-semibold mb-1 flex items-center gap-1.5" style={{ color: COLORS.destructive }}>
             <ShieldCheck size={14} /> Super Admin only
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>System Settings</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.systemSettings}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             Site-wide configuration · changes take effect immediately
           </p>
@@ -7695,7 +7772,7 @@ function AdminSettingsScreen({ setScreen }) {
                 <div className="text-xs" style={{ color: COLORS.inkMuted }}>Custom sender IDs</div>
               </div>
               <div className="bg-white rounded-lg p-3" style={{ border: `1px solid ${COLORS.border}` }}>
-                <div className="text-xs" style={{ color: COLORS.inkMuted }}>Sent today</div>
+                <div className="text-xs" style={{ color: COLORS.inkMuted }}>Today</div>
                 <div className="text-xl font-bold" style={{ color: COLORS.ink }}>34</div>
                 <div className="text-xs" style={{ color: COLORS.success }}>+12 vs yesterday</div>
               </div>
@@ -7918,7 +7995,7 @@ function AdminSettingsScreen({ setScreen }) {
 // Immutable log of all admin actions. Filter by user, event type, entity
 // (including port + schedule + voyage-port-reassignment mutations), date range.
 // ============================================================================
-function AdminAuditScreen({ setScreen }) {
+function AdminAuditScreen({ setScreen, t = T.en }) {
   const events = [
     { id: 'ev0e', ts: 'May 19 · 19:22:08', user: 'Mariano Diokno III', role: 'Customer', type: 'noshow.reschedule.request', entity: 'booking/BR-2026-0518-9V2K', action: 'Submitted reschedule request · missed May 19 06:00 sailing · 30% fee (₱330) · new sailing May 25 06:00 · request NSB-2026-0519-7H2C', severity: 'low' },
     { id: 'ev0d', ts: 'May 19 · 18:47:51', user: 'Patricia Aquino', role: 'Finance Manager', type: 'noshow.refund.request', entity: 'booking/BR-2026-0518-3K7N', action: 'Approved no-show refund · 18h after manifest · 50% tier · ₱550 to GCash · request NSR-2026-0519-4B8M', severity: 'medium' },
@@ -7992,7 +8069,7 @@ function AdminAuditScreen({ setScreen }) {
           <div className="text-sm font-semibold mb-1" style={{ color: COLORS.inkMuted }}>
             Admin · Audit
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>Audit Log</h1>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>{t.auditLog}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             Immutable record of every admin action · retained for 7 years
           </p>
@@ -8148,7 +8225,7 @@ function AdminAuditScreen({ setScreen }) {
 // Terminal-tablet booking flow. Staff at Nasugbu can only book BAT-NAS sailings;
 // staff at Calatagan can only book BAT-CAL sailings. Cash and card-at-counter.
 // ============================================================================
-function StaffWalkinScreen({ setScreen }) {
+function StaffWalkinScreen({ setScreen, t = T.en }) {
   const [step, setStep] = useState(1); // 1: sailing+class, 2: passengers+seats, 3: payment, 4: receipt
   const [selectedClass, setSelectedClass] = useState('aircon');
   const [paxCount, setPaxCount] = useState(1);
@@ -8268,7 +8345,7 @@ function StaffWalkinScreen({ setScreen }) {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-[10px] opacity-70">Walk-in POS Terminal</div>
+          <div className="text-[10px] opacity-70">{t.walkInTitle}</div>
           <div className="text-xs font-mono">May 19, 2026 · 14:32</div>
         </div>
       </div>
@@ -8797,7 +8874,7 @@ function StaffWalkinScreen({ setScreen }) {
 // QR scan, manifest filter, mark Checked-In / No-Show per passenger. Manifest
 // filtered by current voyage (vessel + Batangas port + time).
 // ============================================================================
-function StaffCheckinScreen({ setScreen }) {
+function StaffCheckinScreen({ setScreen, t = T.en }) {
   const [scannerActive, setScannerActive] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // all | checked | pending | noshow
@@ -8821,12 +8898,12 @@ function StaffCheckinScreen({ setScreen }) {
   //   Infant   → free (0-3y), MUST present a PSA birth certificate (age proof)
   //   Adult    → any valid government ID
   const [manifest, setManifest] = useState([
-    { id: 'mp1', seat: 'A03-B', name: 'Maria Cristina Reyes', age: 34, idType: 'PhilHealth', passengerType: 'Adult', class: 'Aircon', ref: 'BR-2026-0518-7K2A', ticket: 'BTN-2026-0518-3B7K', status: 'pending' },
+    { id: 'mp1', seat: 'A03-B', name: 'Maria Cristina Reyes', age: 34, idType: 'PhilHealth', passengerType: 'Adult', class: 'Aircon', ref: 'BR-2026-0518-7K2A', ticket: 'BTN-2026-0518-3B7K', status: 'pending', vehicle: { type: 'SUV', declared: true } },
     { id: 'mp2', seat: 'A03-C', name: 'Jose Antonio Reyes', age: 36, idType: 'Driver License', passengerType: 'Adult', class: 'Aircon', ref: 'BR-2026-0518-7K2A', ticket: 'BTN-2026-0518-4C8L', status: 'pending' },
     { id: 'mp3', seat: 'A03-D', name: 'Sofia Margarita Reyes', age: 8, idType: 'PSA Birth Cert', passengerType: 'Child', class: 'Aircon', ref: 'BR-2026-0518-7K2A', ticket: 'BTN-2026-0518-5D9M', status: 'pending' },
     { id: 'mp4', seat: 'V01-A', name: 'Eduardo Magtanggol', age: 52, idType: 'UMID', passengerType: 'Adult', class: 'VIP', ref: 'BR-2026-0518-1A6F', ticket: 'BTN-2026-0518-6E1N', status: 'checked' },
     { id: 'mp5', seat: 'V01-B', name: 'Lourdes Magtanggol', age: 49, idType: 'Senior Citizen ID', passengerType: 'Senior', class: 'VIP', ref: 'BR-2026-0518-1A6F', ticket: 'BTN-2026-0518-7F2P', status: 'checked' },
-    { id: 'mp6', seat: 'O02-D', name: 'Roberto Pangilinan', age: 28, idType: 'National ID', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0518-4N8G', ticket: 'BTN-2026-0518-8G3Q', status: 'checked' },
+    { id: 'mp6', seat: 'O02-D', name: 'Roberto Pangilinan', age: 28, idType: 'National ID', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0518-4N8G', ticket: 'BTN-2026-0518-8G3Q', status: 'checked', vehicle: { type: 'Motorcycle', declared: true } },
     { id: 'mp7', seat: 'O02-E', name: 'Cristina Pangilinan', age: 26, idType: 'National ID', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0518-4N8G', ticket: 'BTN-2026-0518-9H4R', status: 'checked' },
     { id: 'mp8', seat: 'A04-A', name: 'Beatriz Salonga-Cruz', age: 41, idType: 'PWD ID', passengerType: 'PWD', class: 'Aircon', ref: 'BR-2026-0518-5C8R', ticket: 'BTN-2026-0518-1J5S', status: 'pending' },
     { id: 'mp9', seat: 'A04-B', name: 'Ramon Aquino Jr.', age: 21, idType: 'Student ID', passengerType: 'Student', class: 'Aircon', ref: 'BR-2026-0518-3X9M', ticket: 'BTN-2026-0518-2K6T', status: 'pending' },
@@ -8920,6 +8997,15 @@ function StaffCheckinScreen({ setScreen }) {
   // attempting to use the same QR code or ticket number again (possibly a
   // different person). Staff must investigate before proceeding.
   const [duplicateScanAlert, setDuplicateScanAlert] = useState(null);
+  const [vehicleBilling, setVehicleBilling] = useState(null);
+
+  const vehicleFares = {
+    'Motorcycle': 350,
+    'Sedan': 1500,
+    'SUV': 2000,
+    'Van': 2500,
+    'Light Truck': 3500,
+  };
 
   const simulateScan = () => {
     // In production, the scanned QR decodes to a booking ref + passenger ID.
@@ -9396,10 +9482,30 @@ function StaffCheckinScreen({ setScreen }) {
                     <span>{m.idType}</span>
                     <span>·</span>
                     <span className="font-mono">{m.ref}</span>
+                    {m.vehicle && (
+                      <span className="font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#DBEAFE', color: '#1E40AF' }}>
+                        🚗 {m.vehicle.type}
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex gap-1 flex-shrink-0">
+                  {m.vehicle && m.status === 'checked' && !m.vehicle.billed && (
+                    <button
+                      onClick={() => setVehicleBilling(m)}
+                      className="text-[10px] font-bold px-2 py-2 rounded-lg text-white"
+                      style={{ background: '#1E40AF' }}
+                      title="Process vehicle billing"
+                    >
+                      🚗 Bill
+                    </button>
+                  )}
+                  {m.vehicle && m.vehicle.billed && (
+                    <span className="text-[10px] font-bold px-2 py-1.5 rounded-lg flex items-center gap-0.5" style={{ background: '#DCFCE7', color: '#166534' }}>
+                      🚗 ✓
+                    </span>
+                  )}
                   {m.status === 'pending' ? (
                     <>
                       <button
@@ -9434,6 +9540,80 @@ function StaffCheckinScreen({ setScreen }) {
         )}
       </div>
 
+      {/* VEHICLE BILLING MODAL */}
+      {vehicleBilling && (() => {
+        const vb = vehicleBilling;
+        const vType = vb.vehicle.type;
+        const baseFare = vehicleFares[vType] || 0;
+        const paxFare = vb.class === 'Open Air' ? 350 : vb.class === 'Aircon' ? 550 : 850;
+        const discount = paxFare;
+        const total = baseFare;
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
+            <div className="bg-white rounded-2xl p-5 max-w-md w-full shadow-xl" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-lg" style={{ color: COLORS.ink }}>Vehicle Billing</h3>
+                <button onClick={() => setVehicleBilling(null)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100">
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="rounded-xl border p-3 mb-4" style={{ borderColor: COLORS.border }}>
+                <div className="text-sm font-semibold" style={{ color: COLORS.ink }}>{vb.name}</div>
+                <div className="text-xs" style={{ color: COLORS.inkMuted }}>
+                  Seat {vb.seat} · {vb.class} · Ref: <span className="font-mono">{vb.ref}</span>
+                </div>
+              </div>
+
+              <div className="rounded-xl border p-3 mb-4" style={{ borderColor: '#1E40AF', background: '#EFF6FF' }}>
+                <div className="text-xs font-semibold mb-1" style={{ color: '#1E40AF' }}>Declared vehicle</div>
+                <div className="text-lg font-bold flex items-center gap-2" style={{ color: '#1E40AF' }}>
+                  🚗 {vType}
+                </div>
+                <div className="text-[10px] mt-1" style={{ color: '#1E40AF' }}>Physically inspected and confirmed by check-in staff</div>
+              </div>
+
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span style={{ color: COLORS.ink }}>Vehicle fee ({vType})</span>
+                  <span className="font-semibold" style={{ color: COLORS.ink }}>₱{baseFare.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between" style={{ color: COLORS.success }}>
+                  <span>1 FREE passenger ride</span>
+                  <span>−₱{discount.toLocaleString()}</span>
+                </div>
+                <div className="text-[10px] pl-2" style={{ color: COLORS.inkMuted }}>
+                  {vb.name}'s {vb.class} fare (₱{paxFare.toLocaleString()}) is included with vehicle
+                </div>
+                <div className="border-t pt-2 flex justify-between items-baseline" style={{ borderColor: COLORS.border }}>
+                  <span className="font-bold" style={{ color: COLORS.ink }}>Vehicle total</span>
+                  <span className="text-xl font-bold" style={{ color: '#1E40AF' }}>₱{(total - discount).toLocaleString()}</span>
+                </div>
+                <div className="text-[10px]" style={{ color: COLORS.inkMuted }}>
+                  Passenger booking total is reduced by ₱{discount.toLocaleString()} (1 FREE ride)
+                </div>
+              </div>
+
+              <div className="rounded-xl p-3 mb-4 text-xs" style={{ background: '#FFFBEB', color: '#92400E' }}>
+                <div className="font-semibold mb-1">Payment collected at counter</div>
+                <div>Cash or card accepted. Vehicle sub-ticket issued as <span className="font-mono font-bold">{vb.ref}-V1</span></div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setManifest(prev => prev.map(m => m.id === vb.id ? { ...m, vehicle: { ...m.vehicle, billed: true } } : m));
+                  setVehicleBilling(null);
+                }}
+                className="w-full h-12 rounded-xl font-semibold text-white text-sm"
+                style={{ background: '#1E40AF' }}
+              >
+                Issue vehicle ticket · ₱{(total - discount).toLocaleString()}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Bottom action */}
       <div className="mt-4">
         <PrimaryButton size="md" className="w-full">
@@ -9452,7 +9632,7 @@ function StaffCheckinScreen({ setScreen }) {
 // passenger list with class colors, QR ticket, payment receipt, manifest
 // position, sailing status, and action buttons including "Request refund".
 // ============================================================================
-function BookingDetailScreen({ setScreen }) {
+function BookingDetailScreen({ setScreen, t = T.en }) {
   const [downloadToast, setDownloadToast] = useState(null);
   const [demoStatus, setDemoStatus] = useState('Confirmed'); // 'Confirmed' | 'No-Show' | 'Emergency Cancelled'
 
@@ -9529,7 +9709,7 @@ function BookingDetailScreen({ setScreen }) {
           className="text-sm font-semibold flex items-center gap-1"
           style={{ color: COLORS.primary }}
         >
-          <ChevronLeft size={16} /> Back to My Bookings
+          <ChevronLeft size={16} /> {t.backToMyBookings}
         </button>
         <div className="flex gap-2">
           <button
@@ -9537,14 +9717,14 @@ function BookingDetailScreen({ setScreen }) {
             className="text-xs font-semibold px-3 py-1.5 rounded-lg border bg-white flex items-center gap-1.5"
             style={{ color: COLORS.ink, borderColor: COLORS.border }}
           >
-            <Download size={14} /> E-ticket
+            <Download size={14} /> {t.eticketBtn}
           </button>
           <button
             onClick={() => handleDownload('Receipt PDF')}
             className="text-xs font-semibold px-3 py-1.5 rounded-lg border bg-white flex items-center gap-1.5"
             style={{ color: COLORS.ink, borderColor: COLORS.border }}
           >
-            <FileText size={14} /> Receipt
+            <FileText size={14} /> {t.receiptBtn}
           </button>
         </div>
       </div>
@@ -9614,7 +9794,7 @@ function BookingDetailScreen({ setScreen }) {
       >
         <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
           <div>
-            <div className="text-xs opacity-80 mb-0.5">Booking reference</div>
+            <div className="text-xs opacity-80 mb-0.5">{t.bookingReference}</div>
             <div className="text-2xl font-bold font-mono">{booking.ref}</div>
           </div>
           <span
@@ -9633,7 +9813,7 @@ function BookingDetailScreen({ setScreen }) {
       {/* Voyage card */}
       <div className="bg-white rounded-2xl p-5 mb-4 border" style={{ borderColor: COLORS.border }}>
         <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: COLORS.inkMuted }}>
-          Your voyage
+          {t.yourVoyage}
         </div>
 
         {/* Route */}
@@ -9662,19 +9842,19 @@ function BookingDetailScreen({ setScreen }) {
         {/* Details grid */}
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="rounded-lg p-2.5" style={{ background: COLORS.bgMuted }}>
-            <div className="font-semibold mb-0.5" style={{ color: COLORS.inkMuted }}>Date</div>
+            <div className="font-semibold mb-0.5" style={{ color: COLORS.inkMuted }}>{t.date}</div>
             <div style={{ color: COLORS.ink }}>{booking.date}</div>
           </div>
           <div className="rounded-lg p-2.5" style={{ background: COLORS.bgMuted }}>
-            <div className="font-semibold mb-0.5" style={{ color: COLORS.inkMuted }}>Vessel</div>
+            <div className="font-semibold mb-0.5" style={{ color: COLORS.inkMuted }}>{t.vessel}</div>
             <div style={{ color: COLORS.ink }}>{booking.vessel}</div>
           </div>
           <div className="rounded-lg p-2.5" style={{ background: booking.classBg }}>
-            <div className="font-semibold mb-0.5" style={{ color: booking.classColor }}>Class</div>
+            <div className="font-semibold mb-0.5" style={{ color: booking.classColor }}>{t.class}</div>
             <div style={{ color: booking.classColor }} className="font-semibold">{booking.class}</div>
           </div>
           <div className="rounded-lg p-2.5" style={{ background: COLORS.bgMuted }}>
-            <div className="font-semibold mb-0.5" style={{ color: COLORS.inkMuted }}>Passengers</div>
+            <div className="font-semibold mb-0.5" style={{ color: COLORS.inkMuted }}>{t.passengers}</div>
             <div style={{ color: COLORS.ink }}>{totalPax} pax</div>
           </div>
         </div>
@@ -9683,7 +9863,7 @@ function BookingDetailScreen({ setScreen }) {
       {/* QR ticket */}
       <div className="bg-white rounded-2xl p-5 mb-4 border" style={{ borderColor: COLORS.border }}>
         <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: COLORS.inkMuted }}>
-          Boarding QR
+          {t.boardingQr}
         </div>
         <div className="flex items-center gap-4 flex-wrap">
           <div
@@ -9709,11 +9889,10 @@ function BookingDetailScreen({ setScreen }) {
           </div>
           <div className="flex-1 min-w-[160px]">
             <div className="font-semibold mb-1" style={{ color: COLORS.ink }}>
-              Show this QR at the terminal and at the gangway
+              {t.showQrAtTerminal}
             </div>
             <div className="text-xs mb-2" style={{ color: COLORS.inkMuted }}>
-              The same QR code is used twice: at the counter for check-in, and again at the
-              gangway when physically boarding the vessel.
+              {t.qrUsedTwice}
             </div>
             <div className="text-xs font-mono p-2 rounded-lg" style={{ background: COLORS.bgMuted, color: COLORS.ink }}>
               {booking.ref}
@@ -9760,7 +9939,7 @@ function BookingDetailScreen({ setScreen }) {
       {/* Payment receipt */}
       <div className="bg-white rounded-2xl p-5 mb-4 border" style={{ borderColor: COLORS.border }}>
         <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: COLORS.inkMuted }}>
-          Payment receipt
+          {t.paymentReceipt}
         </div>
         <div className="space-y-1.5 text-sm">
           <div className="flex justify-between">
@@ -9780,7 +9959,7 @@ function BookingDetailScreen({ setScreen }) {
             </span>
           </div>
           <div className="flex justify-between pt-1.5 border-t" style={{ borderColor: COLORS.border }}>
-            <span style={{ color: COLORS.inkMuted }}>Subtotal</span>
+            <span style={{ color: COLORS.inkMuted }}>{t.subtotal}</span>
             <span className="font-mono" style={{ color: COLORS.ink }}>
               ₱{booking.fareBreakdown.subtotal.toLocaleString()}
             </span>
@@ -9792,7 +9971,7 @@ function BookingDetailScreen({ setScreen }) {
             </span>
           </div>
           <div className="flex justify-between pt-1.5 border-t" style={{ borderColor: COLORS.border }}>
-            <span className="font-semibold" style={{ color: COLORS.ink }}>Total paid</span>
+            <span className="font-semibold" style={{ color: COLORS.ink }}>{t.totalPaid}</span>
             <span className="font-mono font-bold text-lg" style={{ color: COLORS.ink }}>
               ₱{booking.fareBreakdown.total.toLocaleString()}
             </span>
@@ -9817,8 +9996,8 @@ function BookingDetailScreen({ setScreen }) {
       <div className="bg-white rounded-2xl p-5 mb-4 border" style={{ borderColor: COLORS.border }}>
         <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: COLORS.inkMuted }}>
           {isEmergency
-            ? 'Your sailing was cancelled'
-            : isNoShow ? 'You missed this sailing' : 'Need to make a change?'}
+            ? t.yourSailingCancelled
+            : isNoShow ? t.youMissedSailing : t.needToChange}
         </div>
 
         {/* Emergency-cancellation banner */}
@@ -9906,8 +10085,8 @@ function BookingDetailScreen({ setScreen }) {
                 <div>
                   <div className="font-semibold text-sm" style={{ color: COLORS.ink }}>
                     {emergencyWindowActive
-                      ? 'Choose your recovery option'
-                      : 'View travel credit (auto-converted)'}
+                      ? t.chooseRecovery
+                      : t.viewTravelCredit}
                   </div>
                   <div className="text-xs" style={{ color: COLORS.inkMuted }}>
                     {emergencyWindowActive
@@ -9939,7 +10118,7 @@ function BookingDetailScreen({ setScreen }) {
                 </div>
                 <div>
                   <div className="font-semibold text-sm" style={{ color: COLORS.ink }}>
-                    Request no-show refund or reschedule
+                    {t.requestNoShowRefund}
                   </div>
                   <div className="text-xs" style={{ color: COLORS.inkMuted }}>
                     {noShowGraceActive
@@ -9970,7 +10149,7 @@ function BookingDetailScreen({ setScreen }) {
                 </div>
                 <div>
                   <div className="font-semibold text-sm" style={{ color: COLORS.ink }}>
-                    Cancel & request refund
+                    {t.cancelAndRefund}
                   </div>
                   <div className="text-xs" style={{ color: COLORS.inkMuted }}>
                     {isPreRefundable
@@ -10002,12 +10181,12 @@ function BookingDetailScreen({ setScreen }) {
               </div>
               <div>
                 <div className="font-semibold text-sm" style={{ color: COLORS.ink }}>
-                  Reschedule to a different date
+                  {t.rescheduleToDate}
                 </div>
                 <div className="text-xs" style={{ color: COLORS.inkMuted }}>
                   {isConfirmed
-                    ? 'Subject to availability · 50% reschedule fee applies'
-                    : 'Reschedule not available for this booking status'}
+                    ? t.subjectToAvail
+                    : t.rescheduleNotAvail}
                 </div>
               </div>
             </div>
@@ -10027,7 +10206,7 @@ function BookingDetailScreen({ setScreen }) {
               </div>
               <div>
                 <div className="font-semibold text-sm" style={{ color: COLORS.ink }}>
-                  Contact support
+                  {t.contactSupport}
                 </div>
                 <div className="text-xs" style={{ color: COLORS.inkMuted }}>
                   support@fandsmarine.ph · or call +63 43 416 0123
@@ -10049,7 +10228,7 @@ function BookingDetailScreen({ setScreen }) {
 // optional notes, refund destination locked to original payment method,
 // submit → success state showing it's now in admin Pending queue.
 // ============================================================================
-function CustomerRefundScreen({ setScreen }) {
+function CustomerRefundScreen({ setScreen, t = T.en }) {
   const [step, setStep] = useState(1); // 1: form, 2: confirm, 3: success
   const [reason, setReason] = useState('changed_plans');
   const [notes, setNotes] = useState('');
@@ -10095,12 +10274,12 @@ function CustomerRefundScreen({ setScreen }) {
   const fee = booking.total - refundAmount;
 
   const reasonOptions = [
-    { id: 'changed_plans', label: 'Changed plans' },
-    { id: 'medical', label: 'Medical emergency' },
-    { id: 'work_conflict', label: 'Work conflict' },
-    { id: 'weather', label: 'Weather concerns' },
-    { id: 'booked_wrong', label: 'Booked wrong date/sailing' },
-    { id: 'other', label: 'Other (please describe)' },
+    { id: 'changed_plans', label: t.changedPlans },
+    { id: 'medical', label: t.medicalEmergency },
+    { id: 'work_conflict', label: t.workConflict },
+    { id: 'weather', label: t.weatherConcerns },
+    { id: 'booked_wrong', label: t.bookedWrongDate },
+    { id: 'other', label: t.otherDescribe },
   ];
 
   const toneColor = (t) =>
@@ -10128,7 +10307,7 @@ function CustomerRefundScreen({ setScreen }) {
           className="text-sm font-semibold flex items-center gap-1 mb-4"
           style={{ color: COLORS.primary }}
         >
-          <ChevronLeft size={16} /> Back to booking
+          <ChevronLeft size={16} /> {t.backToMyBookings}
         </button>
       )}
 
@@ -10136,9 +10315,9 @@ function CustomerRefundScreen({ setScreen }) {
       {step !== 3 && (
         <div className="flex items-center gap-2 mb-6">
           {[
-            { n: 1, label: 'Review refund' },
-            { n: 2, label: 'Confirm' },
-            { n: 3, label: 'Submitted' },
+            { n: 1, label: t.reviewRefund },
+            { n: 2, label: t.confirm },
+            { n: 3, label: t.submitted },
           ].map((s, i) => (
             <div key={s.n} className="flex items-center gap-2">
               <div
@@ -10166,10 +10345,10 @@ function CustomerRefundScreen({ setScreen }) {
       {step === 1 && (
         <>
           <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ color: COLORS.ink }}>
-            Cancel & request refund
+            {t.cancelAndRequestRefund}
           </h1>
           <p className="text-sm mb-6" style={{ color: COLORS.inkMuted }}>
-            Your refund amount depends on how far before departure you cancel.
+            {t.refundDependsOn}
           </p>
 
           {/* Booking summary */}
@@ -10202,7 +10381,7 @@ function CustomerRefundScreen({ setScreen }) {
           >
             <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: toneColor(refundCalc.tone) }}>
-                Your refund amount
+                {t.yourRefundAmount}
               </div>
               <div className="text-xs font-mono" style={{ color: toneColor(refundCalc.tone) }}>
                 {hoursUntilDeparture}h until departure
@@ -10221,12 +10400,12 @@ function CustomerRefundScreen({ setScreen }) {
             </div>
             <div className="space-y-1 text-sm" style={{ color: toneColor(refundCalc.tone) }}>
               <div className="flex justify-between">
-                <span>Total paid</span>
+                <span>{t.totalPaidLabel}</span>
                 <span className="font-mono">₱{booking.total.toLocaleString()}</span>
               </div>
               {fee > 0 && (
                 <div className="flex justify-between">
-                  <span>Cancellation fee ({100 - refundCalc.percent}%)</span>
+                  <span>{t.cancellationFee} ({100 - refundCalc.percent}%)</span>
                   <span className="font-mono">−₱{fee.toLocaleString()}</span>
                 </div>
               )}
@@ -10234,7 +10413,7 @@ function CustomerRefundScreen({ setScreen }) {
                 className="flex justify-between pt-1.5 border-t mt-1.5 font-bold text-base"
                 style={{ borderColor: toneColor(refundCalc.tone) }}
               >
-                <span>You receive</span>
+                <span>{t.youReceive}</span>
                 <span className="font-mono">₱{refundAmount.toLocaleString()}</span>
               </div>
             </div>
@@ -10243,46 +10422,46 @@ function CustomerRefundScreen({ setScreen }) {
           {/* Policy ladder (visualized) */}
           <div className="bg-white rounded-2xl p-5 mb-4 border" style={{ borderColor: COLORS.border }}>
             <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: COLORS.inkMuted }}>
-              Cancellation policy
+              {t.cancellationPolicy}
             </div>
 
             <div className="space-y-2">
               {[
-                { range: 'More than 5 days before',  percent: 50, tone: 'warning',     current: hoursUntilDeparture >= 120 },
-                { range: '5 days before departure',  percent: 40, tone: 'warning',     current: hoursUntilDeparture >= 96  && hoursUntilDeparture < 120 },
-                { range: '4 days before departure',  percent: 30, tone: 'warning',     current: hoursUntilDeparture >= 72  && hoursUntilDeparture < 96 },
-                { range: '3 days before departure',  percent: 20, tone: 'warning',     current: hoursUntilDeparture >= 48  && hoursUntilDeparture < 72 },
-                { range: '2 days before departure',  percent: 10, tone: 'destructive', current: hoursUntilDeparture >= 24  && hoursUntilDeparture < 48 },
-                { range: 'Less than 24h / day-of',   percent: 0,  tone: 'destructive', current: hoursUntilDeparture < 24 },
-              ].map((t, i) => (
+                { range: t.moreThan5Days,    percent: 50, tone: 'warning',     current: hoursUntilDeparture >= 120 },
+                { range: t.fiveDaysBefore,   percent: 40, tone: 'warning',     current: hoursUntilDeparture >= 96  && hoursUntilDeparture < 120 },
+                { range: t.fourDaysBefore,   percent: 30, tone: 'warning',     current: hoursUntilDeparture >= 72  && hoursUntilDeparture < 96 },
+                { range: t.threeDaysBefore,  percent: 20, tone: 'warning',     current: hoursUntilDeparture >= 48  && hoursUntilDeparture < 72 },
+                { range: t.twoDaysBefore,    percent: 10, tone: 'destructive', current: hoursUntilDeparture >= 24  && hoursUntilDeparture < 48 },
+                { range: t.lessThan24h,      percent: 0,  tone: 'destructive', current: hoursUntilDeparture < 24 },
+              ].map((tier, i) => (
                 <div
                   key={i}
                   className="flex items-center gap-3 p-2.5 rounded-lg"
                   style={{
-                    background: t.current ? toneBg(t.tone) : 'transparent',
-                    border: t.current ? `1px solid ${toneColor(t.tone)}` : '1px solid transparent',
+                    background: tier.current ? toneBg(tier.tone) : 'transparent',
+                    border: tier.current ? `1px solid ${toneColor(tier.tone)}` : '1px solid transparent',
                   }}
                 >
                   <div
                     className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold"
-                    style={{ background: toneColor(t.tone), color: 'white' }}
+                    style={{ background: toneColor(tier.tone), color: 'white' }}
                   >
-                    {t.percent}%
+                    {tier.percent}%
                   </div>
                   <div className="flex-1 text-sm">
-                    <div className="font-semibold" style={{ color: COLORS.ink }}>{t.range}</div>
+                    <div className="font-semibold" style={{ color: COLORS.ink }}>{tier.range}</div>
                     <div className="text-xs" style={{ color: COLORS.inkMuted }}>
-                      {t.percent === 0
-                        ? 'No refund — reschedule still allowed for a flat fee'
-                        : `${t.percent}% refund, ${100 - t.percent}% cancellation fee`}
+                      {tier.percent === 0
+                        ? t.noRefundReschedule
+                        : `${tier.percent}% refund, ${100 - tier.percent}% cancellation fee`}
                     </div>
                   </div>
-                  {t.current && (
+                  {tier.current && (
                     <span
                       className="text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0"
-                      style={{ background: toneColor(t.tone), color: 'white' }}
+                      style={{ background: toneColor(tier.tone), color: 'white' }}
                     >
-                      Your refund
+                      {t.yourRefund}
                     </span>
                   )}
                 </div>
@@ -10295,7 +10474,7 @@ function CustomerRefundScreen({ setScreen }) {
             >
               <Info size={12} className="flex-shrink-0 mt-0.5" />
               <div>
-                Maximum refund is capped at <strong>50%</strong> regardless of how early you cancel. From 5 days before departure, the percentage drops by 10 points per day until it reaches 0% in the final 24 hours.
+                {t.maxRefundCap}
               </div>
             </div>
 
@@ -10305,8 +10484,7 @@ function CustomerRefundScreen({ setScreen }) {
             >
               <Info size={12} className="flex-shrink-0 mt-0.5" />
               <div>
-                If your sailing is cancelled by F and S Marine (weather, vessel issue, MARINA-mandated
-                cancellation), you always get a 100% refund regardless of timing.
+                {t.operatorCancelRefund}
               </div>
             </div>
           </div>
@@ -10345,7 +10523,7 @@ function CustomerRefundScreen({ setScreen }) {
           {/* Reason */}
           <div className="bg-white rounded-2xl p-5 mb-4 border" style={{ borderColor: COLORS.border }}>
             <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.ink }}>
-              Reason for cancellation
+              {t.reasonForCancel}
             </label>
             <div className="space-y-1.5">
               {reasonOptions.map((r) => (
@@ -10375,12 +10553,12 @@ function CustomerRefundScreen({ setScreen }) {
             </div>
 
             <label className="block text-xs font-semibold mt-4 mb-1.5" style={{ color: COLORS.ink }}>
-              Additional notes (optional)
+              {t.additionalNotes}
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Anything else you'd like us to know?"
+              placeholder={t.anythingElseToKnow}
               rows={3}
               className="w-full px-3 py-2 rounded-lg border outline-none text-sm"
               style={{ borderColor: COLORS.border, color: COLORS.ink }}
@@ -10390,7 +10568,7 @@ function CustomerRefundScreen({ setScreen }) {
           {/* Refund destination */}
           <div className="bg-white rounded-2xl p-4 mb-4 border" style={{ borderColor: COLORS.border }}>
             <div className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: COLORS.inkMuted }}>
-              Refund will be sent to
+              {t.refundSentTo}
             </div>
             <div className="flex items-center gap-3">
               <div
@@ -10404,7 +10582,7 @@ function CustomerRefundScreen({ setScreen }) {
                   {booking.payment.method} · {booking.payment.account}
                 </div>
                 <div className="text-xs" style={{ color: COLORS.inkMuted }}>
-                  Locked to original payment method · arrives in 3-5 business days
+                  {t.lockedToOriginal}
                 </div>
               </div>
               <Lock size={14} style={{ color: COLORS.inkMuted }} />
@@ -10419,7 +10597,7 @@ function CustomerRefundScreen({ setScreen }) {
               >
                 <Info size={14} className="flex-shrink-0 mt-0.5" />
                 <div>
-                  Your departure is in less than 24 hours. A refund is no longer available — but you can still <strong>reschedule</strong> to a different sailing for a flat fee (set by the operator).
+                  {t.departLessThan24}
                 </div>
               </div>
               <button
@@ -10429,7 +10607,7 @@ function CustomerRefundScreen({ setScreen }) {
                 onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.primaryHover)}
                 onMouseLeave={(e) => (e.currentTarget.style.background = COLORS.primary)}
               >
-                Reschedule instead →
+                {t.rescheduleInstead}
               </button>
             </>
           ) : (
@@ -10448,10 +10626,10 @@ function CustomerRefundScreen({ setScreen }) {
       {step === 2 && (
         <>
           <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ color: COLORS.ink }}>
-            Confirm cancellation
+            {t.confirmCancellation}
           </h1>
           <p className="text-sm mb-6" style={{ color: COLORS.inkMuted }}>
-            Please review the details below. Once submitted, this cannot be undone.
+            {t.reviewBeforeSubmit}
           </p>
 
           <div
@@ -10462,7 +10640,7 @@ function CustomerRefundScreen({ setScreen }) {
               <AlertTriangle size={20} style={{ color: COLORS.destructive }} className="flex-shrink-0 mt-0.5" />
               <div className="text-sm" style={{ color: '#7F1D1D' }}>
                 <div className="font-semibold mb-1">
-                  You're cancelling booking {booking.ref}
+                  {t.youAreCancelling} {booking.ref}
                 </div>
                 <div>
                   All {booking.pax} seats on this sailing will be released and may be sold to other passengers.
@@ -10476,15 +10654,15 @@ function CustomerRefundScreen({ setScreen }) {
               style={{ color: '#7F1D1D' }}
             >
               <div className="flex justify-between">
-                <span>Sailing</span>
+                <span>{t.sailingLabel}</span>
                 <span className="font-semibold">{booking.date} · {booking.time}</span>
               </div>
               <div className="flex justify-between">
-                <span>Vessel · class</span>
+                <span>{t.vesselClass}</span>
                 <span className="font-semibold">{booking.vessel} · {booking.class}</span>
               </div>
               <div className="flex justify-between">
-                <span>Reason</span>
+                <span>{t.reason}</span>
                 <span className="font-semibold">
                   {reasonOptions.find((r) => r.id === reason)?.label}
                 </span>
@@ -10529,7 +10707,7 @@ function CustomerRefundScreen({ setScreen }) {
                 cursor: acknowledged ? 'pointer' : 'not-allowed',
               }}
             >
-              Submit refund request
+              {t.submitRefundRequest}
             </button>
           </div>
         </>
@@ -10545,31 +10723,31 @@ function CustomerRefundScreen({ setScreen }) {
             <CheckCircle2 size={40} style={{ color: COLORS.success }} />
           </div>
           <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>
-            Refund request submitted
+            {t.refundRequestSubmitted}
           </h1>
           <p className="text-sm mb-6" style={{ color: COLORS.inkMuted }}>
-            We've cancelled your booking and queued the refund for review.
+            {t.cancelledAndQueued}
           </p>
 
           <div className="bg-white rounded-2xl p-5 mb-4 border text-left" style={{ borderColor: COLORS.border }}>
             <div className="flex items-center justify-between pb-3 mb-3 border-b" style={{ borderColor: COLORS.border }}>
-              <div className="text-xs" style={{ color: COLORS.inkMuted }}>Request reference</div>
+              <div className="text-xs" style={{ color: COLORS.inkMuted }}>{t.requestReference}</div>
               <div className="font-mono font-bold text-sm" style={{ color: COLORS.primary }}>{requestRef}</div>
             </div>
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Cancelled booking</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.cancelledBooking}</span>
                 <span className="font-mono text-xs" style={{ color: COLORS.ink }}>{booking.ref}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Refund amount</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.refundAmount}</span>
                 <span className="font-mono font-bold" style={{ color: COLORS.ink }}>
                   ₱{refundAmount.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Refund to</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.refundToLabel}</span>
                 <span className="font-semibold" style={{ color: COLORS.ink }}>
                   {booking.payment.method}
                 </span>
@@ -10580,14 +10758,14 @@ function CustomerRefundScreen({ setScreen }) {
           {/* Timeline */}
           <div className="bg-white rounded-2xl p-5 mb-4 border text-left" style={{ borderColor: COLORS.border }}>
             <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: COLORS.inkMuted }}>
-              What happens next
+              {t.whatHappensNextRefund}
             </div>
             <div className="space-y-3">
               {[
-                { icon: Check, label: 'Booking cancelled', sub: 'Seats released · just now', done: true },
-                { icon: Clock, label: 'Finance team reviews', sub: 'Usually within 24 hours', done: false, active: true },
-                { icon: Send, label: 'Refund triggered via Xendit', sub: 'After approval', done: false },
-                { icon: Wallet, label: 'Money arrives in your account', sub: '3-5 business days after trigger', done: false },
+                { icon: Check, label: t.bookingCancelled, sub: t.seatsReleasedJustNow, done: true },
+                { icon: Clock, label: t.financeReviews, sub: t.usuallyWithin24h, done: false, active: true },
+                { icon: Send, label: t.refundTriggered, sub: t.afterApproval, done: false },
+                { icon: Wallet, label: t.moneyArrives, sub: t.threeFiveDays, done: false },
               ].map((t, i) => {
                 const Icon = t.icon;
                 return (
@@ -10628,17 +10806,16 @@ function CustomerRefundScreen({ setScreen }) {
           >
             <Mail size={14} className="flex-shrink-0 mt-0.5" />
             <div>
-              We've sent a copy of this request to your email. You can track its
-              status anytime from My Bookings.
+              {t.sentCopyToEmail}
             </div>
           </div>
 
           <div className="flex gap-2">
             <OutlineButton onClick={() => setScreen('dashboard')} className="flex-1">
-              Back to My Bookings
+              {t.backToMyBookingsBtn}
             </OutlineButton>
             <PrimaryButton onClick={() => setScreen('landing')} size="md" className="flex-1">
-              Book a new trip
+              {t.bookANewTrip}
             </PrimaryButton>
           </div>
         </div>
@@ -10654,7 +10831,7 @@ function CustomerRefundScreen({ setScreen }) {
 //   B. Finalize check     — anomaly review
 //   C. Final manifest     — MARINA MC-180 with blank wet-ink signature lines
 // ============================================================================
-function StaffBoardingScreen({ setScreen, onShowManifest }) {
+function StaffBoardingScreen({ setScreen, t = T.en, onShowManifest }) {
   const [mode, setMode] = useState('A'); // 'A' scanning, 'B' finalize, 'C' manifest
   const [scannerActive, setScannerActive] = useState(false);
   const [lastBoarded, setLastBoarded] = useState(null);
@@ -11667,7 +11844,7 @@ function StaffBoardingScreen({ setScreen, onShowManifest }) {
 // coral, Boarding PWA in purple. Each shows live scanning state, manifest
 // counts, and recent scan logs.
 // ============================================================================
-function NativeAppPreviewScreen({ setScreen }) {
+function NativeAppPreviewScreen({ setScreen, t = T.en }) {
   // Counter PWA local state (independent from web staffCheckin)
   const [counterScanning, setCounterScanning] = useState(true);
   const [counterScanned, setCounterScanned] = useState(8);
@@ -11702,7 +11879,7 @@ function NativeAppPreviewScreen({ setScreen }) {
           📱 Mobile · PWA preview
         </div>
         <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>
-          PWA Mobile Apps Preview
+          {t.pwaPreview}
         </h1>
         <p className="text-sm" style={{ color: COLORS.inkMuted }}>
           Two installable web apps for staff devices · home-screen icons · offline-tolerant scanning
@@ -12286,7 +12463,7 @@ function NativeAppPreviewScreen({ setScreen }) {
 // Filterable by port + date range. CSV export. Used for end-of-day cash
 // reconciliation; companion to AdminReportsScreen which is more analytical.
 // ============================================================================
-function AdminSalesReportsScreen({ setScreen }) {
+function AdminSalesReportsScreen({ setScreen, t = T.en }) {
   const [tab, setTab] = useState('booked'); // 'booked' | 'boarded'
   const [portFilter, setPortFilter] = useState('all'); // 'all' | 'BAT-NAS' | 'BAT-CAL'
   const [range, setRange] = useState('7d'); // '7d' | '30d' | 'custom'
@@ -12387,7 +12564,7 @@ function AdminSalesReportsScreen({ setScreen }) {
           <div className="text-sm font-semibold mb-1 flex items-center gap-1.5" style={{ color: COLORS.success }}>
             <FileSpreadsheet size={14} /> Finance · Daily reconciliation
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold" style={{ color: COLORS.ink }}>Daily Sales Reports</h1>
+          <h1 className="text-2xl md:text-3xl font-bold" style={{ color: COLORS.ink }}>{t.dailySales}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             Booked vs Boarded — separate the cash received online from the cash realized after sailing
           </p>
@@ -12722,7 +12899,7 @@ function AdminSalesReportsScreen({ setScreen }) {
 // Refund ladder: 50% / 40% / 30% / 20% / 10% / 0% per 24h tier (5-day max)
 // Reschedule: flat 30% fee within 5 days, no reschedule after
 // ============================================================================
-function CustomerNoShowRecoveryScreen({ setScreen }) {
+function CustomerNoShowRecoveryScreen({ setScreen, t = T.en }) {
   const [mode, setMode] = useState('refund'); // 'refund' | 'reschedule'
   const [step, setStep] = useState(1); // 1: review, 2: confirm, 3: success
   const [reason, setReason] = useState('missed_terminal');
@@ -12766,22 +12943,22 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
   const rescheduleNet = booking.total - rescheduleFee;
 
   const reasonOptions = [
-    { id: 'missed_terminal', label: 'Got to terminal too late' },
-    { id: 'traffic', label: 'Traffic delay' },
-    { id: 'illness', label: 'Sudden illness' },
-    { id: 'family_emergency', label: 'Family emergency' },
-    { id: 'weather', label: 'Weather / transport disruption' },
-    { id: 'forgot', label: 'Forgot the schedule' },
-    { id: 'other', label: 'Other (please describe)' },
+    { id: 'missed_terminal', label: t.gotToTerminalLate },
+    { id: 'traffic', label: t.trafficDelay },
+    { id: 'illness', label: t.suddenIllness },
+    { id: 'family_emergency', label: t.familyEmergency },
+    { id: 'weather', label: t.weatherDisruption },
+    { id: 'forgot', label: t.forgotSchedule },
+    { id: 'other', label: t.otherPleaseDescribe },
   ];
 
-  const toneColor = (t) =>
-    t === 'success' ? COLORS.success
-    : t === 'warning' ? COLORS.warning
+  const toneColor = (tn) =>
+    tn === 'success' ? COLORS.success
+    : tn === 'warning' ? COLORS.warning
     : COLORS.destructive;
-  const toneBg = (t) =>
-    t === 'success' ? '#DCFCE7'
-    : t === 'warning' ? '#FEF3C7'
+  const toneBg = (tn) =>
+    tn === 'success' ? '#DCFCE7'
+    : tn === 'warning' ? '#FEF3C7'
     : '#FEE2E2';
 
   const handleSubmit = () => {
@@ -12801,7 +12978,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
           className="text-sm font-semibold flex items-center gap-1 mb-4"
           style={{ color: COLORS.primary }}
         >
-          <ChevronLeft size={16} /> Back to booking
+          <ChevronLeft size={16} /> {t.backToMyBookings}
         </button>
       )}
 
@@ -12809,9 +12986,9 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
       {step !== 3 && (
         <div className="flex items-center gap-2 mb-6">
           {[
-            { n: 1, label: mode === 'refund' ? 'Choose refund' : 'Choose new sailing' },
-            { n: 2, label: 'Confirm' },
-            { n: 3, label: 'Submitted' },
+            { n: 1, label: mode === 'refund' ? t.chooseRefund : t.chooseNewSailing },
+            { n: 2, label: t.confirm },
+            { n: 3, label: t.submitted },
           ].map((s, i) => (
             <div key={s.n} className="flex items-center gap-2">
               <div
@@ -12839,12 +13016,10 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
       {step === 1 && (
         <>
           <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ color: COLORS.ink }}>
-            You missed your sailing
+            {t.youMissedYourSailing}
           </h1>
           <p className="text-sm mb-5" style={{ color: COLORS.inkMuted }}>
-            Your booking was marked no-show by the Boarding Officer. You have 5 days
-            from the time the manifest was finalized to either request a partial refund
-            or reschedule to another sailing.
+            {t.noShowExplanation}
           </p>
 
           {/* Missed sailing summary */}
@@ -12868,7 +13043,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                 </div>
                 <div className="flex items-center gap-1 mt-2 text-xs" style={{ color: COLORS.warning }}>
                   <ShieldCheck size={11} />
-                  <span className="font-semibold">Manifest finalized:</span>
+                  <span className="font-semibold">{t.manifestFinalizedLabel}</span>
                   <span>{booking.manifestFinalizedAt}</span>
                 </div>
               </div>
@@ -12896,7 +13071,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
               }}
             >
               <Wallet size={14} />
-              Request refund
+              {t.requestRefundBtn}
             </button>
             <button
               onClick={() => { setMode('reschedule'); setAcknowledged(false); }}
@@ -12908,7 +13083,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
               }}
             >
               <CalendarRange size={14} />
-              Reschedule
+              {t.rescheduleBtn}
             </button>
           </div>
 
@@ -12921,10 +13096,10 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
               >
                 <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
                   <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: toneColor(refundCalc.tone) }}>
-                    Your no-show refund
+                    {t.yourNoShowRefund}
                   </div>
                   <div className="text-xs font-mono" style={{ color: toneColor(refundCalc.tone) }}>
-                    {hoursSinceManifest}h since manifest
+                    {hoursSinceManifest}{t.hSinceManifest}
                   </div>
                 </div>
                 <div className="flex items-baseline gap-3 mb-3">
@@ -12937,12 +13112,12 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                 </div>
                 <div className="space-y-1 text-sm" style={{ color: toneColor(refundCalc.tone) }}>
                   <div className="flex justify-between">
-                    <span>Total paid</span>
+                    <span>{t.totalPaidLabel}</span>
                     <span className="font-mono">₱{booking.total.toLocaleString()}</span>
                   </div>
                   {refundFee > 0 && (
                     <div className="flex justify-between">
-                      <span>No-show deduction ({100 - refundCalc.percent}%)</span>
+                      <span>{t.noShowDeduction} ({100 - refundCalc.percent}%)</span>
                       <span className="font-mono">−₱{refundFee.toLocaleString()}</span>
                     </div>
                   )}
@@ -12950,7 +13125,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                     className="flex justify-between pt-1.5 border-t mt-1.5 font-bold text-base"
                     style={{ borderColor: toneColor(refundCalc.tone) }}
                   >
-                    <span>You receive</span>
+                    <span>{t.youReceive}</span>
                     <span className="font-mono">₱{refundAmount.toLocaleString()}</span>
                   </div>
                 </div>
@@ -12959,7 +13134,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
               {/* Ladder visualization */}
               <div className="bg-white rounded-2xl p-5 mb-4 border" style={{ borderColor: COLORS.border }}>
                 <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: COLORS.inkMuted }}>
-                  No-show refund policy
+                  {t.noShowRefundPolicy}
                 </div>
 
                 <div className="space-y-2">
@@ -12970,35 +13145,35 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                     { range: '72 – 96h after', percent: 20, tone: 'warning', current: hoursSinceManifest >= 72 && hoursSinceManifest < 96 },
                     { range: '96 – 120h after', percent: 10, tone: 'destructive', current: hoursSinceManifest >= 96 && hoursSinceManifest < 120 },
                     { range: 'Past 5 days (120h+)', percent: 0, tone: 'destructive', current: hoursSinceManifest >= 120 },
-                  ].map((t, i) => (
+                  ].map((tier, i) => (
                     <div
                       key={i}
                       className="flex items-center gap-3 p-2.5 rounded-lg"
                       style={{
-                        background: t.current ? toneBg(t.tone) : 'transparent',
-                        border: t.current ? `1px solid ${toneColor(t.tone)}` : '1px solid transparent',
+                        background: tier.current ? toneBg(tier.tone) : 'transparent',
+                        border: tier.current ? `1px solid ${toneColor(tier.tone)}` : '1px solid transparent',
                       }}
                     >
                       <div
                         className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold"
-                        style={{ background: toneColor(t.tone), color: 'white' }}
+                        style={{ background: toneColor(tier.tone), color: 'white' }}
                       >
-                        {t.percent}%
+                        {tier.percent}%
                       </div>
                       <div className="flex-1 text-sm">
-                        <div className="font-semibold" style={{ color: COLORS.ink }}>{t.range}</div>
+                        <div className="font-semibold" style={{ color: COLORS.ink }}>{tier.range}</div>
                         <div className="text-xs" style={{ color: COLORS.inkMuted }}>
-                          {t.percent === 50 ? 'Default no-show refund'
-                            : t.percent === 0 ? 'Booking fully forfeit · grace period expired'
-                            : `Additional ${50 - t.percent}% deduction (10% per extra day)`}
+                          {tier.percent === 50 ? t.defaultNoShowRefund
+                            : tier.percent === 0 ? t.bookingForfeit
+                            : `Additional ${50 - tier.percent}% deduction (10% per extra day)`}
                         </div>
                       </div>
-                      {t.current && (
+                      {tier.current && (
                         <span
                           className="text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0"
-                          style={{ background: toneColor(t.tone), color: 'white' }}
+                          style={{ background: toneColor(tier.tone), color: 'white' }}
                         >
-                          Your tier
+                          {t.yourTier}
                         </span>
                       )}
                     </div>
@@ -13011,10 +13186,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                 >
                   <Info size={12} className="flex-shrink-0 mt-0.5" />
                   <div>
-                    This grace period is a courtesy. It only applies to bookings where
-                    the Boarding Officer marked your seat as no-show on the final
-                    signed manifest. Customers who cancel before sailing follow a
-                    different policy.
+                    {t.noShowGraceInfo}
                   </div>
                 </div>
               </div>
@@ -13055,7 +13227,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
               {/* Reason */}
               <div className="bg-white rounded-2xl p-5 mb-4 border" style={{ borderColor: COLORS.border }}>
                 <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.ink }}>
-                  What happened? (optional but helps us improve)
+                  {t.whatHappened}
                 </label>
                 <div className="space-y-1.5">
                   {reasonOptions.map((r) => (
@@ -13082,12 +13254,12 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                 </div>
 
                 <label className="block text-xs font-semibold mt-4 mb-1.5" style={{ color: COLORS.ink }}>
-                  Additional notes (optional)
+                  {t.additionalNotes}
                 </label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Anything else?"
+                  placeholder={t.anythingElse}
                   rows={3}
                   className="w-full px-3 py-2 rounded-lg border outline-none text-sm"
                   style={{ borderColor: COLORS.border, color: COLORS.ink }}
@@ -13097,7 +13269,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
               {/* Refund destination */}
               <div className="bg-white rounded-2xl p-4 mb-4 border" style={{ borderColor: COLORS.border }}>
                 <div className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: COLORS.inkMuted }}>
-                  Refund will be sent to
+                  {t.refundSentTo}
                 </div>
                 <div className="flex items-center gap-3">
                   <div
@@ -13111,7 +13283,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                       {booking.payment.method} · {booking.payment.account}
                     </div>
                     <div className="text-xs" style={{ color: COLORS.inkMuted }}>
-                      Locked to original payment method · arrives in 3-5 business days
+                      {t.lockedToOriginal}
                     </div>
                   </div>
                   <Lock size={14} style={{ color: COLORS.inkMuted }} />
@@ -13129,7 +13301,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                 }}
               >
                 {beyondGracePeriod
-                  ? 'Grace period expired — cannot proceed'
+                  ? t.graceExpiredCannotProceed
                   : `Continue · receive ₱${refundAmount.toLocaleString()}`}
               </button>
             </>
@@ -13147,20 +13319,19 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
               >
                 <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
                   <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: beyondGracePeriod ? COLORS.destructive : '#5B21B6' }}>
-                    Reschedule fee
+                    {t.rescheduleFeeLabel}
                   </div>
                   <div className="text-xs font-mono" style={{ color: beyondGracePeriod ? COLORS.destructive : '#5B21B6' }}>
-                    {hoursSinceManifest}h since manifest
+                    {hoursSinceManifest}{t.hSinceManifest}
                   </div>
                 </div>
                 {beyondGracePeriod ? (
                   <>
                     <div className="text-2xl md:text-3xl font-bold mb-2" style={{ color: COLORS.destructive }}>
-                      Cannot reschedule
+                      {t.cannotReschedule}
                     </div>
                     <div className="text-sm" style={{ color: '#7F1D1D' }}>
-                      The 5-day grace period has expired. This booking is fully forfeit
-                      and cannot be rescheduled or refunded.
+                      {t.graceExpiredForfeit}
                     </div>
                   </>
                 ) : (
@@ -13170,23 +13341,23 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                         ₱{rescheduleFee.toLocaleString()}
                       </div>
                       <div className="text-sm font-semibold" style={{ color: '#5B21B6' }}>
-                        flat 30% fee
+                        {t.flat30Fee}
                       </div>
                     </div>
                     <div className="space-y-1 text-sm" style={{ color: '#5B21B6' }}>
                       <div className="flex justify-between">
-                        <span>Original ticket value</span>
+                        <span>{t.originalTicketValue}</span>
                         <span className="font-mono">₱{booking.total.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Reschedule fee (30%)</span>
+                        <span>{t.rescheduleFee30}</span>
                         <span className="font-mono">−₱{rescheduleFee.toLocaleString()}</span>
                       </div>
                       <div
                         className="flex justify-between pt-1.5 border-t mt-1.5 font-bold text-base"
                         style={{ borderColor: '#C4B5FD' }}
                       >
-                        <span>Credit applied to new sailing</span>
+                        <span>{t.creditApplied}</span>
                         <span className="font-mono">₱{rescheduleNet.toLocaleString()}</span>
                       </div>
                     </div>
@@ -13199,11 +13370,11 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                   {/* New sailing picker */}
                   <div className="bg-white rounded-2xl p-5 mb-4 border" style={{ borderColor: COLORS.border }}>
                     <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: COLORS.inkMuted }}>
-                      Pick your new sailing
+                      {t.pickNewSailing}
                     </div>
 
                     <label className="block text-xs font-semibold mb-1.5" style={{ color: COLORS.ink }}>
-                      New departure date
+                      {t.newDepartureDate}
                     </label>
                     <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4">
                       {['May 22', 'May 23', 'May 25', 'May 27', 'May 28'].map((d) => (
@@ -13223,26 +13394,26 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                     </div>
 
                     <label className="block text-xs font-semibold mb-1.5" style={{ color: COLORS.ink }}>
-                      Departure time
+                      {t.departureTime}
                     </label>
                     <div className="grid grid-cols-3 gap-2 mb-2">
-                      {['06:00', '10:00', '14:00'].map((t) => (
+                      {['06:00', '10:00', '14:00'].map((time) => (
                         <button
-                          key={t}
-                          onClick={() => setNewSailingTime(t)}
+                          key={time}
+                          onClick={() => setNewSailingTime(time)}
                           className="px-3 py-2 rounded-lg border text-sm font-semibold transition-all"
                           style={{
-                            background: newSailingTime === t ? '#EDE9FE' : 'white',
-                            borderColor: newSailingTime === t ? '#7C3AED' : COLORS.border,
-                            color: newSailingTime === t ? '#5B21B6' : COLORS.ink,
+                            background: newSailingTime === time ? '#EDE9FE' : 'white',
+                            borderColor: newSailingTime === time ? '#7C3AED' : COLORS.border,
+                            color: newSailingTime === time ? '#5B21B6' : COLORS.ink,
                           }}
                         >
-                          {t}
+                          {time}
                         </button>
                       ))}
                     </div>
                     <div className="text-xs mt-2" style={{ color: COLORS.inkMuted }}>
-                      Same vessel class ({booking.class}) and passenger count ({booking.pax} pax) carried over from your original booking
+                      {t.sameVesselClass} ({booking.class}) {t.andPaxCount} ({booking.pax} pax) {t.carriedOver}
                     </div>
                   </div>
 
@@ -13253,9 +13424,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                   >
                     <Info size={12} className="flex-shrink-0 mt-0.5" />
                     <div>
-                      If the new sailing has a different fare, the difference is settled
-                      in your account: higher fare = pay the gap, lower fare = receive
-                      the balance back via your original payment method.
+                      {t.fareDiffNote}
                     </div>
                   </div>
                 </>
@@ -13272,7 +13441,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                 }}
               >
                 {beyondGracePeriod
-                  ? 'Grace period expired — cannot proceed'
+                  ? t.graceExpiredCannotProceed
                   : `Continue · reschedule to ${newSailingDate} ${newSailingTime}`}
               </button>
             </>
@@ -13284,10 +13453,10 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
       {step === 2 && (
         <>
           <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ color: COLORS.ink }}>
-            {mode === 'refund' ? 'Confirm refund' : 'Confirm reschedule'}
+            {mode === 'refund' ? t.confirmRefund : t.confirmRescheduleLabel}
           </h1>
           <p className="text-sm mb-6" style={{ color: COLORS.inkMuted }}>
-            Please review the details below. Once submitted, this cannot be undone.
+            {t.reviewBeforeSubmit}
           </p>
 
           <div
@@ -13305,7 +13474,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
               />
               <div className="text-sm" style={{ color: mode === 'refund' ? '#92400E' : '#5B21B6' }}>
                 <div className="font-semibold mb-1">
-                  You're {mode === 'refund' ? 'requesting a refund for' : 'rescheduling'} {booking.ref}
+                  {mode === 'refund' ? t.youAreRequesting : t.youAreRescheduling} {booking.ref}
                 </div>
                 <div>
                   {mode === 'refund'
@@ -13320,27 +13489,27 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
               style={{ color: mode === 'refund' ? '#92400E' : '#5B21B6' }}
             >
               <div className="flex justify-between">
-                <span>Missed sailing</span>
+                <span>{t.missedSailingLabel}</span>
                 <span className="font-semibold">{booking.originalDate} · {booking.originalTime}</span>
               </div>
               <div className="flex justify-between">
-                <span>Vessel · class</span>
+                <span>{t.vesselClass}</span>
                 <span className="font-semibold">{booking.vessel} · {booking.class}</span>
               </div>
               {mode === 'refund' && (
                 <>
                   <div className="flex justify-between">
-                    <span>Reason</span>
+                    <span>{t.reason}</span>
                     <span className="font-semibold">
                       {reasonOptions.find((r) => r.id === reason)?.label}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Refund tier</span>
+                    <span>{t.refundTier}</span>
                     <span className="font-semibold">{refundCalc.tier}</span>
                   </div>
                   <div className="flex justify-between pt-2 mt-1 border-t font-bold" style={{ borderColor: '#FCD34D' }}>
-                    <span>Refund to {booking.payment.method}</span>
+                    <span>{t.refundToLabel} {booking.payment.method}</span>
                     <span className="font-mono">₱{refundAmount.toLocaleString()}</span>
                   </div>
                 </>
@@ -13348,15 +13517,15 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
               {mode === 'reschedule' && (
                 <>
                   <div className="flex justify-between">
-                    <span>New sailing</span>
+                    <span>{t.newSailing}</span>
                     <span className="font-semibold">{newSailingDate} · {newSailingTime}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Reschedule fee (30%)</span>
+                    <span>{t.rescheduleFee30}</span>
                     <span className="font-mono">−₱{rescheduleFee.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between pt-2 mt-1 border-t font-bold" style={{ borderColor: '#C4B5FD' }}>
-                    <span>Credit applied to new booking</span>
+                    <span>{t.creditAppliedToNew}</span>
                     <span className="font-mono">₱{rescheduleNet.toLocaleString()}</span>
                   </div>
                 </>
@@ -13406,7 +13575,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
                 cursor: acknowledged ? 'pointer' : 'not-allowed',
               }}
             >
-              Submit {mode === 'refund' ? 'refund request' : 'reschedule request'}
+              {mode === 'refund' ? t.submitRefundRequestBtn : t.submitRescheduleRequest}
             </button>
           </div>
         </>
@@ -13422,35 +13591,35 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
             <CheckCircle2 size={40} style={{ color: COLORS.success }} />
           </div>
           <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>
-            {mode === 'refund' ? 'Refund requested' : 'Reschedule requested'}
+            {mode === 'refund' ? t.refundRequested : t.rescheduleRequested}
           </h1>
           <p className="text-sm mb-6" style={{ color: COLORS.inkMuted }}>
             {mode === 'refund'
-              ? "We've queued your no-show refund for review."
-              : `We've reserved your seat on ${newSailingDate} ${newSailingTime} and queued the reschedule for approval.`}
+              ? t.noShowRefundQueued
+              : `${t.seatReserved} ${newSailingDate} ${newSailingTime} ${t.andQueuedReschedule}`}
           </p>
 
           <div className="bg-white rounded-2xl p-5 mb-4 border text-left" style={{ borderColor: COLORS.border }}>
             <div className="flex items-center justify-between pb-3 mb-3 border-b" style={{ borderColor: COLORS.border }}>
-              <div className="text-xs" style={{ color: COLORS.inkMuted }}>Request reference</div>
+              <div className="text-xs" style={{ color: COLORS.inkMuted }}>{t.requestReference}</div>
               <div className="font-mono font-bold text-sm" style={{ color: COLORS.primary }}>{requestRef}</div>
             </div>
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Missed booking</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.missedBooking}</span>
                 <span className="font-mono text-xs" style={{ color: COLORS.ink }}>{booking.ref}</span>
               </div>
               {mode === 'refund' && (
                 <>
                   <div className="flex justify-between">
-                    <span style={{ color: COLORS.inkMuted }}>Refund amount</span>
+                    <span style={{ color: COLORS.inkMuted }}>{t.refundAmount}</span>
                     <span className="font-mono font-bold" style={{ color: COLORS.ink }}>
                       ₱{refundAmount.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span style={{ color: COLORS.inkMuted }}>Refund to</span>
+                    <span style={{ color: COLORS.inkMuted }}>{t.refundToLabel}</span>
                     <span className="font-semibold" style={{ color: COLORS.ink }}>
                       {booking.payment.method}
                     </span>
@@ -13460,13 +13629,13 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
               {mode === 'reschedule' && (
                 <>
                   <div className="flex justify-between">
-                    <span style={{ color: COLORS.inkMuted }}>New sailing</span>
+                    <span style={{ color: COLORS.inkMuted }}>{t.newSailing}</span>
                     <span className="font-semibold" style={{ color: COLORS.ink }}>
                       {newSailingDate} · {newSailingTime}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span style={{ color: COLORS.inkMuted }}>Reschedule fee</span>
+                    <span style={{ color: COLORS.inkMuted }}>{t.rescheduleFeeLabel}</span>
                     <span className="font-mono" style={{ color: COLORS.ink }}>
                       ₱{rescheduleFee.toLocaleString()}
                     </span>
@@ -13482,16 +13651,16 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
           >
             <Mail size={14} className="flex-shrink-0 mt-0.5" />
             <div>
-              We've sent confirmation to your phone via SMS and to your email if on file. Track this request from My Bookings.
+              {t.sentConfirmation}
             </div>
           </div>
 
           <div className="flex gap-2">
             <OutlineButton onClick={() => setScreen('dashboard')} className="flex-1">
-              Back to My Bookings
+              {t.backToMyBookingsBtn}
             </OutlineButton>
             <PrimaryButton onClick={() => setScreen('landing')} size="md" className="flex-1">
-              Book another trip
+              {t.bookAnotherTrip}
             </PrimaryButton>
           </div>
         </div>
@@ -13510,7 +13679,7 @@ function CustomerNoShowRecoveryScreen({ setScreen }) {
 // Gating: same 24h pre-departure cutoff as refund — past 24h, booking is
 // locked and reschedule is unavailable from this screen.
 // ============================================================================
-function CustomerReschedulePreScreen({ setScreen }) {
+function CustomerReschedulePreScreen({ setScreen, t = T.en }) {
   const [step, setStep] = useState(1); // 1: pick new sailing, 2: confirm, 3: success
   const [hoursUntilDeparture, setHoursUntilDeparture] = useState(86); // demo control
   const [newSailingDate, setNewSailingDate] = useState('May 27');
@@ -13618,7 +13787,7 @@ function CustomerReschedulePreScreen({ setScreen }) {
           className="text-sm font-semibold flex items-center gap-1 mb-4"
           style={{ color: COLORS.primary }}
         >
-          <ChevronLeft size={16} /> Back to booking
+          <ChevronLeft size={16} /> {t.backToMyBookings}
         </button>
       )}
 
@@ -13626,9 +13795,9 @@ function CustomerReschedulePreScreen({ setScreen }) {
       {step !== 3 && (
         <div className="flex items-center gap-2 mb-6">
           {[
-            { n: 1, label: 'Pick new sailing' },
-            { n: 2, label: 'Confirm' },
-            { n: 3, label: 'Done' },
+            { n: 1, label: t.pickNewSailingLabel },
+            { n: 2, label: t.confirm },
+            { n: 3, label: t.submitted },
           ].map((s, i) => (
             <div key={s.n} className="flex items-center gap-2">
               <div
@@ -13656,11 +13825,10 @@ function CustomerReschedulePreScreen({ setScreen }) {
       {step === 1 && (
         <>
           <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ color: COLORS.ink }}>
-            Reschedule your sailing
+            {t.rescheduleYourSailing}
           </h1>
           <p className="text-sm mb-5" style={{ color: COLORS.inkMuted }}>
-            Pick a new departure for the same vessel class. A flat {rescheduleFeePercent}% reschedule fee
-            applies regardless of how far in advance, plus any fare difference between the two sailings.
+            {t.rescheduleSub} {rescheduleFeePercent}% {t.rescheduleSubEnd}
           </p>
 
           {/* Original booking summary */}
@@ -13687,7 +13855,7 @@ function CustomerReschedulePreScreen({ setScreen }) {
                 className="text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0"
                 style={{ background: '#DCFCE7', color: '#15803D' }}
               >
-                Confirmed
+                {t.confirmed}
               </span>
             </div>
           </div>
@@ -13731,9 +13899,9 @@ function CustomerReschedulePreScreen({ setScreen }) {
               <div className="flex items-start gap-3">
                 <AlertTriangle size={20} style={{ color: COLORS.destructive }} className="flex-shrink-0 mt-0.5" />
                 <div className="text-sm" style={{ color: '#7F1D1D' }}>
-                  <div className="font-semibold mb-1">Sailing has already departed</div>
+                  <div className="font-semibold mb-1">{t.sailingDeparted}</div>
                   <div>
-                    Reschedule is no longer possible from this screen. If you missed the sailing and the Boarding Officer marked you no-show, you can request a partial refund or reschedule from the no-show recovery flow within 5 days of manifest finalization.
+                    {t.sailingDepartedSub}
                   </div>
                 </div>
               </div>
@@ -13750,11 +13918,11 @@ function CustomerReschedulePreScreen({ setScreen }) {
             }}
           >
             <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: COLORS.inkMuted }}>
-              Pick your new sailing
+              {t.pickNewSailingLabel}
             </div>
 
             <label className="block text-xs font-semibold mb-1.5" style={{ color: COLORS.ink }}>
-              New departure date
+              {t.newDepartureDateLabel}
             </label>
 
             {/* Month selector */}
@@ -13821,12 +13989,12 @@ function CustomerReschedulePreScreen({ setScreen }) {
                     </div>
                     <div className="text-lg font-bold leading-tight">{day.date}</div>
                     {day.blocked ? (
-                      <div className="text-[9px] font-semibold" style={{ color: COLORS.destructive }}>Blocked</div>
+                      <div className="text-[9px] font-semibold" style={{ color: COLORS.destructive }}>{t.blockedLabel}</div>
                     ) : day.isOriginal ? (
-                      <div className="text-[9px] font-semibold" style={{ color: COLORS.inkMuted }}>Original</div>
+                      <div className="text-[9px] font-semibold" style={{ color: COLORS.inkMuted }}>{t.originalLabel}</div>
                     ) : (
                       <div className="text-[9px]" style={{ color: isSelected ? COLORS.primary : COLORS.inkMuted }}>
-                        {day.avail} seats
+                        {day.avail} {t.seatsLower}
                       </div>
                     )}
                     {day.isToday && (
@@ -13839,11 +14007,11 @@ function CustomerReschedulePreScreen({ setScreen }) {
 
             <div className="text-[10px] mb-3 flex items-center gap-1" style={{ color: COLORS.inkMuted }}>
               <Clock size={10} />
-              Rescheduling allowed up to 30 days from today · swipe to see more dates
+              {t.rescheduleAllowed}
             </div>
 
             <label className="block text-xs font-semibold mb-1.5" style={{ color: COLORS.ink }}>
-              Departure time
+              {t.departureTimeLabel}
             </label>
             <div className="grid grid-cols-3 gap-2 mb-3">
               {availableTimes.map((time) => {
@@ -13879,9 +14047,7 @@ function CustomerReschedulePreScreen({ setScreen }) {
             </div>
 
             <div className="text-xs" style={{ color: COLORS.inkMuted }}>
-              Same vessel class ({booking.class}) and {booking.pax} passenger
-              {booking.pax > 1 ? 's' : ''} carry over from your original booking.
-              Port and route stay the same: {booking.departCode} → {booking.arriveCode}.
+              {t.passengerReuseInfo}
             </div>
           </div>
 
@@ -13889,7 +14055,7 @@ function CustomerReschedulePreScreen({ setScreen }) {
           {!isLocked && (
             <div className="bg-white rounded-2xl p-4 mb-4 border" style={{ borderColor: COLORS.border }}>
               <div className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: COLORS.inkMuted }}>
-                Passengers carried over ({booking.pax})
+                {t.passengerCarriedOver} ({booking.pax})
               </div>
               <div className="space-y-1.5">
                 {booking.passengerNames.map((name, i) => (
@@ -13907,8 +14073,7 @@ function CustomerReschedulePreScreen({ setScreen }) {
               <div className="flex items-start gap-1.5 mt-3 text-xs" style={{ color: COLORS.inkMuted }}>
                 <Info size={11} className="flex-shrink-0 mt-0.5" />
                 <span>
-                  Passenger names and IDs are reused as-is. If you need to add, remove,
-                  or substitute a passenger, please cancel this booking and start a new one.
+                  {t.passengerReuseInfo}
                 </span>
               </div>
             </div>
@@ -13921,42 +14086,42 @@ function CustomerReschedulePreScreen({ setScreen }) {
               style={{ background: '#FFE5E9', borderColor: COLORS.primary }}
             >
               <div className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#9B1A3D' }}>
-                Reschedule cost
+                {t.rescheduleCost}
               </div>
               <div className="space-y-1 text-sm" style={{ color: '#9B1A3D' }}>
                 <div className="flex justify-between">
-                  <span>Original ticket value</span>
+                  <span>{t.originalTicketValue}</span>
                   <span className="font-mono">₱{booking.total.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>New sailing fare</span>
+                  <span>{t.newSailingFare}</span>
                   <span className="font-mono">₱{newFare.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Fare difference</span>
+                  <span>{t.fareDifference}</span>
                   <span className="font-mono" style={{ color: fareDiff > 0 ? COLORS.warning : fareDiff < 0 ? COLORS.success : COLORS.ink }}>
                     {fareDiff === 0 ? '₱0' : fareDiff > 0 ? `+₱${fareDiff.toLocaleString()}` : `−₱${Math.abs(fareDiff).toLocaleString()}`}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Reschedule fee ({rescheduleFeePercent}% of original)</span>
+                  <span>{t.rescheduleFeePct} ({rescheduleFeePercent}% {t.ofOriginal})</span>
                   <span className="font-mono font-semibold">+₱{rescheduleFee.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between pt-2 mt-1 border-t font-bold text-base"
                   style={{ borderColor: '#FCD34D' }}>
                   {netCharge > 0 ? (
                     <>
-                      <span>You'll pay today</span>
+                      <span>{t.youllPayToday}</span>
                       <span className="font-mono">+₱{netCharge.toLocaleString()}</span>
                     </>
                   ) : netCharge < 0 ? (
                     <>
-                      <span>You'll get back</span>
+                      <span>{t.youllGetBack}</span>
                       <span className="font-mono">₱{Math.abs(netCharge).toLocaleString()}</span>
                     </>
                   ) : (
                     <>
-                      <span>No additional charge</span>
+                      <span>{t.noAdditionalCharge}</span>
                       <span className="font-mono">₱0</span>
                     </>
                   )}
@@ -13965,9 +14130,7 @@ function CustomerReschedulePreScreen({ setScreen }) {
               <div className="text-xs mt-2 flex items-start gap-1.5" style={{ color: '#9B1A3D' }}>
                 <Info size={11} className="flex-shrink-0 mt-0.5" />
                 <span>
-                  The reschedule fee is a flat percentage of the original ticket value and is non-refundable.
-                  {fareDiff > 0 && ` The fare difference of ₱${fareDiff.toLocaleString()} is charged on top.`}
-                  {fareDiff < 0 && ` The lower new fare partially offsets the fee.`}
+                  {t.rescheduleFeeInfo}
                 </span>
               </div>
             </div>
@@ -13986,7 +14149,7 @@ function CustomerReschedulePreScreen({ setScreen }) {
             onMouseLeave={(e) => { if (!isLocked) e.currentTarget.style.background = COLORS.primary; }}
           >
             {isLocked
-              ? 'Reschedule cutoff has passed — cannot proceed'
+              ? t.rescheduleCutoffPassed
               : `Continue · reschedule to ${newSailingDate} ${newSailingTime}`}
           </button>
         </>
@@ -13996,11 +14159,10 @@ function CustomerReschedulePreScreen({ setScreen }) {
       {step === 2 && (
         <>
           <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ color: COLORS.ink }}>
-            Confirm reschedule
+            {t.confirmReschedule}
           </h1>
           <p className="text-sm mb-6" style={{ color: COLORS.inkMuted }}>
-            Please review the details below. Your original booking will be closed and
-            a new booking reference will be issued for the new sailing.
+            {t.confirmRescheduleSub}
           </p>
 
           <div
@@ -14011,7 +14173,7 @@ function CustomerReschedulePreScreen({ setScreen }) {
               <ArrowRightLeft size={20} style={{ color: COLORS.primary }} className="flex-shrink-0 mt-0.5" />
               <div className="text-sm" style={{ color: '#9B1A3D' }}>
                 <div className="font-semibold mb-1">
-                  You're rescheduling {booking.ref}
+                  {t.youAreReschedulingRef} {booking.ref}
                 </div>
                 <div>
                   Your old booking closes and a new one is created for{' '}
@@ -14026,48 +14188,48 @@ function CustomerReschedulePreScreen({ setScreen }) {
               style={{ color: COLORS.ink }}
             >
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Original sailing</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.originalSailing}</span>
                 <span className="font-semibold">{booking.originalDate} · {booking.originalTime}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>New sailing</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.newSailing}</span>
                 <span className="font-semibold" style={{ color: COLORS.primary }}>
                   {newSailingDate} · {newSailingTime}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Vessel · class</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.vesselClass}</span>
                 <span className="font-semibold">{booking.vessel} · {booking.class}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Passengers</span>
-                <span className="font-semibold">{booking.pax} (carried over)</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.passengers}</span>
+                <span className="font-semibold">{booking.pax} {t.carriedOverPax}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Fare difference</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.fareDifference}</span>
                 <span className="font-mono" style={{ color: fareDiff > 0 ? COLORS.warning : fareDiff < 0 ? COLORS.success : COLORS.ink }}>
                   {fareDiff === 0 ? '₱0' : fareDiff > 0 ? `+₱${fareDiff.toLocaleString()}` : `−₱${Math.abs(fareDiff).toLocaleString()}`}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Reschedule fee ({rescheduleFeePercent}%)</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.rescheduleFeePct} ({rescheduleFeePercent}%)</span>
                 <span className="font-mono font-semibold" style={{ color: COLORS.warning }}>+₱{rescheduleFee.toLocaleString()}</span>
               </div>
               <div className="flex justify-between pt-2 mt-1 border-t font-bold"
                 style={{ borderColor: COLORS.border }}>
                 {netCharge > 0 ? (
                   <>
-                    <span>You'll pay today</span>
+                    <span>{t.youllPayToday}</span>
                     <span className="font-mono" style={{ color: COLORS.warning }}>+₱{netCharge.toLocaleString()}</span>
                   </>
                 ) : netCharge < 0 ? (
                   <>
-                    <span>You'll get back</span>
+                    <span>{t.youllGetBack}</span>
                     <span className="font-mono" style={{ color: COLORS.success }}>₱{Math.abs(netCharge).toLocaleString()}</span>
                   </>
                 ) : (
                   <>
-                    <span>Net charge</span>
+                    <span>{t.netCharge}</span>
                     <span className="font-mono" style={{ color: COLORS.success }}>₱0</span>
                   </>
                 )}
@@ -14133,7 +14295,7 @@ function CustomerReschedulePreScreen({ setScreen }) {
               onMouseEnter={(e) => { if (acknowledged) e.currentTarget.style.background = COLORS.primaryHover; }}
               onMouseLeave={(e) => { if (acknowledged) e.currentTarget.style.background = COLORS.primary; }}
             >
-              Confirm reschedule
+              {t.confirmReschedule}
             </button>
           </div>
         </>
@@ -14149,49 +14311,48 @@ function CustomerReschedulePreScreen({ setScreen }) {
             <CheckCircle2 size={40} style={{ color: COLORS.success }} />
           </div>
           <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>
-            You're rescheduled!
+            {t.youreRescheduled}
           </h1>
           <p className="text-sm mb-6" style={{ color: COLORS.inkMuted }}>
-            Your new booking is confirmed for {newSailingDate} · {newSailingTime}.
-            Your old e-ticket is no longer valid — a new one has been issued.
+            {t.newBookingConfirmed} {newSailingDate} · {newSailingTime}. {t.oldEticketInvalid}
           </p>
 
           <div className="bg-white rounded-2xl p-5 mb-4 border text-left" style={{ borderColor: COLORS.border }}>
             <div className="flex items-center justify-between pb-3 mb-3 border-b" style={{ borderColor: COLORS.border }}>
-              <div className="text-xs" style={{ color: COLORS.inkMuted }}>New booking reference</div>
+              <div className="text-xs" style={{ color: COLORS.inkMuted }}>{t.newBookingReference}</div>
               <div className="font-mono font-bold text-sm" style={{ color: COLORS.primary }}>{newBookingRef}</div>
             </div>
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Closed booking</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.closedBooking}</span>
                 <span className="font-mono text-xs line-through" style={{ color: COLORS.inkMuted }}>{booking.ref}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>New sailing</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.newSailing}</span>
                 <span className="font-semibold" style={{ color: COLORS.ink }}>
                   {newSailingDate} · {newSailingTime}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Vessel · class</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.vesselClass}</span>
                 <span className="font-semibold" style={{ color: COLORS.ink }}>
                   {booking.vessel} · {booking.class}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Passengers</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.passengers}</span>
                 <span className="font-semibold" style={{ color: COLORS.ink }}>{booking.pax}</span>
               </div>
               <div className="flex justify-between pt-2 mt-1 border-t" style={{ borderColor: COLORS.border }}>
-                <span style={{ color: COLORS.inkMuted }}>Reschedule fee ({rescheduleFeePercent}%)</span>
+                <span style={{ color: COLORS.inkMuted }}>{t.rescheduleFeePct} ({rescheduleFeePercent}%)</span>
                 <span className="font-mono font-semibold" style={{ color: COLORS.warning }}>
                   +₱{rescheduleFee.toLocaleString()}
                 </span>
               </div>
               {fareDiff !== 0 && (
                 <div className="flex justify-between">
-                  <span style={{ color: COLORS.inkMuted }}>Fare difference</span>
+                  <span style={{ color: COLORS.inkMuted }}>{t.fareDifference}</span>
                   <span className="font-mono" style={{ color: fareDiff > 0 ? COLORS.warning : COLORS.success }}>
                     {fareDiff > 0 ? `+₱${fareDiff.toLocaleString()}` : `−₱${Math.abs(fareDiff).toLocaleString()}`}
                   </span>
@@ -14200,17 +14361,17 @@ function CustomerReschedulePreScreen({ setScreen }) {
               <div className="flex justify-between pt-2 mt-1 border-t font-bold" style={{ borderColor: COLORS.border }}>
                 {netCharge > 0 ? (
                   <>
-                    <span style={{ color: COLORS.ink }}>Total charged today</span>
+                    <span style={{ color: COLORS.ink }}>{t.youllPayToday}</span>
                     <span className="font-mono" style={{ color: COLORS.warning }}>+₱{netCharge.toLocaleString()}</span>
                   </>
                 ) : netCharge < 0 ? (
                   <>
-                    <span style={{ color: COLORS.ink }}>Credit returned</span>
+                    <span style={{ color: COLORS.ink }}>{t.youllGetBack}</span>
                     <span className="font-mono" style={{ color: COLORS.success }}>₱{Math.abs(netCharge).toLocaleString()}</span>
                   </>
                 ) : (
                   <>
-                    <span style={{ color: COLORS.ink }}>Net charge</span>
+                    <span style={{ color: COLORS.ink }}>{t.netCharge}</span>
                     <span className="font-mono" style={{ color: COLORS.success }}>₱0</span>
                   </>
                 )}
@@ -14224,17 +14385,16 @@ function CustomerReschedulePreScreen({ setScreen }) {
           >
             <Mail size={14} className="flex-shrink-0 mt-0.5" />
             <div>
-              Your new e-ticket has been sent via SMS, and to email if on file. Show the
-              QR code at the gate for boarding. Find this booking under My Bookings.
+              {t.newEticketSent}
             </div>
           </div>
 
           <div className="flex gap-2">
             <OutlineButton onClick={() => setScreen('dashboard')} className="flex-1">
-              Back to My Bookings
+              {t.backToMyBookingsBtn}
             </OutlineButton>
             <PrimaryButton onClick={() => setScreen('confirmation')} size="md" className="flex-1">
-              View new e-ticket
+              {t.viewNewEticket}
             </PrimaryButton>
           </div>
         </div>
@@ -14251,7 +14411,7 @@ function CustomerReschedulePreScreen({ setScreen }) {
 // options (Refund / Reschedule same-route / Credit) within a 3-day window
 // instead of a forced auto-refund.
 // ============================================================================
-function AdminEmergencyCancelScreen({ setScreen }) {
+function AdminEmergencyCancelScreen({ setScreen, t = T.en }) {
   const [step, setStep] = useState(1); // 1: form, 2: preview, 3: confirm, 4: success
   const [scope, setScope] = useState('voyage'); // 'voyage' | 'date-port' | 'date-all'
   const [selectedDate, setSelectedDate] = useState('May 22, 2026');
@@ -14339,7 +14499,7 @@ function AdminEmergencyCancelScreen({ setScreen }) {
         </div>
         <div>
           <h1 className="text-2xl md:text-3xl font-bold" style={{ color: COLORS.ink }}>
-            Emergency cancellation
+            {t.emergencyCancel}
           </h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
             For unplanned operational disruptions. Affected customers get 3 days to choose
@@ -14817,7 +14977,7 @@ function AdminEmergencyCancelScreen({ setScreen }) {
 // announcement: 100% Refund, free same-route Reschedule, or Travel Credit
 // (12-month expiry). After 72h, auto-converts to travel credit.
 // ============================================================================
-function CustomerEmergencyRecoveryScreen({ setScreen }) {
+function CustomerEmergencyRecoveryScreen({ setScreen, t = T.en }) {
   const [mode, setMode] = useState(null); // null | 'refund' | 'reschedule' | 'credit'
   const [step, setStep] = useState(1); // 1: pick, 2: confirm, 3: success
   const [hoursSinceAnnouncement, setHoursSinceAnnouncement] = useState(8); // demo control
@@ -14887,7 +15047,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
           className="text-sm font-semibold flex items-center gap-1 mb-4"
           style={{ color: COLORS.primary }}
         >
-          <ChevronLeft size={16} /> Back to booking
+          <ChevronLeft size={16} /> {t.backToMyBookings}
         </button>
       )}
 
@@ -14895,10 +15055,10 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
       {step === 1 && (
         <>
           <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ color: COLORS.ink }}>
-            Your sailing was cancelled
+            {t.yourSailingCancelled}
           </h1>
           <p className="text-sm mb-5" style={{ color: COLORS.inkMuted }}>
-            We're sorry for the disruption. Pick how you'd like to recover — your booking value is fully protected.
+            {t.emergRecoverySub}
           </p>
 
           {/* Cancellation context */}
@@ -14918,7 +15078,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
             </div>
 
             <div className="bg-white rounded-xl p-3">
-              <div className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: COLORS.inkMuted }}>Your cancelled sailing</div>
+              <div className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: COLORS.inkMuted }}>{t.yourSailingCancelled}</div>
               <div className="font-semibold" style={{ color: COLORS.ink }}>{booking.originalDate} · {booking.originalTime}</div>
               <div className="text-xs" style={{ color: COLORS.inkMuted }}>
                 {booking.vessel} · {booking.class} · {booking.pax} pax · {booking.departCode} → {booking.arriveCode}
@@ -14974,10 +15134,10 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
               </div>
               <div className="flex-1">
                 <div className="font-bold" style={{ color: '#92400E' }}>
-                  {hoursRemaining}h left to choose
+                  {hoursRemaining}h {t.hoursLeft}
                 </div>
                 <div className="text-xs" style={{ color: '#92400E' }}>
-                  After this, your booking will be auto-converted to travel credit (12-month expiry).
+                  {t.afterWindowCredit}
                 </div>
               </div>
             </div>
@@ -14989,7 +15149,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
               <div className="flex items-start gap-3">
                 <Banknote size={22} style={{ color: '#7C3AED' }} className="flex-shrink-0 mt-0.5" />
                 <div className="text-sm" style={{ color: '#5B21B6' }}>
-                  <div className="font-bold mb-1">72h window has passed — auto-converted to travel credit</div>
+                  <div className="font-bold mb-1">{t.windowPassed}</div>
                   <div className="text-xs">
                     Your booking value of ₱{booking.total.toLocaleString()} is now in your travel-credit wallet,
                     usable on any future booking until {creditExpiryLabel}. Contact support if you'd prefer a refund instead.
@@ -15022,7 +15182,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <div className="font-bold" style={{ color: COLORS.ink }}>Full refund</div>
+                    <div className="font-bold" style={{ color: COLORS.ink }}>{t.fullRefund}</div>
                     <span className="text-xs font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#DCFCE7', color: '#166534' }}>
                       100%
                     </span>
@@ -15056,7 +15216,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <div className="font-bold" style={{ color: COLORS.ink }}>Reschedule on the same route</div>
+                    <div className="font-bold" style={{ color: COLORS.ink }}>{t.freeReschedule}</div>
                     <span className="text-xs font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#FFE5E9', color: '#9B1A3D' }}>
                       FREE
                     </span>
@@ -15091,7 +15251,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <div className="font-bold" style={{ color: COLORS.ink }}>Save as travel credit</div>
+                    <div className="font-bold" style={{ color: COLORS.ink }}>{t.travelCreditOption}</div>
                     <span className="text-xs font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#EDE9FE', color: '#5B21B6' }}>
                       12 months
                     </span>
@@ -15110,11 +15270,11 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
           {mode === 'reschedule' && !windowExpired && (
             <div className="bg-white rounded-2xl p-5 mb-4 border-2" style={{ borderColor: COLORS.primary }}>
               <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: COLORS.inkMuted }}>
-                Pick your new sailing · same route only
+                {t.pickNewSailingLabel}
               </div>
 
               <label className="block text-xs font-semibold mb-1.5" style={{ color: COLORS.ink }}>
-                New departure date
+                {t.newDepartureDateLabel}
               </label>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4">
                 {availableDates.map((day) => (
@@ -15130,13 +15290,13 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
                   >
                     <div className="text-[10px] font-semibold uppercase" style={{ color: COLORS.inkMuted }}>{day.dow}</div>
                     <div className="text-sm font-bold">{day.d}</div>
-                    <div className="text-[10px]" style={{ color: COLORS.inkMuted }}>{day.avail} seats</div>
+                    <div className="text-[10px]" style={{ color: COLORS.inkMuted }}>{day.avail} {t.seatsLower}</div>
                   </button>
                 ))}
               </div>
 
               <label className="block text-xs font-semibold mb-1.5" style={{ color: COLORS.ink }}>
-                Departure time
+                {t.departureTimeLabel}
               </label>
               <div className="grid grid-cols-3 gap-2 mb-2">
                 {availableTimes.map((time) => {
@@ -15202,7 +15362,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
       {step === 2 && (
         <>
           <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ color: COLORS.ink }}>
-            Confirm your choice
+            {t.confirm}
           </h1>
           <p className="text-sm mb-6" style={{ color: COLORS.inkMuted }}>
             Once submitted, this can't be changed. Your original booking is permanently closed.
@@ -15222,7 +15382,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
               : mode === 'reschedule' ? '#9B1A3D'
               : '#5B21B6';
             const title =
-              mode === 'refund' ? 'Full refund' : mode === 'reschedule' ? 'Reschedule on the same route' : 'Save as travel credit';
+              mode === 'refund' ? t.fullRefund : mode === 'reschedule' ? t.freeReschedule : t.travelCreditOption;
 
             return (
               <div className="rounded-2xl p-5 mb-4 border-2" style={{ background: themeBg, borderColor: themeFg }}>
@@ -15301,7 +15461,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
           </button>
 
           <div className="flex gap-2">
-            <OutlineButton onClick={() => setStep(1)} className="flex-1">← Change choice</OutlineButton>
+            <OutlineButton onClick={() => setStep(1)} className="flex-1">{t.backBtn}</OutlineButton>
             <button
               onClick={handleSubmit}
               disabled={!acknowledged}
@@ -15314,7 +15474,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
                 cursor: acknowledged ? 'pointer' : 'not-allowed',
               }}
             >
-              {mode === 'refund' ? 'Submit refund request' : mode === 'reschedule' ? 'Confirm reschedule' : 'Save as credit'}
+              {mode === 'refund' ? t.submitRefundRequest : mode === 'reschedule' ? t.confirmReschedule : t.travelCreditOption}
             </button>
           </div>
         </>
@@ -15330,7 +15490,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
             <CheckCircle2 size={40} style={{ color: COLORS.success }} />
           </div>
           <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: COLORS.ink }}>
-            {mode === 'refund' ? 'Refund requested' : mode === 'reschedule' ? "You're rescheduled!" : 'Credit saved'}
+            {mode === 'refund' ? t.refundRequested : mode === 'reschedule' ? t.youreRescheduled : t.travelCreditOption}
           </h1>
           <p className="text-sm mb-6" style={{ color: COLORS.inkMuted }}>
             {mode === 'refund'
@@ -15397,13 +15557,13 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
           </div>
 
           <div className="flex gap-2">
-            <OutlineButton onClick={() => setScreen('dashboard')} className="flex-1">Back to My Bookings</OutlineButton>
+            <OutlineButton onClick={() => setScreen('dashboard')} className="flex-1">{t.backToMyBookingsBtn}</OutlineButton>
             {mode === 'credit' ? (
-              <PrimaryButton onClick={() => setScreen('creditWallet')} size="md" className="flex-1">View my credit →</PrimaryButton>
+              <PrimaryButton onClick={() => setScreen('creditWallet')} size="md" className="flex-1">{t.useCredit}</PrimaryButton>
             ) : mode === 'reschedule' ? (
-              <PrimaryButton onClick={() => setScreen('confirmation')} size="md" className="flex-1">View new e-ticket →</PrimaryButton>
+              <PrimaryButton onClick={() => setScreen('confirmation')} size="md" className="flex-1">{t.viewNewEticket}</PrimaryButton>
             ) : (
-              <PrimaryButton onClick={() => setScreen('landing')} size="md" className="flex-1">Book another trip →</PrimaryButton>
+              <PrimaryButton onClick={() => setScreen('landing')} size="md" className="flex-1">{t.bookAnotherTrip}</PrimaryButton>
             )}
           </div>
         </div>
@@ -15418,7 +15578,7 @@ function CustomerEmergencyRecoveryScreen({ setScreen }) {
 // or admin goodwill. Each credit has a 12-month expiry, a remaining balance,
 // and a redemption history.
 // ============================================================================
-function CustomerCreditWalletScreen({ setScreen }) {
+function CustomerCreditWalletScreen({ setScreen, t = T.en }) {
   const credits = [
     {
       ref: 'CRD-2026-0521-9V2K',
@@ -15472,7 +15632,7 @@ function CustomerCreditWalletScreen({ setScreen }) {
         className="text-sm font-semibold flex items-center gap-1 mb-4"
         style={{ color: COLORS.primary }}
       >
-        <ChevronLeft size={16} /> Back to My Bookings
+        <ChevronLeft size={16} /> {t.backToMyBookingsBtn}
       </button>
 
       <div className="flex items-start gap-3 mb-5">
@@ -15483,9 +15643,9 @@ function CustomerCreditWalletScreen({ setScreen }) {
           <Banknote size={24} style={{ color: '#7C3AED' }} />
         </div>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold" style={{ color: COLORS.ink }}>Travel credit</h1>
+          <h1 className="text-2xl md:text-3xl font-bold" style={{ color: COLORS.ink }}>{t.creditWalletTitle}</h1>
           <p className="text-sm" style={{ color: COLORS.inkMuted }}>
-            Use credit on any future booking — any route, class, or time.
+            {t.creditWalletSub}
           </p>
         </div>
       </div>
@@ -15496,7 +15656,7 @@ function CustomerCreditWalletScreen({ setScreen }) {
         style={{ background: '#EDE9FE', borderColor: '#7C3AED' }}
       >
         <div className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: '#5B21B6' }}>
-          Total available credit
+          {t.totalCredits}
         </div>
         <div className="text-4xl md:text-5xl font-bold mb-2" style={{ color: '#5B21B6' }}>
           ₱{totalAvailable.toLocaleString()}
@@ -15511,7 +15671,7 @@ function CustomerCreditWalletScreen({ setScreen }) {
           onMouseEnter={(e) => (e.currentTarget.style.background = '#5B21B6')}
           onMouseLeave={(e) => (e.currentTarget.style.background = '#7C3AED')}
         >
-          Book a trip with credit →
+          {t.useCredit}
         </button>
       </div>
 
@@ -15580,7 +15740,7 @@ function CustomerCreditWalletScreen({ setScreen }) {
                 <div className="flex items-center gap-1.5" style={{ color: isLowExpiry ? COLORS.warning : COLORS.inkMuted }}>
                   {isLowExpiry && <AlertTriangle size={11} />}
                   <span>
-                    {isExhausted ? 'Fully used' : `Expires ${c.expiresAt} · ${c.daysUntilExpiry} days left`}
+                    {isExhausted ? t.usedLabel : `Expires ${c.expiresAt} · ${c.daysUntilExpiry} days left`}
                   </span>
                 </div>
                 <button
@@ -15629,20 +15789,18 @@ function CustomerCreditWalletScreen({ setScreen }) {
 // Class is locked from the previous step; selected count must equal pax count
 // before "Continue" enables.
 // ============================================================================
-function SeatSelectionScreen({ setScreen }) {
-  // Mockup seed — matches the booking flow that ran on prior screens.
-  // Hard-coding the class to 'Aircon' as the default for the demo because that's
-  // the most common pick; a class toggle in the demo strip lets you preview
-  // the other layouts.
-  const [selectedClass, setSelectedClass] = useState('Aircon'); // demo control
-  const [paxCount] = useState(3); // matches PassengersScreen default
+function SeatSelectionScreen({ setScreen, t = T.en }) {
+  const [selectedClass, setSelectedClass] = useState('Aircon');
+  const [paxCount] = useState(3);
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const [priorityToast, setPriorityToast] = useState(null);
 
-  const passengerNames = [
-    'Maria Cristina Reyes',
-    'Jose Antonio Reyes',
-    'Sofia Margarita Reyes',
+  const passengers = [
+    { name: 'Maria Cristina Reyes', type: 'Adult' },
+    { name: 'Lola Salvacion Bautista', type: 'Senior' },
+    { name: 'Jose Antonio Reyes', type: 'Adult' },
   ];
+  const passengerNames = passengers.map(p => p.name);
 
   // Class-specific config — each describes the layout, color theme, and any
   // pre-occupied seats. In production these would be derived from voyage
@@ -15652,12 +15810,12 @@ function SeatSelectionScreen({ setScreen }) {
       fareLabel: '₱350 / pax',
       themeFg: '#1E40AF',
       themeBg: '#DBEAFE',
-      // 80 seats — 10 rows × 8 across; bench-style, no aisle
       rows: 10,
       cols: 8,
       idFor: (r, c) => `O${String(r + 1).padStart(2, '0')}-${String.fromCharCode(65 + c)}`,
       occupied: ['O01-A','O01-B','O02-C','O03-F','O04-A','O04-B','O04-C','O05-G','O05-H','O07-D','O08-A','O09-F','O09-G','O10-H'],
-      aisleCols: [], // no aisle on open-air benches
+      prioritySeats: ['O10-A','O10-B','O10-C','O10-F','O10-G','O10-H'],
+      aisleCols: [],
       icon: Sun,
       vesselLabel: 'Upper deck · open-air benches · 80 seats',
     },
@@ -15665,12 +15823,12 @@ function SeatSelectionScreen({ setScreen }) {
       fareLabel: '₱550 / pax',
       themeFg: '#FF385C',
       themeBg: '#FFE5E9',
-      // 50 seats — 10 rows × 5 across with center aisle after col 2
       rows: 10,
       cols: 5,
       idFor: (r, c) => `A${String(r + 1).padStart(2, '0')}-${String.fromCharCode(65 + c)}`,
       occupied: ['A01-A','A01-D','A02-B','A03-C','A04-A','A04-E','A05-D','A07-B','A07-C','A09-A'],
-      aisleCols: [2], // aisle after column C (index 2)
+      prioritySeats: ['A01-B','A01-C','A01-E','A10-A'],
+      aisleCols: [2],
       icon: Snowflake,
       vesselLabel: 'Main cabin · air-conditioned · 50 seats',
     },
@@ -15678,12 +15836,12 @@ function SeatSelectionScreen({ setScreen }) {
       fareLabel: '₱850 / pax',
       themeFg: '#A16207',
       themeBg: '#FEF3C7',
-      // 12 seats — 3 rows × 4 across, all aisle (lounge style)
       rows: 3,
       cols: 4,
       idFor: (r, c) => `V${String(r + 1).padStart(2, '0')}-${String.fromCharCode(65 + c)}`,
       occupied: ['V01-A','V02-C'],
-      aisleCols: [1], // aisle after column B (index 1)
+      prioritySeats: ['V01-B','V01-C'],
+      aisleCols: [1],
       icon: Crown,
       vesselLabel: 'Forward lounge · reclining + privacy curtain · 12 seats',
     },
@@ -15691,23 +15849,37 @@ function SeatSelectionScreen({ setScreen }) {
 
   const config = classConfigs[selectedClass];
   const occupiedSet = new Set(config.occupied);
+  const prioritySet = new Set(config.prioritySeats || []);
   const totalSeats = config.rows * config.cols;
   const availableSeats = totalSeats - config.occupied.length;
 
-  // Tap behavior: cycle through assigning the seat to the next unfilled passenger,
-  // and tapping an already-selected seat unselects it.
+  const regularAvailable = Array.from({ length: config.rows * config.cols }, (_, i) => {
+    const r = Math.floor(i / config.cols);
+    const c = i % config.cols;
+    return config.idFor(r, c);
+  }).filter(id => !occupiedSet.has(id) && !prioritySet.has(id) && !selectedSeats.some(s => s.seatId === id));
+  const regularsSoldOut = regularAvailable.length === 0;
+
   const handleSeatTap = (seatId) => {
     if (occupiedSet.has(seatId)) return;
+    const nextPaxIdx = selectedSeats.findIndex((s) => s.seatId === seatId) >= 0
+      ? null
+      : Math.min(selectedSeats.length, paxCount - 1);
+
+    if (prioritySet.has(seatId) && selectedSeats.findIndex((s) => s.seatId === seatId) < 0) {
+      const targetPax = passengers[nextPaxIdx];
+      const isPriorityPax = targetPax && (targetPax.type === 'Senior' || targetPax.type === 'PWD');
+      if (!isPriorityPax && !regularsSoldOut) {
+        setPriorityToast('Reserved for Senior / PWD passengers. Please pick another seat.');
+        setTimeout(() => setPriorityToast(null), 2500);
+        return;
+      }
+    }
+
     setSelectedSeats((prev) => {
       const idx = prev.findIndex((s) => s.seatId === seatId);
-      if (idx >= 0) {
-        // unselect
-        return prev.filter((s) => s.seatId !== seatId);
-      }
-      if (prev.length >= paxCount) {
-        // already picked all — replace the last one
-        return [...prev.slice(0, -1), { seatId, passengerIndex: prev.length - 1 }];
-      }
+      if (idx >= 0) return prev.filter((s) => s.seatId !== seatId);
+      if (prev.length >= paxCount) return [...prev.slice(0, -1), { seatId, passengerIndex: prev.length - 1 }];
       return [...prev, { seatId, passengerIndex: prev.length }];
     });
   };
@@ -15717,6 +15889,8 @@ function SeatSelectionScreen({ setScreen }) {
     setSelectedClass(newClass);
     setSelectedSeats([]);
   };
+
+  const isPriority = (seatId) => prioritySet.has(seatId);
 
   const seatStateFor = (seatId) => {
     if (occupiedSet.has(seatId)) return 'occupied';
@@ -15734,22 +15908,22 @@ function SeatSelectionScreen({ setScreen }) {
 
       {/* Step indicator — note 6 steps now: Date, Sailing, Passengers, Seats, Review, Pay */}
       <div className="flex items-center gap-2 mb-6 text-sm flex-wrap">
-        <span style={{ color: COLORS.inkMuted }}>1. Date ✓</span>
+        <span style={{ color: COLORS.inkMuted }}>1. {t.stepDate} ✓</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>2. Sailing ✓</span>
+        <span style={{ color: COLORS.inkMuted }}>2. {t.stepSailing} ✓</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>3. Passengers ✓</span>
+        <span style={{ color: COLORS.inkMuted }}>3. {t.stepPassengers} ✓</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span className="font-semibold" style={{ color: COLORS.primary }}>4. Seats</span>
+        <span className="font-semibold" style={{ color: COLORS.primary }}>4. {t.stepSeats}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>5. Review</span>
+        <span style={{ color: COLORS.inkMuted }}>5. {t.stepReview}</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
-        <span style={{ color: COLORS.inkMuted }}>6. Pay</span>
+        <span style={{ color: COLORS.inkMuted }}>6. {t.stepPay}</span>
       </div>
 
-      <h1 className="text-3xl font-bold mb-1" style={{ color: COLORS.ink }}>Pick your seats</h1>
+      <h1 className="text-3xl font-bold mb-1" style={{ color: COLORS.ink }}>{t.seatSelTitle}</h1>
       <p className="text-sm mb-5" style={{ color: COLORS.inkMuted }}>
-        Fri, May 22 · 08:00 · Nasugbu → Tilik · MV Our Lady of St Therese
+        {t.seatSelSub}
         <span style={{ color: config.themeFg }}> · {selectedClass}</span>
       </p>
 
@@ -15827,6 +16001,11 @@ function SeatSelectionScreen({ setScreen }) {
                     <div className="font-semibold truncate" style={{ color: COLORS.ink }}>
                       {passengerNames[i] || `Passenger ${i + 1}`}
                     </div>
+                    {passengers[i] && (passengers[i].type === 'Senior' || passengers[i].type === 'PWD') && (
+                      <div className="text-[10px] font-semibold mt-0.5" style={{ color: '#7C3AED' }}>
+                        ♿ {passengers[i].type}
+                      </div>
+                    )}
                   </div>
                 </div>
                 {seat ? (
@@ -15854,21 +16033,35 @@ function SeatSelectionScreen({ setScreen }) {
         </div>
       </div>
 
+      {/* Priority toast */}
+      {priorityToast && (
+        <div className="rounded-xl p-3 mb-3 text-xs font-semibold flex items-center gap-2 animate-pulse"
+          style={{ background: '#EDE9FE', color: '#7C3AED', border: '2px solid #7C3AED' }}>
+          <span>♿</span> {priorityToast}
+        </div>
+      )}
+
       {/* Legend */}
-      <div className="flex items-center gap-4 mb-3 flex-wrap text-xs" style={{ color: COLORS.inkMuted }}>
+      <div className="flex items-center gap-3 mb-3 flex-wrap text-xs" style={{ color: COLORS.inkMuted }}>
         <div className="flex items-center gap-1.5">
           <div className="w-5 h-5 rounded-md border-2 bg-white" style={{ borderColor: COLORS.border }} />
-          <span>Available</span>
+          <span>{t.availableSeat}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-5 h-5 rounded-md" style={{ background: config.themeFg }} />
-          <span style={{ color: config.themeFg }}>Your pick</span>
+          <span style={{ color: config.themeFg }}>{t.yourSeat}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: '#E4E4E4' }}>
             <X size={10} style={{ color: '#717171' }} />
           </div>
-          <span>Taken</span>
+          <span>{t.occupiedSeat}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-md border-2 flex items-center justify-center" style={{ background: '#EDE9FE', borderColor: '#7C3AED' }}>
+            <span style={{ fontSize: 8 }}>♿</span>
+          </div>
+          <span style={{ color: '#7C3AED' }}>{t.prioritySeat}</span>
         </div>
         <div className="ml-auto font-mono" style={{ color: COLORS.inkMuted }}>
           {availableSeats}/{totalSeats} free
@@ -15915,17 +16108,20 @@ function SeatSelectionScreen({ setScreen }) {
                       <button
                         onClick={() => handleSeatTap(seatId)}
                         disabled={isOccupied}
-                        className="w-8 h-8 md:w-9 md:h-9 rounded-md border-2 flex items-center justify-center text-[10px] md:text-xs font-bold transition-all flex-shrink-0"
+                        className="w-8 h-8 md:w-9 md:h-9 rounded-md border-2 flex items-center justify-center text-[10px] md:text-xs font-bold transition-all flex-shrink-0 relative"
                         style={{
-                          background: isSelected ? config.themeFg : isOccupied ? '#E4E4E4' : 'white',
-                          borderColor: isSelected ? config.themeFg : isOccupied ? '#D1D5DB' : COLORS.border,
-                          color: isSelected ? 'white' : isOccupied ? '#9CA3AF' : COLORS.ink,
+                          background: isSelected ? config.themeFg : isOccupied ? '#E4E4E4' : isPriority(seatId) ? '#EDE9FE' : 'white',
+                          borderColor: isSelected ? config.themeFg : isOccupied ? '#D1D5DB' : isPriority(seatId) ? '#7C3AED' : COLORS.border,
+                          color: isSelected ? 'white' : isOccupied ? '#9CA3AF' : isPriority(seatId) ? '#7C3AED' : COLORS.ink,
                           cursor: isOccupied ? 'not-allowed' : 'pointer',
                           opacity: isOccupied ? 0.6 : 1,
                         }}
-                        title={isOccupied ? `${seatId} (taken)` : seatId}
+                        title={isOccupied ? `${seatId} (taken)` : isPriority(seatId) ? `${seatId} (PWD/Senior priority)` : seatId}
                       >
                         {isOccupied ? <X size={12} /> : seatLabel}
+                        {isPriority(seatId) && !isOccupied && !isSelected && (
+                          <span className="absolute -top-1 -right-1 text-[7px] leading-none" style={{ color: '#7C3AED' }}>♿</span>
+                        )}
                       </button>
                       {config.aisleCols.includes(c) && (
                         <div
@@ -15981,7 +16177,7 @@ function SeatSelectionScreen({ setScreen }) {
           onMouseLeave={(e) => { if (isComplete) e.currentTarget.style.background = COLORS.primary; }}
         >
           {isComplete
-            ? `Continue · ${selectedSeats.map((s) => s.seatId).join(', ')} →`
+            ? `${t.continueToReview} · ${selectedSeats.map((s) => s.seatId).join(', ')} →`
             : `Pick ${paxCount - selectedSeats.length} more seat${paxCount - selectedSeats.length === 1 ? '' : 's'}`}
         </button>
       </div>
@@ -15996,11 +16192,1334 @@ function SeatSelectionScreen({ setScreen }) {
 // the nav collapses above the phone. The phone frame's internal viewport is
 // 390px × 844px (iPhone 14 / 15 dimensions) and scrolls independently.
 // ============================================================================
+const T = {
+  en: {
+    // Landing
+    bookTrip: 'Book your trip to Lubang Island in just a minute.',
+    pickDate: 'Pick your date, see live seat availability, book secure with GCash, Maya, or card.',
+    heroTag: '🚢 Batangas ↔ Lubang Island · Daily Departures',
+    oneWay: 'One-way',
+    roundTrip: 'Round-trip · save 10%',
+    from: 'FROM',
+    to: 'TO',
+    depart: 'DEPART',
+    pickADate: 'Pick a date',
+    searchTrips: 'Search available trips →',
+    bookings: 'Bookings',
+    myBookings: 'My Bookings',
+    signIn: 'Sign in',
+    threeWays: 'Three ways to sail',
+    openAirDesc: 'Outdoor deck. Sea breeze, mountain views. Backpacker favorite.',
+    airconDesc: 'Climate-controlled cabin with reclining seats and USB charging.',
+    vipDesc: 'Private lounge. Refreshments, expedited boarding, prime window seats.',
+    marinaLicensed: 'MARINA-licensed',
+    avgRating: '4.8 average rating',
+    paxServed: '180,000+ passengers',
+    yearsOp: '12 years operating',
+    cert: 'Cert. PSL-2019-04287',
+    reviews: '12,847 reviews',
+    servedIn: 'served in 2025',
+    since: 'since 2013',
+    // Steps
+    stepDate: 'Date',
+    stepSailing: 'Sailing',
+    stepPassengers: 'Passengers',
+    stepSeats: 'Seats',
+    stepReview: 'Review',
+    stepPay: 'Pay',
+    // Calendar
+    pickDepartDate: 'Pick your departure date',
+    calendarSub: 'Batangas → Lubang Island · One-way · Each date shows aggregate seats across all sailings.',
+    available: 'Available',
+    fillingUp: 'Filling up',
+    almostFull: 'Almost full',
+    unavailable: 'Unavailable',
+    blocked: 'Blocked',
+    selected: 'Selected',
+    totalAvail: 'Total availability across all sailings operating today',
+    sailingsOp: 'Sailings operating',
+    seatsFrom: 'seats from',
+    back: '← Back',
+    seeSailingsOn: 'See sailings on',
+    // Sailings
+    todaysSailings: "Today's sailings to Tilik",
+    sailingsSub: 'sailings available · Tap a sailing to see classes and prices',
+    portInfo: 'Each sailing departs from a specific Batangas port. The port is shown clearly below — no need to choose; it\'s determined by the vessel\'s schedule for that day.',
+    departingFrom: 'Departing from',
+    portSurcharge: 'PORT SURCHARGE',
+    pickYourClass: 'Pick your class',
+    left: 'left',
+    changeDate: '← Change date',
+    continueWithSailing: 'Continue with selected sailing →',
+    // Passengers
+    whosSailing: "Who's sailing?",
+    totalPax: 'Total passengers',
+    totalPaxSub: 'Adults, seniors, PWDs, students, and children',
+    alreadyHaveAccount: 'Already have an account?',
+    signInAutoFill: 'Sign in to auto-fill your details.',
+    passenger: 'Passenger',
+    accountOwner: 'Account owner',
+    lastName: 'Last Name',
+    firstName: 'First Name',
+    middleName: 'Middle Name',
+    suffix: 'Suffix',
+    optional: 'optional',
+    dateOfBirth: 'Date of Birth',
+    passengerType: 'Passenger Type',
+    validIdType: 'Valid ID Type',
+    idNumber: 'ID Number',
+    validIdPhoto: 'Valid ID Photo',
+    requiredForBoarding: 'required for boarding',
+    captured: 'Captured',
+    retake: 'Retake',
+    takePhoto: 'Take photo',
+    encrypted: 'Encrypted · auto-deleted 90 days after voyage',
+    useSameContact: 'Use same contact as booking creator',
+    contactNumber: 'Contact Number',
+    smsRecovery: 'also used for SMS recovery',
+    accountLinked: 'This number is already linked to an account.',
+    autoAttach: "We'll attach this booking to it automatically — no sign-in needed.",
+    creatorInfo: 'This name plus your contact phone number identifies your account. If a phone number you enter below is already linked to an F&S Marine account, this booking will attach to that account automatically — no separate sign-in needed. After payment, all e-tickets are sent to that phone via SMS (and to your email if you provide one).',
+    bringRightId: 'Bring the right ID for each passenger',
+    discountClaims: 'Discount claims (Senior, PWD, Student, Child, Infant) require specific IDs at the counter. The booking discount is forfeited if the matching original ID isn\'t shown — staff are required to verify before letting the passenger board.',
+    weWillSend: "We'll send this checklist with your e-ticket so the right person brings the right ID on travel day.",
+    bringVehicle: 'Bringing a vehicle?',
+    vehicleReserveOnly: 'Reserve a vehicle slot for this sailing. Vehicle fee is assessed and paid at the port on the day of travel.',
+    vehicleType: 'Vehicle Type',
+    reservationOnly: 'Reservation only — no vehicle fee is charged online.',
+    reservationOnlyDesc: 'Check-in staff will inspect your vehicle at the port, confirm the type, and process the vehicle billing ticket. 1 passenger ride is included FREE with the vehicle fee.',
+    changeSailing: '← Change sailing',
+    pickSeats: 'Pick seats →',
+    // Seat Selection
+    seatSelTitle: 'Pick your seats',
+    seatSelSub: 'Tap a seat to assign it to a passenger. Priority seats (♿) are reserved for PWD/Senior passengers.',
+    seatLegend: 'Seat legend',
+    availableSeat: 'Available',
+    yourSeat: 'Your seat',
+    occupiedSeat: 'Occupied',
+    prioritySeat: 'PWD / Senior',
+    assignTo: 'Assign to',
+    continueToReview: 'Continue to review →',
+    // Review
+    reviewPay: 'Review and pay',
+    lastLook: 'One last look before payment.',
+    paxCount: 'passengers',
+    paymentMethod: 'Payment method',
+    priceDetails: 'Price details',
+    childDiscount: 'Child discount (50%)',
+    seniorDiscount: 'Senior discount (20%)',
+    bookingFee: 'Booking fee',
+    total: 'Total',
+    payWith: 'Pay',
+    agreeTerms: 'By proceeding you agree to our terms and cancellation policy.',
+    backToSeats: '← Back to seats',
+    vehicleDeclared: 'Vehicle declared',
+    payAtCounter: 'Pay at counter on check-in',
+    vehicleReservConf: 'Reservation confirmed for this sailing. Vehicle fee will be assessed and collected by check-in staff at the port.',
+    freeRide: '1 passenger ride is FREE',
+    // Confirmation Method
+    paymentReceived: 'Payment received',
+    howSendTicket: 'How should we send your ticket?',
+    pickEasier: 'Pick whichever is easier for you. Both options send the same booking reference.',
+    phoneSms: 'Phone (SMS)',
+    easiest: 'Easiest',
+    email: 'Email',
+    mobileNumber: 'Mobile number',
+    willSendTo: 'Will send to',
+    whatHappensNext: 'What happens next',
+    sendVerificationCode: 'Send verification code',
+    smsRates: 'Standard SMS rates may apply · powered by UniSMS',
+    emailAddress: 'Email address',
+    sendEticket: 'Send my e-ticket →',
+    weVerifyPhone: 'We send a 6-digit code to your phone to verify ownership',
+    afterVerify: 'After verification, your booking reference is texted to this number',
+    noEmailNeeded: 'No email or password needed — log in any time with your phone + a new code',
+    showRefAtTerminal: 'Show the booking reference at the terminal counter or save the SMS',
+    eticketWithQr: 'Your e-ticket with QR code is sent to this address',
+    accountCreatedEmail: 'A F and S Marine Transport Inc. account is created — username = this email',
+    tempPasswordIncluded: 'A temporary password is included — you can change it on first sign-in',
+    signInAnytime: 'Sign in any time to see active and past bookings',
+    alreadyHaveAccountEmail: 'Already have an account with this email? Your booking will be linked automatically.',
+    recoveryLink: "If anything goes wrong, we'll text a recovery link to",
+    // OTP Verify
+    useDifferentNumber: '← Use a different number',
+    enterYourCode: 'Enter your code',
+    weSentCode: 'We sent a 6-digit code to',
+    incorrectCode: 'Incorrect code. Please try again.',
+    verified: 'Verified — sending you to your e-ticket…',
+    verifyingUniSMS: 'Verifying with UniSMS…',
+    codeExpires: 'Code expires in',
+    didntGetCode: "Didn't get the code?",
+    resendIn: 'Resend in',
+    resendCode: 'Resend code',
+    useEmailInstead: 'Use email instead →',
+    // E-Ticket / Confirmation
+    youreBooked: "You're booked, Maria!",
+    weSentEticket: "We've sent your e-ticket and account details to",
+    ifBookedWithPhone: '(If you booked with phone, you\'ll also receive an SMS with your booking reference.)',
+    bookingRef: 'Booking Ref',
+    vessel: 'Vessel',
+    class: 'Class',
+    passengers: 'Passengers',
+    whatToBring: 'What to bring to the terminal',
+    counterStaffVerify: 'Counter staff will verify each passenger\'s physical ID against the booking. Discount claims (Senior, PWD, Student, Child, Infant) require the specific ID listed below — bring the original, not a photo.',
+    bring: 'Bring',
+    discountForfeited: "Discount will be forfeited if the ID isn't presented or doesn't match — passenger may be asked to pay the regular fare difference at the counter.",
+    checklistSent: "We've sent this checklist along with your e-ticket. You can also find it any time on this booking's detail page under My Bookings.",
+    accountReady: 'Your account is ready',
+    tempPassword: 'Temporary password sent to your email — change it on first sign-in.',
+    ifBookedPhone: '(If you booked with phone, log in by phone + OTP — no password needed.)',
+    smsConfirmation: 'SMS booking confirmation received',
+    delivered: 'Delivered',
+    bookAnother: 'Book another trip',
+    viewMyBookings: 'View my bookings →',
+    arriveEarly: 'Arrive 2 hours before departure with valid ID',
+    baggageIncl: '20kg baggage included',
+    vehicleDeclaredEticket: 'Vehicle declared',
+    payVehicleFee: 'Pay vehicle fee at the counter during check-in. 1 passenger ride is FREE.',
+    // Dashboard
+    welcomeBack: 'Welcome back, Maria',
+    manageTripsSub: 'Manage your trips and download e-tickets.',
+    bookNewTrip: '+ Book new trip',
+    travelCredit: 'travel credit available',
+    activeCredits: 'active credits · use on any future booking',
+    active: 'Active',
+    actionNeeded: 'Action needed',
+    past: 'Past',
+    missedSailing: 'You missed',
+    missedSailingSub: 'You have 5 days from when each manifest was finalized to request a partial refund (deduction increases over time) or reschedule for a 30% fee.',
+    cancel: 'Cancel',
+    pickRecovery: 'Pick recovery →',
+    refundOrReschedule: 'Refund or reschedule →',
+    viewDetails: 'View details →',
+    pax: 'pax',
+    // Login
+    welcomeBackLogin: 'Welcome back',
+    logInToSee: 'Log in to see your bookings and travel faster',
+    phoneOtp: 'Phone (OTP)',
+    password: 'Password',
+    magicLink: 'Magic link',
+    noPasswordNeeded: 'No password needed — we\'ll text you a 6-digit code via UniSMS. Your bookings are linked to this phone number.',
+    sendLoginCode: 'Send login code',
+    enterCode: 'Enter the 6-digit code',
+    sentTo: 'Sent to',
+    checkInbox: 'Check your inbox',
+    weSentLink: 'We sent a sign-in link to',
+    linkExpires: 'The link expires in 15 minutes.',
+    useDifferentEmail: '← Use a different email',
+    sendMagicLink: 'Send magic link',
+    logIn: 'Log in',
+    dontHaveAccount: "Don't have an account?",
+    signUp: 'Sign up',
+    or: 'or',
+    continueAsGuest: 'Continue as guest',
+    forgotPassword: 'Forgot password?',
+    loginTerms: 'By logging in you agree to our Terms of Service and Privacy Policy. We never share your information without your consent.',
+    // Profile
+    profileTitle: 'Profile',
+    personalInfo: 'Personal information',
+    fullName: 'Full Name',
+    emailLabel: 'Email',
+    phoneLabel: 'Phone',
+    notifications: 'Notifications',
+    emailPromos: 'Email promotions and travel deals',
+    smsReminders: 'SMS trip reminders',
+    saveChanges: 'Save changes',
+    deleteAccount: 'Delete account',
+    deleteAccountDesc: 'Permanently delete your account and all associated data.',
+    deleteConfirm: 'This action cannot be undone. All your bookings, travel credits, and personal data will be permanently deleted.',
+    yesDelete: 'Yes, delete my account',
+    noKeep: 'No, keep my account',
+    // Admin common
+    opsDashboard: 'Operations Dashboard',
+    exportManifest: "Export today's manifest",
+    blockDate: '+ Block date',
+    todaySnapshot: "Today's snapshot",
+    revenue: 'Revenue',
+    totalBookings: 'Total bookings',
+    boardingRate: 'Boarding rate',
+    activeVoyages: 'Active voyages',
+    bookingsList: 'Bookings',
+    ofResults: 'of results',
+    export: 'Export',
+    newBooking: '+ New booking',
+    searchBooking: 'Search by reference, name, or contact…',
+    allStatuses: 'All statuses',
+    confirmed: 'Confirmed',
+    pendingPayment: 'Pending Payment',
+    used: 'Used',
+    cancelled: 'Cancelled',
+    refunded: 'Refunded',
+    reference: 'Reference',
+    bookingCreator: 'Booking Creator',
+    dateTime: 'Date / Time',
+    batangasPort: 'Batangas port',
+    payment: 'Payment',
+    status: 'Status',
+    showing: 'Showing',
+    prev: '← Prev',
+    next: 'Next →',
+    noFlagged: 'No flagged bookings',
+    flaggedDesc: 'Flagged bookings (suspicious activity, manual review needed) will appear here.',
+    // Admin Schedule
+    schedule: 'Schedule',
+    scheduleSub: 'Vessel-Port-Time assignment',
+    visualMode: 'Visual',
+    formMode: 'Form',
+    addSailing: '+ Add Sailing',
+    // Admin Ports
+    portManagement: 'Port Management',
+    // Admin Vessels
+    vesselManagement: 'Vessel Management',
+    // Admin Blocked
+    dateBlocking: 'Date Blocking',
+    // Admin Fares
+    fareOverrides: 'Fare Overrides',
+    // Admin Promos
+    promoCodes: 'Promo Codes',
+    // Admin Manifest
+    manifestExport: 'Manifest Export',
+    // Admin Refunds
+    refundQueue: 'Refund Queue',
+    // Admin Reports
+    salesReports: 'Sales Reports',
+    dailySales: 'Daily Sales',
+    // Admin Users
+    userManagement: 'User Management',
+    // Admin Settings
+    systemSettings: 'System Settings',
+    // Admin Audit
+    auditLog: 'Audit Log',
+    // Admin Emergency
+    emergencyCancel: 'Emergency Cancel',
+    // Staff
+    walkInBooking: 'Walk-in Booking',
+    checkinScanner: 'Check-in Scanner',
+    boardingOfficer: 'Boarding Officer',
+    pwaPreview: 'PWA Preview',
+    // Staff Walk-in
+    walkInTitle: 'Walk-in Point of Sale',
+    walkInSub: 'Create a booking for a walk-in customer at the port counter.',
+    // Staff Check-in
+    checkinTitle: 'Check-in Scanner',
+    checkinSub: 'Scan QR or search booking reference to check in passengers.',
+    scanQr: 'Scan QR Code',
+    searchRef: 'Search by Reference',
+    checkedIn: 'Checked in',
+    notCheckedIn: 'Not checked in',
+    checkInBtn: 'Check in',
+    vehicleBill: '🚗 Bill',
+    vehicleBilled: '🚗 ✓',
+    vehicleBilling: 'Vehicle Billing',
+    vehicleFee: 'Vehicle fee',
+    freePassenger: '1 FREE passenger ride',
+    subTicket: 'Sub-ticket',
+    confirmBilling: 'Confirm vehicle billing',
+    // Staff Boarding
+    boardingTitle: 'Boarding Officer',
+    boardingSub: 'Verify passengers at the gangway and finalize the manifest.',
+    // Customer flows
+    requestRefund: 'Request Refund',
+    noShowRecovery: 'No-Show Recovery',
+    reschedule: 'Reschedule',
+    emergencyRecovery: 'Emergency Recovery',
+    creditWallet: 'Travel Credit Wallet',
+    bookingDetail: 'Booking Detail',
+    date: 'Date',
+    sailing: 'Sailing',
+    seats: 'Seats',
+    review: 'Review',
+    pay: 'Pay',
+    // TimeSlot
+    timeSlotTitle: 'Pick your time',
+    timeSlotSub: 'MV Our Lady of St Therese runs three trips from Nasugbu Port on Sat, May 23, 2026. Pick the one that fits your day.',
+    timeSlotBanner: 'Same vessel, same port.',
+    timeSlotBannerSub: 'Only the departure time differs. All trips arrive at Tilik Port on Lubang Island.',
+    sunriseSailing: 'Sunrise sailing',
+    middaySailing: 'Midday sailing',
+    sunsetSailing: 'Sunset sailing',
+    fillingUpFast: 'Filling up fast',
+    bestPhotos: 'Best photo opportunities',
+    openAirLabel: 'Open Air',
+    airconLabel: 'Aircon',
+    vipLabel: 'VIP',
+    seatsLabel: 'seats',
+    backToSailings: '← Back to sailings',
+    continueToClass: 'Continue to class →',
+    stepTimeSlot: 'Time slot',
+    stepClass: 'Class',
+    // ClassPicker
+    classPickerTitle: 'Pick your travel class',
+    classPickerSub: 'MV Our Lady of St Therese · 06:00 from Nasugbu Port · Fri, May 22, 2026',
+    openAirName: 'Open Air',
+    openAirTagline: 'Sea breeze and a view',
+    airconName: 'Aircon',
+    airconTagline: 'Indoor comfort with AC',
+    vipName: 'VIP',
+    vipTagline: 'Private suite, premium service',
+    mostPicked: 'Most picked',
+    perPax: '/ pax',
+    ofSeats: 'of',
+    whatsIncluded: "What's included in",
+    openDeckBench: 'Open-deck bench seating',
+    seaBreezeViews: 'Sea breeze and panoramic views',
+    bestValueFare: 'Best value fare',
+    lifeJacket: 'Life jacket provided',
+    enclosedAircon: 'Enclosed air-conditioned cabin',
+    recliningSeats: 'Reclining seats',
+    tvEntertainment: 'TV / entertainment',
+    privateVipSuite: 'Private VIP suite with privacy curtain',
+    compSnacks: 'Complimentary snacks and drinks',
+    priorityBoarding: 'Priority boarding',
+    premiumReclining: 'Premium reclining seats',
+    backBtn: '← Back',
+    continueWith: 'Continue with',
+    // BookingDetail
+    backToMyBookings: 'Back to My Bookings',
+    eticketBtn: 'E-ticket',
+    receiptBtn: 'Receipt',
+    downloading: 'downloading…',
+    bookingReference: 'Booking reference',
+    booked: 'Booked',
+    by: 'by',
+    yourVoyage: 'Your voyage',
+    boardingQr: 'Boarding QR',
+    showQrAtTerminal: 'Show this QR at the terminal and at the gangway',
+    qrUsedTwice: 'The same QR code is used twice: at the counter for check-in, and again at the gangway when physically boarding the vessel.',
+    passengersCount: 'Passengers',
+    age: 'Age',
+    paymentReceipt: 'Payment receipt',
+    adultFare: 'Adult fare',
+    childFare: 'Child fare',
+    fiftyOff: '50% off',
+    subtotal: 'Subtotal',
+    promoCode: 'Promo code',
+    totalPaid: 'Total paid',
+    paidVia: 'Paid via',
+    ref: 'Ref',
+    yourSailingCancelled: 'Your sailing was cancelled',
+    youMissedSailing: 'You missed this sailing',
+    needToChange: 'Need to make a change?',
+    fsMCancelled: 'F&S Marine cancelled this sailing',
+    pickHowToRecover: 'Pick how to recover your booking value — full refund, free same-route reschedule, or 12-month travel credit.',
+    announcementRef: 'Announcement ref',
+    hoursLeft: 'left',
+    toChoose: 'to choose. After 72h, auto-converts to travel credit (12-month expiry).',
+    windowPassed: '72h window passed — booking auto-credited as travel credit',
+    expires: 'expires',
+    chooseRecovery: 'Choose your recovery option',
+    viewTravelCredit: 'View travel credit (auto-converted)',
+    leftToPick: 'left to pick Refund · Reschedule · Credit',
+    boardingMarkedNoShow: 'Boarding officer marked this booking as no-show',
+    manifestFinalized: 'Manifest finalized',
+    fiveDaysToRequest: 'to request a partial refund',
+    elapsed: 'elapsed',
+    orRescheduleFor30: 'or reschedule for a 30% fee.',
+    requestNoShowRefund: 'Request no-show refund or reschedule',
+    withinGracePeriod: 'Within 5-day grace period',
+    sinceManifest: 'since manifest',
+    gracePeriodExpired: 'Grace period expired (past 5 days) — booking forfeit',
+    cancelAndRefund: 'Cancel & request refund',
+    partialRefund: 'Partial refund (up to 50%)',
+    untilDeparture: 'until departure',
+    refundNotAvailable: 'Refund not available — less than 24h. Reschedule still possible →',
+    rescheduleToDate: 'Reschedule to a different date',
+    subjectToAvail: 'Subject to availability · 50% reschedule fee applies',
+    rescheduleNotAvail: 'Reschedule not available for this booking status',
+    contactSupport: 'Contact support',
+    // CustomerRefund
+    cancelAndRequestRefund: 'Cancel & request refund',
+    refundDependsOn: 'Your refund amount depends on how far before departure you cancel.',
+    paidLabel: 'paid',
+    yourRefundAmount: 'Your refund amount',
+    hUntilDeparture: 'until departure',
+    tier: 'Tier',
+    totalPaidLabel: 'Total paid',
+    cancellationFee: 'Cancellation fee',
+    youReceive: 'You receive',
+    cancellationPolicy: 'Cancellation policy',
+    moreThan5Days: 'More than 5 days before',
+    fiveDaysBefore: '5 days before departure',
+    fourDaysBefore: '4 days before departure',
+    threeDaysBefore: '3 days before departure',
+    twoDaysBefore: '2 days before departure',
+    lessThan24h: 'Less than 24h / day-of',
+    noRefundReschedule: 'No refund — reschedule still allowed for a flat fee',
+    refundAndFee: 'refund',
+    cancFee: 'cancellation fee',
+    yourRefund: 'Your refund',
+    maxRefundCap: 'Maximum refund is capped at 50% regardless of how early you cancel. From 5 days before departure, the percentage drops by 10 points per day until it reaches 0% in the final 24 hours.',
+    operatorCancelRefund: "If your sailing is cancelled by F and S Marine (weather, vessel issue, MARINA-mandated cancellation), you always get a 100% refund regardless of timing.",
+    simulateTiming: 'simulate departure timing',
+    reasonForCancel: 'Reason for cancellation',
+    changedPlans: 'Changed plans',
+    medicalEmergency: 'Medical emergency',
+    workConflict: 'Work conflict',
+    weatherConcerns: 'Weather concerns',
+    bookedWrongDate: 'Booked wrong date/sailing',
+    otherDescribe: 'Other (please describe)',
+    additionalNotes: 'Additional notes',
+    anythingElseToKnow: "Anything else you'd like us to know?",
+    refundSentTo: 'Refund will be sent to',
+    lockedToOriginal: 'Locked to original payment method · arrives in 3-5 business days',
+    departLessThan24: 'Your departure is in less than 24 hours. A refund is no longer available — but you can still reschedule to a different sailing for a flat fee (set by the operator).',
+    rescheduleInstead: 'Reschedule instead →',
+    continueReceive: 'Continue · receive',
+    reviewRefund: 'Review refund',
+    confirm: 'Confirm',
+    submitted: 'Submitted',
+    confirmCancellation: 'Confirm cancellation',
+    reviewBeforeSubmit: 'Please review the details below. Once submitted, this cannot be undone.',
+    youAreCancelling: "You're cancelling booking",
+    allSeatsReleased: 'seats on this sailing will be released and may be sold to other passengers. The QR ticket will be invalidated immediately.',
+    sailingLabel: 'Sailing',
+    vesselClass: 'Vessel · class',
+    reason: 'Reason',
+    refundTo: 'Refund to',
+    iUnderstandRefund: 'I understand the refund of',
+    willBeSentTo: 'will be sent to my',
+    account: 'account',
+    within35days: 'within 3-5 business days, and that I forfeit',
+    perCancelPolicy: 'per the cancellation policy.',
+    submitRefundRequest: 'Submit refund request',
+    refundRequestSubmitted: 'Refund request submitted',
+    cancelledAndQueued: "We've cancelled your booking and queued the refund for review.",
+    requestReference: 'Request reference',
+    cancelledBooking: 'Cancelled booking',
+    refundAmount: 'Refund amount',
+    refundToLabel: 'Refund to',
+    whatHappensNextRefund: 'What happens next',
+    bookingCancelled: 'Booking cancelled',
+    seatsReleasedJustNow: 'Seats released · just now',
+    financeReviews: 'Finance team reviews',
+    usuallyWithin24h: 'Usually within 24 hours',
+    refundTriggered: 'Refund triggered via Xendit',
+    afterApproval: 'After approval',
+    moneyArrives: 'Money arrives in your account',
+    threeFiveDays: '3-5 business days after trigger',
+    sentCopyToEmail: "We've sent a copy of this request to your email. You can track its status anytime from My Bookings.",
+    backToMyBookingsBtn: 'Back to My Bookings',
+    bookANewTrip: 'Book a new trip',
+    // NoShowRecovery
+    youMissedYourSailing: 'You missed your sailing',
+    noShowExplanation: 'Your booking was marked no-show by the Boarding Officer. You have 5 days from the time the manifest was finalized to either request a partial refund or reschedule to another sailing.',
+    noShowStatus: 'No-Show',
+    manifestFinalizedLabel: 'Manifest finalized:',
+    requestRefundBtn: 'Request refund',
+    rescheduleBtn: 'Reschedule',
+    yourNoShowRefund: 'Your no-show refund',
+    hSinceManifest: 'since manifest',
+    noShowDeduction: 'No-show deduction',
+    noShowRefundPolicy: 'No-show refund policy',
+    afterManifest: 'after manifest',
+    defaultNoShowRefund: 'Default no-show refund',
+    bookingForfeit: 'Booking fully forfeit · grace period expired',
+    additionalDeduction: 'Additional',
+    deductionPerDay: 'deduction (10% per extra day)',
+    yourTier: 'Your tier',
+    noShowGraceInfo: 'This grace period is a courtesy. It only applies to bookings where the Boarding Officer marked your seat as no-show on the final signed manifest. Customers who cancel before sailing follow a different policy.',
+    simulateManifest: 'simulate time since manifest finalized',
+    whatHappened: 'What happened?',
+    gotToTerminalLate: 'Got to terminal too late',
+    trafficDelay: 'Traffic delay',
+    suddenIllness: 'Sudden illness',
+    familyEmergency: 'Family emergency',
+    weatherDisruption: 'Weather / transport disruption',
+    forgotSchedule: 'Forgot the schedule',
+    anythingElse: 'Anything else?',
+    graceExpiredCannotProceed: 'Grace period expired — cannot proceed',
+    rescheduleFeeLabel: 'Reschedule fee',
+    cannotReschedule: 'Cannot reschedule',
+    graceExpiredForfeit: 'The 5-day grace period has expired. This booking is fully forfeit and cannot be rescheduled or refunded.',
+    flat30Fee: 'flat 30% fee',
+    originalTicketValue: 'Original ticket value',
+    rescheduleFee30: 'Reschedule fee (30%)',
+    creditApplied: 'Credit applied to new sailing',
+    pickNewSailing: 'Pick your new sailing',
+    newDepartureDate: 'New departure date',
+    departureTime: 'Departure time',
+    sameVesselClass: 'Same vessel class',
+    andPaxCount: 'and passenger count',
+    carriedOver: 'carried over from your original booking',
+    fareDiffNote: 'If the new sailing has a different fare, the difference is settled in your account: higher fare = pay the gap, lower fare = receive the balance back via your original payment method.',
+    continueReschedule: 'Continue · reschedule to',
+    confirmRefund: 'Confirm refund',
+    confirmRescheduleLabel: 'Confirm reschedule',
+    youAreRequesting: "You're requesting a refund for",
+    youAreRescheduling: "You're rescheduling",
+    bookingPermanentlyClosed: 'Your booking is permanently closed. After approval,',
+    willBeSentToAccount: 'will be sent to your',
+    oldBookingClosed: 'Your old booking is closed and a new one is created for',
+    feeNonRefundable: 'The 30% fee',
+    isNonRefundable: 'is non-refundable.',
+    missedSailingLabel: 'Missed sailing',
+    refundTier: 'Refund tier',
+    newSailing: 'New sailing',
+    creditAppliedToNew: 'Credit applied to new booking',
+    iUnderstandNoShowRefund: 'I understand the refund of',
+    perNoShowPolicy: 'per the no-show grace policy.',
+    iUnderstandReschedule: 'I understand the 30% reschedule fee',
+    isNonRefundableEvenCancel: 'is non-refundable even if I cancel the new booking later, and that my original booking will be permanently closed.',
+    submitRefundRequestBtn: 'Submit refund request',
+    submitRescheduleRequest: 'Submit reschedule request',
+    refundRequested: 'Refund requested',
+    rescheduleRequested: 'Reschedule requested',
+    noShowRefundQueued: "We've queued your no-show refund for review.",
+    seatReserved: "We've reserved your seat on",
+    andQueuedReschedule: 'and queued the reschedule for approval.',
+    missedBooking: 'Missed booking',
+    sentConfirmation: "We've sent confirmation to your phone via SMS and to your email if on file. Track this request from My Bookings.",
+    bookAnotherTrip: 'Book another trip',
+    chooseRefund: 'Choose refund',
+    chooseNewSailing: 'Choose new sailing',
+    // Reschedule Pre
+    rescheduleYourSailing: 'Reschedule your sailing',
+    rescheduleSub: 'Pick a new departure for the same vessel class. A flat',
+    rescheduleSubEnd: 'reschedule fee applies regardless of how far in advance, plus any fare difference between the two sailings.',
+    sailingDeparted: 'Sailing has already departed',
+    sailingDepartedSub: "Reschedule is no longer possible from this screen. If you missed the sailing and the Boarding Officer marked you no-show, you can request a partial refund or reschedule from the no-show recovery flow within 5 days of manifest finalization.",
+    pickNewSailingLabel: 'Pick your new sailing',
+    newDepartureDateLabel: 'New departure date',
+    departureTimeLabel: 'Departure time',
+    seatsLower: 'seats',
+    blockedLabel: 'Blocked',
+    originalLabel: 'Original',
+    rescheduleAllowed: 'Rescheduling allowed up to 30 days from today · swipe to see more dates',
+    passengerCarriedOver: 'Passengers carried over',
+    passengerReuseInfo: "Passenger names and IDs are reused as-is. If you need to add, remove, or substitute a passenger, please cancel this booking and start a new one.",
+    rescheduleCost: 'Reschedule cost',
+    newSailingFare: 'New sailing fare',
+    fareDifference: 'Fare difference',
+    rescheduleFeePct: 'Reschedule fee',
+    ofOriginal: 'of original',
+    youllPayToday: "You'll pay today",
+    youllGetBack: "You'll get back",
+    noAdditionalCharge: 'No additional charge',
+    rescheduleFeeInfo: 'The reschedule fee is a flat percentage of the original ticket value and is non-refundable.',
+    fareDiffCharged: 'The fare difference of',
+    isChargedOnTop: 'is charged on top.',
+    lowerFareOffsets: 'The lower new fare partially offsets the fee.',
+    rescheduleCutoffPassed: 'Reschedule cutoff has passed — cannot proceed',
+    confirmReschedule: 'Confirm reschedule',
+    confirmRescheduleSub: 'Please review the details below. Your original booking will be closed and a new booking reference will be issued for the new sailing.',
+    youAreReschedulingRef: "You're rescheduling",
+    oldBookingClosesNew: 'Your old booking closes and a new one is created for',
+    rescheduleApplies: 'reschedule fee applies, plus any fare difference between the two sailings.',
+    originalSailing: 'Original sailing',
+    carriedOverPax: '(carried over)',
+    netCharge: 'Net charge',
+    totalChargedToday: 'Total charged today',
+    creditReturned: 'Credit returned',
+    iUnderstandClose: 'I understand my original booking',
+    willBeClosed: 'will be permanently closed and a new booking reference will be issued for',
+    iAgreeNonRefundable: 'I agree to the non-refundable',
+    onTopOfFareDiff: 'on top of any fare difference.',
+    iAuthorizeCharge: 'I authorize a total charge of',
+    toMy: 'to my',
+    lowerNewFareOffsets: 'The lower new fare offsets part of the fee, so a credit of',
+    willBeReturned: 'will be returned to my',
+    noChargeOrRefund: 'No additional charge or refund applies — the lower new fare exactly offsets the reschedule fee.',
+    youreRescheduled: "You're rescheduled!",
+    newBookingConfirmed: 'Your new booking is confirmed for',
+    oldEticketInvalid: 'Your old e-ticket is no longer valid — a new one has been issued.',
+    newBookingReference: 'New booking reference',
+    closedBooking: 'Closed booking',
+    newEticketSent: 'Your new e-ticket has been sent via SMS, and to email if on file. Show the QR code at the gate for boarding. Find this booking under My Bookings.',
+    viewNewEticket: 'View new e-ticket',
+    // Emergency Recovery
+    emergencyRecoveryTitle: 'Emergency recovery',
+    emergRecoverySub: 'Your sailing was cancelled by F&S Marine due to an emergency. Pick how you want to recover your booking value.',
+    fullRefund: 'Full refund',
+    freeReschedule: 'Free reschedule',
+    travelCreditOption: 'Travel credit',
+    refund100: '100% refund to your original payment method within 3-5 business days.',
+    freeRescheduleSub: 'Move to any available sailing on the same route — no fee, no fare difference.',
+    travelCreditSub: '12-month travel credit for the full booking value. Use on any future booking.',
+    emergencyWindowLabel: 'Recovery window',
+    hoursRemaining: 'remaining',
+    afterWindowCredit: 'After the window closes, your booking auto-converts to travel credit.',
+    // Credit Wallet
+    creditWalletTitle: 'Travel Credit Wallet',
+    creditWalletSub: 'Your travel credits from refunds, cancellations, and promotions.',
+    totalCredits: 'Total credits',
+    activeLabel: 'Active',
+    expiredLabel: 'Expired',
+    usedLabel: 'Used',
+    creditSource: 'Source',
+    creditAmount: 'Amount',
+    creditExpiry: 'Expires',
+    useCredit: 'Use on next booking',
+    noCredits: 'No travel credits yet',
+    noCreditsDesc: 'Credits from refunds, emergency cancellations, and promotions will appear here.',
+  },
+  tl: {
+    // Landing
+    bookTrip: 'Mag-book ng biyahe sa Lubang Island sa isang minuto.',
+    pickDate: 'Pumili ng petsa, tingnan ang mga bakanteng upuan, at magbayad gamit ang GCash, Maya, o card.',
+    heroTag: '🚢 Batangas ↔ Lubang Island · Araw-araw na Biyahe',
+    oneWay: 'Isang lakad',
+    roundTrip: 'Balikan · tipid 10%',
+    from: 'MULA SA',
+    to: 'PAPUNTA SA',
+    depart: 'ALIS',
+    pickADate: 'Pumili ng petsa',
+    searchTrips: 'Hanapin ang mga biyahe →',
+    bookings: 'Mga Booking',
+    myBookings: 'Mga Booking Ko',
+    signIn: 'Mag-sign in',
+    threeWays: 'Tatlong paraan ng paglalayag',
+    openAirDesc: 'Bukas na kubyerta. Simoy ng dagat, tanawin ng bundok. Paborito ng backpacker.',
+    airconDesc: 'Aircon na cabin na may reclining seats at USB charging.',
+    vipDesc: 'Pribadong lounge. Refreshments, priority boarding, pinakamahusay na upuan.',
+    marinaLicensed: 'MARINA-lisensyado',
+    avgRating: '4.8 average rating',
+    paxServed: '180,000+ pasahero',
+    yearsOp: '12 taon nang nagpapatakbo',
+    cert: 'Cert. PSL-2019-04287',
+    reviews: '12,847 na review',
+    servedIn: 'pinagsilbihan noong 2025',
+    since: 'mula 2013',
+    // Steps
+    stepDate: 'Petsa',
+    stepSailing: 'Biyahe',
+    stepPassengers: 'Pasahero',
+    stepSeats: 'Upuan',
+    stepReview: 'Suriin',
+    stepPay: 'Bayad',
+    // Calendar
+    pickDepartDate: 'Pumili ng petsa ng alis',
+    calendarSub: 'Batangas → Lubang Island · Isang lakad · Ang bawat petsa ay nagpapakita ng kabuuang upuan sa lahat ng biyahe.',
+    available: 'Available',
+    fillingUp: 'Napupuno',
+    almostFull: 'Halos puno',
+    unavailable: 'Hindi available',
+    blocked: 'Naka-block',
+    selected: 'Napili',
+    totalAvail: 'Kabuuang availability sa lahat ng biyaheng tumatakbo ngayon',
+    sailingsOp: 'Mga biyaheng tumatakbo',
+    seatsFrom: 'upuan mula sa',
+    back: '← Bumalik',
+    seeSailingsOn: 'Tingnan ang mga biyahe sa',
+    // Sailings
+    todaysSailings: 'Mga biyahe ngayon papuntang Tilik',
+    sailingsSub: 'biyahe ang available · I-tap ang biyahe para makita ang klase at presyo',
+    portInfo: 'Ang bawat biyahe ay umaalis sa isang tiyak na Batangas port. Malinaw na nakasaad sa ibaba — hindi kailangang pumili; ito ay tinutukoy ng schedule ng barko para sa araw na iyon.',
+    departingFrom: 'Umaalis mula sa',
+    portSurcharge: 'DAGDAG-BAYAD SA PORT',
+    pickYourClass: 'Pumili ng klase',
+    left: 'natitira',
+    changeDate: '← Palitan ang petsa',
+    continueWithSailing: 'Magpatuloy sa napiling biyahe →',
+    // Passengers
+    whosSailing: 'Sino ang sasakay?',
+    totalPax: 'Kabuuang pasahero',
+    totalPaxSub: 'Mga adult, senior, PWD, estudyante, at bata',
+    alreadyHaveAccount: 'May account ka na?',
+    signInAutoFill: 'Mag-sign in para ma-auto-fill ang iyong detalye.',
+    passenger: 'Pasahero',
+    accountOwner: 'May-ari ng account',
+    lastName: 'Apelyido',
+    firstName: 'Pangalan',
+    middleName: 'Gitnang Pangalan',
+    suffix: 'Suffix',
+    optional: 'opsyonal',
+    dateOfBirth: 'Petsa ng Kapanganakan',
+    passengerType: 'Uri ng Pasahero',
+    validIdType: 'Uri ng Valid ID',
+    idNumber: 'ID Number',
+    validIdPhoto: 'Larawan ng Valid ID',
+    requiredForBoarding: 'kailangan para sa boarding',
+    captured: 'Nakuha na',
+    retake: 'Kunan ulit',
+    takePhoto: 'Kumuha ng larawan',
+    encrypted: 'Naka-encrypt · awtomatikong natatanggal 90 araw pagkatapos ng biyahe',
+    useSameContact: 'Gamitin ang parehong contact ng booking creator',
+    contactNumber: 'Contact Number',
+    smsRecovery: 'ginagamit din para sa SMS recovery',
+    accountLinked: 'Nakakonekta na ang numerong ito sa isang account.',
+    autoAttach: 'Awtomatiko naming ikokonekta ang booking na ito — hindi na kailangan mag-sign in.',
+    creatorInfo: 'Ang pangalan at contact number mo ang nagpapakilala sa iyong account. Kung ang ibinigay mong number ay nakakonekta na sa F&S Marine account, awtomatikong makakabit ang booking na ito — hindi na kailangan mag-sign in. Pagkatapos magbayad, ang lahat ng e-ticket ay ipapadala sa numerong ito via SMS (at sa email mo kung nagbigay ka).',
+    bringRightId: 'Dalhin ang tamang ID para sa bawat pasahero',
+    discountClaims: 'Ang discount claims (Senior, PWD, Student, Child, Infant) ay nangangailangan ng tiyak na ID sa counter. Ang discount ay mawawala kung hindi maipakita ang tamang orihinal na ID — kinakailangan ng staff na ma-verify bago payagang sumakay.',
+    weWillSend: 'Ipapadala namin ang checklist na ito kasama ng iyong e-ticket para madala ng tamang tao ang tamang ID sa araw ng biyahe.',
+    bringVehicle: 'May dala kang sasakyan?',
+    vehicleReserveOnly: 'Magreserba ng slot para sa sasakyan sa biyaheng ito. Ang bayad sa sasakyan ay sinisingil at binabayaran sa pier sa araw ng biyahe.',
+    vehicleType: 'Uri ng Sasakyan',
+    reservationOnly: 'Reserbasyon lamang — walang bayad sa sasakyan ang sinisingil online.',
+    reservationOnlyDesc: 'Ii-inspeksyon ng check-in staff ang iyong sasakyan sa pier, kukumpirmahin ang uri, at ipoproseso ang vehicle billing ticket. 1 pasahero ang LIBRE sa bayad ng sasakyan.',
+    changeSailing: '← Palitan ang biyahe',
+    pickSeats: 'Pumili ng upuan →',
+    // Seat Selection
+    seatSelTitle: 'Pumili ng upuan',
+    seatSelSub: 'I-tap ang upuan para i-assign sa pasahero. Ang priority seats (♿) ay nakalaan para sa PWD/Senior.',
+    seatLegend: 'Gabay sa upuan',
+    availableSeat: 'Available',
+    yourSeat: 'Upuan mo',
+    occupiedSeat: 'Okupado',
+    prioritySeat: 'PWD / Senior',
+    assignTo: 'I-assign sa',
+    continueToReview: 'Magpatuloy sa pagsuri →',
+    // Review
+    reviewPay: 'Suriin at magbayad',
+    lastLook: 'Huling tingin bago magbayad.',
+    paxCount: 'pasahero',
+    paymentMethod: 'Paraan ng pagbabayad',
+    priceDetails: 'Detalye ng presyo',
+    childDiscount: 'Discount ng bata (50%)',
+    seniorDiscount: 'Discount ng senior (20%)',
+    bookingFee: 'Booking fee',
+    total: 'Kabuuan',
+    payWith: 'Magbayad',
+    agreeTerms: 'Sa pagpapatuloy, sumasang-ayon ka sa aming terms at cancellation policy.',
+    backToSeats: '← Bumalik sa upuan',
+    vehicleDeclared: 'Sasakyan na idineklara',
+    payAtCounter: 'Magbayad sa counter sa check-in',
+    vehicleReservConf: 'Nakumpirma ang reserbasyon para sa biyaheng ito. Ang bayad sa sasakyan ay sinisingil at kokolektahin ng check-in staff sa pier.',
+    freeRide: '1 pasahero ang LIBRE',
+    // Confirmation Method
+    paymentReceived: 'Natanggap ang bayad',
+    howSendTicket: 'Paano namin ipapadala ang iyong ticket?',
+    pickEasier: 'Piliin kung alin ang mas madali para sa iyo. Parehong opsyon ang magpapadala ng booking reference.',
+    phoneSms: 'Telepono (SMS)',
+    easiest: 'Pinakamadali',
+    email: 'Email',
+    mobileNumber: 'Mobile number',
+    willSendTo: 'Ipapadala sa',
+    whatHappensNext: 'Ano ang susunod',
+    sendVerificationCode: 'Magpadala ng verification code',
+    smsRates: 'Maaaring may standard SMS rates · pinapagana ng UniSMS',
+    emailAddress: 'Email address',
+    sendEticket: 'Ipadala ang aking e-ticket →',
+    weVerifyPhone: 'Magpapadala kami ng 6-digit na code sa iyong telepono para ma-verify',
+    afterVerify: 'Pagkatapos ma-verify, ite-text ang booking reference mo sa numerong ito',
+    noEmailNeeded: 'Hindi kailangan ng email o password — mag-log in anumang oras gamit ang iyong telepono + bagong code',
+    showRefAtTerminal: 'Ipakita ang booking reference sa terminal counter o i-save ang SMS',
+    eticketWithQr: 'Ang iyong e-ticket na may QR code ay ipapadala sa address na ito',
+    accountCreatedEmail: 'Gagawa ng F and S Marine Transport Inc. account — username = ang email na ito',
+    tempPasswordIncluded: 'Kasama ang pansamantalang password — mababago mo sa unang sign-in',
+    signInAnytime: 'Mag-sign in anumang oras para makita ang active at nakaraang booking',
+    alreadyHaveAccountEmail: 'May account ka na gamit ang email na ito? Awtomatikong maikokonekta ang booking mo.',
+    recoveryLink: 'Kung may problema, magpapadala kami ng recovery link sa',
+    // OTP Verify
+    useDifferentNumber: '← Gumamit ng ibang numero',
+    enterYourCode: 'Ilagay ang iyong code',
+    weSentCode: 'Nagpadala kami ng 6-digit na code sa',
+    incorrectCode: 'Mali ang code. Subukan ulit.',
+    verified: 'Na-verify — dinadala ka sa iyong e-ticket…',
+    verifyingUniSMS: 'Vini-verify sa UniSMS…',
+    codeExpires: 'Mag-e-expire ang code sa',
+    didntGetCode: 'Hindi mo natanggap ang code?',
+    resendIn: 'I-resend sa',
+    resendCode: 'I-resend ang code',
+    useEmailInstead: 'Gumamit ng email sa halip →',
+    // E-Ticket / Confirmation
+    youreBooked: 'Nakabooking ka na, Maria!',
+    weSentEticket: 'Naipadala na ang iyong e-ticket at account details sa',
+    ifBookedWithPhone: '(Kung nag-book ka gamit ang telepono, makakatanggap ka rin ng SMS na may booking reference.)',
+    bookingRef: 'Booking Ref',
+    vessel: 'Barko',
+    class: 'Klase',
+    passengers: 'Pasahero',
+    whatToBring: 'Ano ang dapat dalhin sa terminal',
+    counterStaffVerify: 'Ive-verify ng counter staff ang pisikal na ID ng bawat pasahero laban sa booking. Ang discount claims (Senior, PWD, Student, Child, Infant) ay nangangailangan ng tiyak na ID na nakalista sa ibaba — dalhin ang orihinal, hindi larawan.',
+    bring: 'Dalhin',
+    discountForfeited: 'Mawawala ang discount kung hindi maipakita ang ID o hindi tugma — maaaring pagbayarin ang pasahero ng regular fare difference sa counter.',
+    checklistSent: 'Naipadala na namin ang checklist na ito kasama ng iyong e-ticket. Makikita mo rin ito anumang oras sa booking detail page sa ilalim ng Mga Booking Ko.',
+    accountReady: 'Handa na ang iyong account',
+    tempPassword: 'Naipadala ang pansamantalang password sa iyong email — palitan sa unang sign-in.',
+    ifBookedPhone: '(Kung nag-book ka gamit ang telepono, mag-log in gamit ang telepono + OTP — hindi kailangan ng password.)',
+    smsConfirmation: 'Natanggap ang SMS booking confirmation',
+    delivered: 'Na-deliver',
+    bookAnother: 'Mag-book ng ibang biyahe',
+    viewMyBookings: 'Tingnan ang mga booking ko →',
+    arriveEarly: 'Dumating 2 oras bago umalis na may valid ID',
+    baggageIncl: '20kg baggage kasama',
+    vehicleDeclaredEticket: 'Sasakyan na idineklara',
+    payVehicleFee: 'Magbayad ng vehicle fee sa counter sa check-in. 1 pasahero ang LIBRE.',
+    // Dashboard
+    welcomeBack: 'Maligayang pagbabalik, Maria',
+    manageTripsSub: 'Pamahalaan ang iyong mga biyahe at i-download ang e-tickets.',
+    bookNewTrip: '+ Mag-book ng bagong biyahe',
+    travelCredit: 'travel credit na available',
+    activeCredits: 'active credits · gamitin sa susunod na booking',
+    active: 'Active',
+    actionNeeded: 'Kailangan ng aksyon',
+    past: 'Nakaraan',
+    missedSailing: 'Na-miss mo',
+    missedSailingSub: 'May 5 araw ka mula nang ma-finalize ang manifest para humiling ng partial refund (tumataas ang bawas sa oras) o mag-reschedule na may 30% na bayad.',
+    cancel: 'I-cancel',
+    pickRecovery: 'Pumili ng recovery →',
+    refundOrReschedule: 'Refund o reschedule →',
+    viewDetails: 'Tingnan ang detalye →',
+    pax: 'pasahero',
+    // Login
+    welcomeBackLogin: 'Maligayang pagbabalik',
+    logInToSee: 'Mag-log in para makita ang iyong mga booking at maglakbay nang mas mabilis',
+    phoneOtp: 'Telepono (OTP)',
+    password: 'Password',
+    magicLink: 'Magic link',
+    noPasswordNeeded: 'Hindi kailangan ng password — magpapadala kami ng 6-digit na code via UniSMS. Nakakonekta ang iyong mga booking sa numerong ito.',
+    sendLoginCode: 'Ipadala ang login code',
+    enterCode: 'Ilagay ang 6-digit na code',
+    sentTo: 'Ipinadala sa',
+    checkInbox: 'Tingnan ang iyong inbox',
+    weSentLink: 'Nagpadala kami ng sign-in link sa',
+    linkExpires: 'Mag-e-expire ang link sa 15 minuto.',
+    useDifferentEmail: '← Gumamit ng ibang email',
+    sendMagicLink: 'Ipadala ang magic link',
+    logIn: 'Mag-log in',
+    dontHaveAccount: 'Wala pang account?',
+    signUp: 'Mag-sign up',
+    or: 'o',
+    continueAsGuest: 'Magpatuloy bilang bisita',
+    forgotPassword: 'Nakalimutan ang password?',
+    loginTerms: 'Sa pag-log in, sumasang-ayon ka sa aming Terms of Service at Privacy Policy. Hindi namin ibabahagi ang iyong impormasyon nang walang pahintulot mo.',
+    // Profile
+    profileTitle: 'Profile',
+    personalInfo: 'Personal na impormasyon',
+    fullName: 'Buong Pangalan',
+    emailLabel: 'Email',
+    phoneLabel: 'Telepono',
+    notifications: 'Mga Notification',
+    emailPromos: 'Mga email promo at travel deals',
+    smsReminders: 'SMS trip reminders',
+    saveChanges: 'I-save ang mga pagbabago',
+    deleteAccount: 'I-delete ang account',
+    deleteAccountDesc: 'Permanenteng i-delete ang iyong account at lahat ng kaugnay na data.',
+    deleteConfirm: 'Hindi ito maaaring i-undo. Lahat ng iyong booking, travel credits, at personal data ay permanenteng made-delete.',
+    yesDelete: 'Oo, i-delete ang aking account',
+    noKeep: 'Hindi, panatilihin ang aking account',
+    // Admin common
+    opsDashboard: 'Operations Dashboard',
+    exportManifest: 'I-export ang manifest ngayon',
+    blockDate: '+ I-block ang petsa',
+    todaySnapshot: 'Snapshot ngayon',
+    revenue: 'Kita',
+    totalBookings: 'Kabuuang booking',
+    boardingRate: 'Boarding rate',
+    activeVoyages: 'Active na biyahe',
+    bookingsList: 'Mga Booking',
+    ofResults: 'ng mga resulta',
+    export: 'I-export',
+    newBooking: '+ Bagong booking',
+    searchBooking: 'Hanapin gamit ang reference, pangalan, o contact…',
+    allStatuses: 'Lahat ng status',
+    confirmed: 'Nakumpirma',
+    pendingPayment: 'Naghihintay ng Bayad',
+    used: 'Nagamit',
+    cancelled: 'Na-cancel',
+    refunded: 'Na-refund',
+    reference: 'Reference',
+    bookingCreator: 'Gumawa ng Booking',
+    dateTime: 'Petsa / Oras',
+    batangasPort: 'Batangas port',
+    payment: 'Bayad',
+    status: 'Status',
+    showing: 'Ipinapakita',
+    prev: '← Nakaraang',
+    next: 'Susunod →',
+    noFlagged: 'Walang naka-flag na booking',
+    flaggedDesc: 'Ang mga naka-flag na booking (kahina-hinalang aktibidad, kailangan ng manual na pagsuri) ay lalabas dito.',
+    // Admin Schedule
+    schedule: 'Schedule',
+    scheduleSub: 'Barko-Port-Oras na assignment',
+    visualMode: 'Visual',
+    formMode: 'Form',
+    addSailing: '+ Magdagdag ng Biyahe',
+    // Admin Ports
+    portManagement: 'Pamamahala ng Port',
+    // Admin Vessels
+    vesselManagement: 'Pamamahala ng Barko',
+    // Admin Blocked
+    dateBlocking: 'Pagba-block ng Petsa',
+    // Admin Fares
+    fareOverrides: 'Mga Override ng Pamasahe',
+    // Admin Promos
+    promoCodes: 'Mga Promo Code',
+    // Admin Manifest
+    manifestExport: 'I-export ang Manifest',
+    // Admin Refunds
+    refundQueue: 'Pila ng Refund',
+    // Admin Reports
+    salesReports: 'Mga Ulat ng Benta',
+    dailySales: 'Araw-araw na Benta',
+    // Admin Users
+    userManagement: 'Pamamahala ng User',
+    // Admin Settings
+    systemSettings: 'Mga Setting ng Sistema',
+    // Admin Audit
+    auditLog: 'Audit Log',
+    // Admin Emergency
+    emergencyCancel: 'Emergency Cancel',
+    // Staff
+    walkInBooking: 'Walk-in Booking',
+    checkinScanner: 'Check-in Scanner',
+    boardingOfficer: 'Boarding Officer',
+    pwaPreview: 'PWA Preview',
+    // Staff Walk-in
+    walkInTitle: 'Walk-in Point of Sale',
+    walkInSub: 'Gumawa ng booking para sa walk-in na customer sa port counter.',
+    // Staff Check-in
+    checkinTitle: 'Check-in Scanner',
+    checkinSub: 'I-scan ang QR o hanapin ang booking reference para i-check in ang mga pasahero.',
+    scanQr: 'I-scan ang QR Code',
+    searchRef: 'Hanapin gamit ang Reference',
+    checkedIn: 'Na-check in',
+    notCheckedIn: 'Hindi pa na-check in',
+    checkInBtn: 'I-check in',
+    vehicleBill: '🚗 Singil',
+    vehicleBilled: '🚗 ✓',
+    vehicleBilling: 'Vehicle Billing',
+    vehicleFee: 'Bayad sa sasakyan',
+    freePassenger: '1 LIBRENG sakay ng pasahero',
+    subTicket: 'Sub-ticket',
+    confirmBilling: 'Kumpirmahin ang vehicle billing',
+    // Staff Boarding
+    boardingTitle: 'Boarding Officer',
+    boardingSub: 'I-verify ang mga pasahero sa gangway at i-finalize ang manifest.',
+    // Customer flows
+    requestRefund: 'Humiling ng Refund',
+    noShowRecovery: 'No-Show Recovery',
+    reschedule: 'I-reschedule',
+    emergencyRecovery: 'Emergency Recovery',
+    creditWallet: 'Travel Credit Wallet',
+    bookingDetail: 'Detalye ng Booking',
+    date: 'Petsa',
+    sailing: 'Biyahe',
+    seats: 'Upuan',
+    review: 'Suriin',
+    pay: 'Bayad',
+    // TimeSlot
+    timeSlotTitle: 'Pumili ng oras',
+    timeSlotSub: 'May tatlong biyahe ang MV Our Lady of St Therese mula Nasugbu Port sa Sab, Mayo 23, 2026. Pumili ng akma sa iyong araw.',
+    timeSlotBanner: 'Parehong barko, parehong port.',
+    timeSlotBannerSub: 'Oras ng alis lang ang magkaiba. Lahat ng biyahe ay dadating sa Tilik Port sa Lubang Island.',
+    sunriseSailing: 'Biyahe ng madaling araw',
+    middaySailing: 'Biyahe ng tanghali',
+    sunsetSailing: 'Biyahe ng hapon',
+    fillingUpFast: 'Mabilis na napupuno',
+    bestPhotos: 'Pinakamagandang pagkakataon para kumuha ng litrato',
+    openAirLabel: 'Open Air',
+    airconLabel: 'Aircon',
+    vipLabel: 'VIP',
+    seatsLabel: 'upuan',
+    backToSailings: '← Bumalik sa mga biyahe',
+    continueToClass: 'Magpatuloy sa klase →',
+    stepTimeSlot: 'Oras',
+    stepClass: 'Klase',
+    // ClassPicker
+    classPickerTitle: 'Pumili ng klase ng biyahe',
+    classPickerSub: 'MV Our Lady of St Therese · 06:00 mula Nasugbu Port · Biy, Mayo 22, 2026',
+    openAirName: 'Open Air',
+    openAirTagline: 'Simoy ng dagat at tanawin',
+    airconName: 'Aircon',
+    airconTagline: 'Indoor na kaginhawaan na may AC',
+    vipName: 'VIP',
+    vipTagline: 'Pribadong suite, premium na serbisyo',
+    mostPicked: 'Pinaka-pinili',
+    perPax: '/ pasahero',
+    ofSeats: 'sa',
+    whatsIncluded: 'Kasama sa',
+    openDeckBench: 'Open-deck bench seating',
+    seaBreezeViews: 'Simoy ng dagat at panoramic na tanawin',
+    bestValueFare: 'Pinakamurang pamasahe',
+    lifeJacket: 'Kasama ang life jacket',
+    enclosedAircon: 'Nakapinid na air-conditioned na cabin',
+    recliningSeats: 'Reclining seats',
+    tvEntertainment: 'TV / entertainment',
+    privateVipSuite: 'Pribadong VIP suite na may privacy curtain',
+    compSnacks: 'Libreng meryenda at inumin',
+    priorityBoarding: 'Priority boarding',
+    premiumReclining: 'Premium reclining seats',
+    backBtn: '← Bumalik',
+    continueWith: 'Magpatuloy sa',
+    // BookingDetail
+    backToMyBookings: 'Bumalik sa Mga Booking Ko',
+    eticketBtn: 'E-ticket',
+    receiptBtn: 'Resibo',
+    downloading: 'dina-download…',
+    bookingReference: 'Booking reference',
+    booked: 'Na-book',
+    by: 'ni',
+    yourVoyage: 'Ang iyong biyahe',
+    boardingQr: 'Boarding QR',
+    showQrAtTerminal: 'Ipakita ang QR na ito sa terminal at sa gangway',
+    qrUsedTwice: 'Ang parehong QR code ay ginagamit nang dalawang beses: sa counter para sa check-in, at muli sa gangway kapag pisikal nang sumasakay sa barko.',
+    passengersCount: 'Mga Pasahero',
+    age: 'Edad',
+    paymentReceipt: 'Resibo ng bayad',
+    adultFare: 'Pamasahe ng adult',
+    childFare: 'Pamasahe ng bata',
+    fiftyOff: '50% diskwento',
+    subtotal: 'Subtotal',
+    promoCode: 'Promo code',
+    totalPaid: 'Kabuuang binayad',
+    paidVia: 'Binayaran sa pamamagitan ng',
+    ref: 'Ref',
+    yourSailingCancelled: 'Na-cancel ang iyong biyahe',
+    youMissedSailing: 'Na-miss mo ang biyaheng ito',
+    needToChange: 'Kailangan mo bang magbago?',
+    fsMCancelled: 'Na-cancel ng F&S Marine ang biyaheng ito',
+    pickHowToRecover: 'Pumili kung paano ma-recover ang halaga ng iyong booking — buong refund, libreng reschedule sa parehong ruta, o 12-buwan na travel credit.',
+    announcementRef: 'Announcement ref',
+    hoursLeft: 'natitira',
+    toChoose: 'para pumili. Pagkatapos ng 72h, awtomatikong magiging travel credit (12-buwan na expiry).',
+    windowPassed: '72h window na lumipas — awtomatikong naging travel credit ang booking',
+    expires: 'mag-e-expire',
+    chooseRecovery: 'Pumili ng recovery option',
+    viewTravelCredit: 'Tingnan ang travel credit (auto-converted)',
+    leftToPick: 'natitira para pumili ng Refund · Reschedule · Credit',
+    boardingMarkedNoShow: 'Minarkahan ng boarding officer ang booking na ito bilang no-show',
+    manifestFinalized: 'Na-finalize ang manifest',
+    fiveDaysToRequest: 'para humiling ng partial refund',
+    elapsed: 'lumipas',
+    orRescheduleFor30: 'o mag-reschedule na may 30% na bayad.',
+    requestNoShowRefund: 'Humiling ng no-show refund o reschedule',
+    withinGracePeriod: 'Nasa loob ng 5-araw na grace period',
+    sinceManifest: 'mula nang ma-finalize ang manifest',
+    gracePeriodExpired: 'Na-expire na ang grace period (lagpas na sa 5 araw) — nawala na ang booking',
+    cancelAndRefund: 'I-cancel at humiling ng refund',
+    partialRefund: 'Partial refund (hanggang 50%)',
+    untilDeparture: 'bago umalis',
+    refundNotAvailable: 'Hindi na available ang refund — wala pang 24h. Posible pa rin ang reschedule →',
+    rescheduleToDate: 'I-reschedule sa ibang petsa',
+    subjectToAvail: 'Depende sa availability · 50% reschedule fee',
+    rescheduleNotAvail: 'Hindi available ang reschedule para sa booking status na ito',
+    contactSupport: 'Makipag-ugnayan sa support',
+    // CustomerRefund
+    cancelAndRequestRefund: 'I-cancel at humiling ng refund',
+    refundDependsOn: 'Ang halaga ng iyong refund ay depende sa kung gaano kaaga ka nag-cancel bago umalis.',
+    paidLabel: 'binayad',
+    yourRefundAmount: 'Halaga ng iyong refund',
+    hUntilDeparture: 'bago umalis',
+    tier: 'Tier',
+    totalPaidLabel: 'Kabuuang binayad',
+    cancellationFee: 'Cancellation fee',
+    youReceive: 'Matatanggap mo',
+    cancellationPolicy: 'Patakaran sa pag-cancel',
+    moreThan5Days: 'Higit sa 5 araw bago',
+    fiveDaysBefore: '5 araw bago umalis',
+    fourDaysBefore: '4 na araw bago umalis',
+    threeDaysBefore: '3 araw bago umalis',
+    twoDaysBefore: '2 araw bago umalis',
+    lessThan24h: 'Wala pang 24h / araw na rin',
+    noRefundReschedule: 'Walang refund — posible pa rin ang reschedule na may bayad',
+    refundAndFee: 'refund',
+    cancFee: 'cancellation fee',
+    yourRefund: 'Iyong refund',
+    maxRefundCap: 'Ang pinakamataas na refund ay 50% anuman ang kaaga ng pag-cancel mo. Mula 5 araw bago umalis, bumababa ng 10 puntos bawat araw ang porsyento hanggang maabot ang 0% sa huling 24 oras.',
+    operatorCancelRefund: 'Kung ang iyong biyahe ay na-cancel ng F and S Marine (panahon, barko, MARINA-mandated na pagkansela), palagi kang makakakuha ng 100% refund anuman ang oras.',
+    simulateTiming: 'i-simulate ang oras ng pag-alis',
+    reasonForCancel: 'Dahilan ng pag-cancel',
+    changedPlans: 'Nagbago ang plano',
+    medicalEmergency: 'Medical emergency',
+    workConflict: 'Hindi tugma sa trabaho',
+    weatherConcerns: 'Pangamba sa panahon',
+    bookedWrongDate: 'Mali ang na-book na petsa/biyahe',
+    otherDescribe: 'Iba pa (mangyaring ilarawan)',
+    additionalNotes: 'Karagdagang tala',
+    anythingElseToKnow: 'May iba pa ba kayong gustong ipaalam sa amin?',
+    refundSentTo: 'Ipapadala ang refund sa',
+    lockedToOriginal: 'Naka-lock sa orihinal na paraan ng pagbabayad · darating sa loob ng 3-5 araw ng negosyo',
+    departLessThan24: 'Wala pang 24 oras bago umalis ang iyong biyahe. Hindi na available ang refund — pero maaari ka pa ring mag-reschedule sa ibang biyahe na may bayad (itinakda ng operator).',
+    rescheduleInstead: 'Mag-reschedule sa halip →',
+    continueReceive: 'Magpatuloy · matatanggap',
+    reviewRefund: 'Suriin ang refund',
+    confirm: 'Kumpirmahin',
+    submitted: 'Naisumite na',
+    confirmCancellation: 'Kumpirmahin ang pag-cancel',
+    reviewBeforeSubmit: 'Suriin ang mga detalye sa ibaba. Kapag naisumite na, hindi na ito maaaring i-undo.',
+    youAreCancelling: 'Kina-cancel mo ang booking',
+    allSeatsReleased: 'upuan sa biyaheng ito ay ire-release at maaaring ibenta sa ibang pasahero. Agad na mawa-walang bisa ang QR ticket.',
+    sailingLabel: 'Biyahe',
+    vesselClass: 'Barko · klase',
+    reason: 'Dahilan',
+    refundTo: 'Refund sa',
+    iUnderstandRefund: 'Naiintindihan ko na ang refund na',
+    willBeSentTo: 'ay ipapadala sa aking',
+    account: 'account',
+    within35days: 'sa loob ng 3-5 araw ng negosyo, at naiintindihan ko na mawawala ang',
+    perCancelPolicy: 'ayon sa patakaran sa pag-cancel.',
+    submitRefundRequest: 'Isumite ang refund request',
+    refundRequestSubmitted: 'Naisumite ang refund request',
+    cancelledAndQueued: 'Na-cancel na namin ang iyong booking at nakapila na ang refund para sa pagsuri.',
+    requestReference: 'Request reference',
+    cancelledBooking: 'Na-cancel na booking',
+    refundAmount: 'Halaga ng refund',
+    refundToLabel: 'Refund sa',
+    whatHappensNextRefund: 'Ano ang susunod',
+    bookingCancelled: 'Na-cancel ang booking',
+    seatsReleasedJustNow: 'Na-release ang mga upuan · ngayon lang',
+    financeReviews: 'Sinusuri ng finance team',
+    usuallyWithin24h: 'Karaniwan sa loob ng 24 oras',
+    refundTriggered: 'Na-trigger ang refund sa Xendit',
+    afterApproval: 'Pagkatapos ma-approve',
+    moneyArrives: 'Darating ang pera sa iyong account',
+    threeFiveDays: '3-5 araw ng negosyo pagkatapos ma-trigger',
+    sentCopyToEmail: 'Nagpadala kami ng kopya ng request na ito sa iyong email. Maaari mong subaybayan ang status nito anumang oras mula sa Mga Booking Ko.',
+    backToMyBookingsBtn: 'Bumalik sa Mga Booking Ko',
+    bookANewTrip: 'Mag-book ng bagong biyahe',
+    // NoShowRecovery
+    youMissedYourSailing: 'Na-miss mo ang iyong biyahe',
+    noShowExplanation: 'Ang iyong booking ay minarkahan bilang no-show ng Boarding Officer. Mayroon kang 5 araw mula nang ma-finalize ang manifest para humiling ng partial refund o mag-reschedule sa ibang biyahe.',
+    noShowStatus: 'No-Show',
+    manifestFinalizedLabel: 'Na-finalize ang manifest:',
+    requestRefundBtn: 'Humiling ng refund',
+    rescheduleBtn: 'I-reschedule',
+    yourNoShowRefund: 'Ang iyong no-show refund',
+    hSinceManifest: 'mula nang ma-finalize ang manifest',
+    noShowDeduction: 'No-show deduction',
+    noShowRefundPolicy: 'Patakaran sa no-show refund',
+    afterManifest: 'pagkatapos ng manifest',
+    defaultNoShowRefund: 'Default na no-show refund',
+    bookingForfeit: 'Ganap na nawala ang booking · nag-expire na ang grace period',
+    additionalDeduction: 'Karagdagang',
+    deductionPerDay: 'bawas (10% bawat karagdagang araw)',
+    yourTier: 'Ang iyong tier',
+    noShowGraceInfo: 'Ang grace period na ito ay isang courtesy. Nalalapat lamang ito sa mga booking kung saan minarkahan ng Boarding Officer ang iyong upuan bilang no-show sa final na nilagdaang manifest. Ang mga customer na nag-cancel bago lumayag ay sumusunod sa ibang patakaran.',
+    simulateManifest: 'i-simulate ang oras mula nang ma-finalize ang manifest',
+    whatHappened: 'Anong nangyari? (opsyonal pero nakakatulong sa amin)',
+    gotToTerminalLate: 'Nahuli sa terminal',
+    trafficDelay: 'Na-delay sa traffic',
+    suddenIllness: 'Biglaang sakit',
+    familyEmergency: 'Emergency sa pamilya',
+    weatherDisruption: 'Panahon / pagkagambala sa transportasyon',
+    forgotSchedule: 'Nakalimutan ang schedule',
+    anythingElse: 'May iba pa ba?',
+    graceExpiredCannotProceed: 'Nag-expire na ang grace period — hindi maaaring magpatuloy',
+    rescheduleFeeLabel: 'Bayad sa reschedule',
+    cannotReschedule: 'Hindi maaaring i-reschedule',
+    graceExpiredForfeit: 'Nag-expire na ang 5-araw na grace period. Ganap na nawala ang booking na ito at hindi na maaaring i-reschedule o i-refund.',
+    flat30Fee: 'flat na 30% na bayad',
+    originalTicketValue: 'Orihinal na halaga ng ticket',
+    rescheduleFee30: 'Bayad sa reschedule (30%)',
+    creditApplied: 'Credit na inilapat sa bagong biyahe',
+    pickNewSailing: 'Pumili ng iyong bagong biyahe',
+    newDepartureDate: 'Bagong petsa ng pag-alis',
+    departureTime: 'Oras ng pag-alis',
+    sameVesselClass: 'Parehong klase ng barko',
+    andPaxCount: 'at bilang ng pasahero',
+    carriedOver: 'dinala mula sa iyong orihinal na booking',
+    fareDiffNote: 'Kung ang bagong biyahe ay may ibang pamasahe, ang pagkakaiba ay ise-settle sa iyong account: mas mataas na pamasahe = bayaran ang agwat, mas mababang pamasahe = ibabalik ang balanse sa iyong orihinal na paraan ng pagbabayad.',
+    continueReschedule: 'Magpatuloy · i-reschedule sa',
+    confirmRefund: 'Kumpirmahin ang refund',
+    confirmRescheduleLabel: 'Kumpirmahin ang reschedule',
+    youAreRequesting: 'Humihiling ka ng refund para sa',
+    youAreRescheduling: 'Nire-reschedule mo ang',
+    bookingPermanentlyClosed: 'Permanenteng sarado na ang iyong booking. Pagkatapos ma-approve,',
+    willBeSentToAccount: 'ay ipapadala sa iyong',
+    oldBookingClosed: 'Sarado na ang luma mong booking at gagawa ng bago para sa',
+    feeNonRefundable: 'Ang 30% na bayad',
+    isNonRefundable: 'ay hindi na maibabalik.',
+    missedSailingLabel: 'Na-miss na biyahe',
+    refundTier: 'Refund tier',
+    newSailing: 'Bagong biyahe',
+    creditAppliedToNew: 'Credit na inilapat sa bagong booking',
+    iUnderstandNoShowRefund: 'Naiintindihan ko na ang refund na',
+    perNoShowPolicy: 'ayon sa no-show grace policy.',
+    iUnderstandReschedule: 'Naiintindihan ko na ang 30% reschedule fee',
+    isNonRefundableEvenCancel: 'ay hindi na maibabalik kahit i-cancel ko ang bagong booking sa hinaharap, at permanenteng isasara ang aking orihinal na booking.',
+    submitRefundRequestBtn: 'Isumite ang refund request',
+    submitRescheduleRequest: 'Isumite ang reschedule request',
+    refundRequested: 'Na-request ang refund',
+    rescheduleRequested: 'Na-request ang reschedule',
+    noShowRefundQueued: 'Nakapila na ang iyong no-show refund para sa pagsuri.',
+    seatReserved: 'Nareserba na ang iyong upuan sa',
+    andQueuedReschedule: 'at nakapila na ang reschedule para sa pag-approve.',
+    missedBooking: 'Na-miss na booking',
+    sentConfirmation: 'Nagpadala kami ng kumpirmasyon sa iyong telepono via SMS at sa iyong email kung mayroon. Subaybayan ang request na ito mula sa Mga Booking Ko.',
+    bookAnotherTrip: 'Mag-book ng ibang biyahe',
+    chooseRefund: 'Pumili ng refund',
+    chooseNewSailing: 'Pumili ng bagong biyahe',
+    // Reschedule Pre
+    rescheduleYourSailing: 'I-reschedule ang iyong biyahe',
+    rescheduleSub: 'Pumili ng bagong oras ng alis para sa parehong klase ng barko. Isang flat na',
+    rescheduleSubEnd: 'reschedule fee ang inilalapat anuman ang kaaga, dagdag ang pagkakaiba ng pamasahe sa dalawang biyahe.',
+    sailingDeparted: 'Umalis na ang biyahe',
+    sailingDepartedSub: 'Hindi na posible ang reschedule mula sa screen na ito. Kung na-miss mo ang biyahe at minarkahan ka ng Boarding Officer bilang no-show, maaari kang humiling ng partial refund o mag-reschedule mula sa no-show recovery flow sa loob ng 5 araw mula nang ma-finalize ang manifest.',
+    pickNewSailingLabel: 'Pumili ng iyong bagong biyahe',
+    newDepartureDateLabel: 'Bagong petsa ng pag-alis',
+    departureTimeLabel: 'Oras ng pag-alis',
+    seatsLower: 'upuan',
+    blockedLabel: 'Naka-block',
+    originalLabel: 'Orihinal',
+    rescheduleAllowed: 'Pinapayagan ang pag-reschedule hanggang 30 araw mula ngayon · mag-swipe para makita ang mas maraming petsa',
+    passengerCarriedOver: 'Mga pasaherong dinala',
+    passengerReuseInfo: 'Ginagamit ulit ang mga pangalan at ID ng pasahero. Kung kailangan mong magdagdag, magtanggal, o magpalit ng pasahero, i-cancel ang booking na ito at gumawa ng bago.',
+    rescheduleCost: 'Gastos sa reschedule',
+    newSailingFare: 'Pamasahe ng bagong biyahe',
+    fareDifference: 'Pagkakaiba ng pamasahe',
+    rescheduleFeePct: 'Bayad sa reschedule',
+    ofOriginal: 'ng orihinal',
+    youllPayToday: 'Babayaran mo ngayon',
+    youllGetBack: 'Ibabalik sa iyo',
+    noAdditionalCharge: 'Walang karagdagang bayad',
+    rescheduleFeeInfo: 'Ang bayad sa reschedule ay flat na porsyento ng orihinal na halaga ng ticket at hindi na maibabalik.',
+    fareDiffCharged: 'Ang pagkakaiba ng pamasahe na',
+    isChargedOnTop: 'ay sinisingil pa.',
+    lowerFareOffsets: 'Bahagyang bina-balance ng mas mababang bagong pamasahe ang bayad.',
+    rescheduleCutoffPassed: 'Lumipas na ang cutoff sa reschedule — hindi maaaring magpatuloy',
+    confirmReschedule: 'Kumpirmahin ang reschedule',
+    confirmRescheduleSub: 'Suriin ang mga detalye sa ibaba. Isasara ang iyong orihinal na booking at maglalabas ng bagong booking reference para sa bagong biyahe.',
+    youAreReschedulingRef: 'Nire-reschedule mo ang',
+    oldBookingClosesNew: 'Isasara ang luma mong booking at gagawa ng bago para sa',
+    rescheduleApplies: 'reschedule fee ang inilalapat, dagdag ang pagkakaiba ng pamasahe sa dalawang biyahe.',
+    originalSailing: 'Orihinal na biyahe',
+    carriedOverPax: '(dinala)',
+    netCharge: 'Net na bayad',
+    totalChargedToday: 'Kabuuang siningil ngayon',
+    creditReturned: 'Naibalik na credit',
+    iUnderstandClose: 'Naiintindihan ko na ang aking orihinal na booking',
+    willBeClosed: 'ay permanenteng isasara at maglalabas ng bagong booking reference para sa',
+    iAgreeNonRefundable: 'Sumasang-ayon ako sa hindi na maibabalik na',
+    onTopOfFareDiff: 'dagdag sa pagkakaiba ng pamasahe.',
+    iAuthorizeCharge: 'Pinapahintulutan ko ang kabuuang singil na',
+    toMy: 'sa aking',
+    lowerNewFareOffsets: 'Bahagyang bina-balance ng mas mababang bagong pamasahe ang bayad, kaya ang credit na',
+    willBeReturned: 'ay ibabalik sa aking',
+    noChargeOrRefund: 'Walang karagdagang bayad o refund — eksakto ang mas mababang bagong pamasahe sa reschedule fee.',
+    youreRescheduled: 'Na-reschedule ka na!',
+    newBookingConfirmed: 'Nakumpirma ang iyong bagong booking para sa',
+    oldEticketInvalid: 'Hindi na valid ang luma mong e-ticket — naglabas na ng bago.',
+    newBookingReference: 'Bagong booking reference',
+    closedBooking: 'Saradong booking',
+    newEticketSent: 'Naipadala na ang iyong bagong e-ticket via SMS, at sa email kung mayroon. Ipakita ang QR code sa gate para sa boarding. Makikita ang booking na ito sa Mga Booking Ko.',
+    viewNewEticket: 'Tingnan ang bagong e-ticket',
+    // Emergency Recovery
+    emergencyRecoveryTitle: 'Emergency recovery',
+    emergRecoverySub: 'Na-cancel ang iyong biyahe ng F&S Marine dahil sa emergency. Pumili kung paano mo gustong ma-recover ang halaga ng iyong booking.',
+    fullRefund: 'Buong refund',
+    freeReschedule: 'Libreng reschedule',
+    travelCreditOption: 'Travel credit',
+    refund100: '100% refund sa iyong orihinal na paraan ng pagbabayad sa loob ng 3-5 araw ng negosyo.',
+    freeRescheduleSub: 'Lumipat sa anumang available na biyahe sa parehong ruta — walang bayad, walang pagkakaiba ng pamasahe.',
+    travelCreditSub: '12-buwan na travel credit para sa buong halaga ng booking. Gamitin sa anumang hinaharap na booking.',
+    emergencyWindowLabel: 'Recovery window',
+    hoursRemaining: 'natitira',
+    afterWindowCredit: 'Pagkatapos magsara ang window, awtomatikong magiging travel credit ang iyong booking.',
+    // Credit Wallet
+    creditWalletTitle: 'Travel Credit Wallet',
+    creditWalletSub: 'Ang iyong mga travel credit mula sa refund, cancellation, at promosyon.',
+    totalCredits: 'Kabuuang credits',
+    activeLabel: 'Active',
+    expiredLabel: 'Nag-expire',
+    usedLabel: 'Nagamit',
+    creditSource: 'Pinagmulan',
+    creditAmount: 'Halaga',
+    creditExpiry: 'Mag-e-expire',
+    useCredit: 'Gamitin sa susunod na booking',
+    noCredits: 'Wala pang travel credits',
+    noCreditsDesc: 'Ang mga credit mula sa refund, emergency cancellation, at promosyon ay lalabas dito.',
+  },
+};
+
 export default function FandSMarineMockup() {
   const [screen, setScreen] = useState('landing');
   const [viewMode, setViewMode] = useState('phone'); // 'phone' | 'tablet' | 'desktop'
   const [navCollapsed, setNavCollapsed] = useState(false);
   const [showManifestPreview, setShowManifestPreview] = useState(false);
+  const [lang, setLang] = useState('en');
+  const t = T[lang];
 
   // Screen groups for the mockup navigator (outside the phone)
   const isCustomer = ['landing', 'calendar', 'sailings', 'time', 'classPicker', 'passengers',
@@ -16010,46 +17529,46 @@ export default function FandSMarineMockup() {
   const isStaff = ['staffWalkin', 'staffCheckin', 'staffBoarding', 'nativeApp'].includes(screen);
 
   let content;
-  if (screen === 'landing') content = <LandingScreen setScreen={setScreen} />;
-  else if (screen === 'calendar') content = <CalendarScreen setScreen={setScreen} />;
-  else if (screen === 'sailings') content = <SailingsListScreen setScreen={setScreen} />;
-  else if (screen === 'time') content = <TimeSlotScreen setScreen={setScreen} />;
-  else if (screen === 'classPicker') content = <ClassPickerScreen setScreen={setScreen} />;
-  else if (screen === 'passengers') content = <PassengersScreen setScreen={setScreen} />;
-  else if (screen === 'seatSelection') content = <SeatSelectionScreen setScreen={setScreen} />;
-  else if (screen === 'review') content = <ReviewScreen setScreen={setScreen} />;
-  else if (screen === 'email') content = <ConfirmationMethodScreen setScreen={setScreen} />;
-  else if (screen === 'otpVerify') content = <OtpVerifyScreen setScreen={setScreen} />;
-  else if (screen === 'confirmation') content = <ConfirmationScreen setScreen={setScreen} />;
-  else if (screen === 'dashboard') content = <DashboardScreen setScreen={setScreen} />;
-  else if (screen === 'bookingDetail') content = <BookingDetailScreen setScreen={setScreen} />;
-  else if (screen === 'customerRefund') content = <CustomerRefundScreen setScreen={setScreen} />;
-  else if (screen === 'customerNoShowRecovery') content = <CustomerNoShowRecoveryScreen setScreen={setScreen} />;
-  else if (screen === 'customerReschedulePre') content = <CustomerReschedulePreScreen setScreen={setScreen} />;
-  else if (screen === 'customerEmergencyRecovery') content = <CustomerEmergencyRecoveryScreen setScreen={setScreen} />;
-  else if (screen === 'creditWallet') content = <CustomerCreditWalletScreen setScreen={setScreen} />;
-  else if (screen === 'login') content = <LoginScreen setScreen={setScreen} />;
-  else if (screen === 'profile') content = <ProfileScreen setScreen={setScreen} />;
-  else if (screen === 'adminOps') content = <AdminOpsScreen setScreen={setScreen} />;
-  else if (screen === 'adminBookings') content = <AdminBookingsScreen setScreen={setScreen} />;
-  else if (screen === 'adminSchedules') content = <AdminSchedulesScreen setScreen={setScreen} />;
-  else if (screen === 'adminPorts') content = <AdminPortsScreen setScreen={setScreen} />;
-  else if (screen === 'adminVessels') content = <AdminVesselsScreen setScreen={setScreen} />;
-  else if (screen === 'adminBlocked') content = <AdminBlockedScreen setScreen={setScreen} />;
-  else if (screen === 'adminEmergencyCancel') content = <AdminEmergencyCancelScreen setScreen={setScreen} />;
-  else if (screen === 'adminManifest') content = <AdminManifestScreen setScreen={setScreen} />;
-  else if (screen === 'adminFares') content = <AdminFaresScreen setScreen={setScreen} />;
-  else if (screen === 'adminPromos') content = <AdminPromosScreen setScreen={setScreen} />;
-  else if (screen === 'adminRefunds') content = <AdminRefundsScreen setScreen={setScreen} />;
-  else if (screen === 'adminReports') content = <AdminReportsScreen setScreen={setScreen} />;
-  else if (screen === 'adminSalesReports') content = <AdminSalesReportsScreen setScreen={setScreen} />;
-  else if (screen === 'adminUsers') content = <AdminUsersScreen setScreen={setScreen} />;
-  else if (screen === 'adminSettings') content = <AdminSettingsScreen setScreen={setScreen} />;
-  else if (screen === 'adminAudit') content = <AdminAuditScreen setScreen={setScreen} />;
-  else if (screen === 'staffWalkin') content = <StaffWalkinScreen setScreen={setScreen} />;
-  else if (screen === 'staffCheckin') content = <StaffCheckinScreen setScreen={setScreen} />;
-  else if (screen === 'staffBoarding') content = <StaffBoardingScreen setScreen={setScreen} onShowManifest={setShowManifestPreview} />;
-  else if (screen === 'nativeApp') content = <NativeAppPreviewScreen setScreen={setScreen} />;
+  if (screen === 'landing') content = <LandingScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'calendar') content = <CalendarScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'sailings') content = <SailingsListScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'time') content = <TimeSlotScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'classPicker') content = <ClassPickerScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'passengers') content = <PassengersScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'seatSelection') content = <SeatSelectionScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'review') content = <ReviewScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'email') content = <ConfirmationMethodScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'otpVerify') content = <OtpVerifyScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'confirmation') content = <ConfirmationScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'dashboard') content = <DashboardScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'bookingDetail') content = <BookingDetailScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'customerRefund') content = <CustomerRefundScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'customerNoShowRecovery') content = <CustomerNoShowRecoveryScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'customerReschedulePre') content = <CustomerReschedulePreScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'customerEmergencyRecovery') content = <CustomerEmergencyRecoveryScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'creditWallet') content = <CustomerCreditWalletScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'login') content = <LoginScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'profile') content = <ProfileScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminOps') content = <AdminOpsScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminBookings') content = <AdminBookingsScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminSchedules') content = <AdminSchedulesScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminPorts') content = <AdminPortsScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminVessels') content = <AdminVesselsScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminBlocked') content = <AdminBlockedScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminEmergencyCancel') content = <AdminEmergencyCancelScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminManifest') content = <AdminManifestScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminFares') content = <AdminFaresScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminPromos') content = <AdminPromosScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminRefunds') content = <AdminRefundsScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminReports') content = <AdminReportsScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminSalesReports') content = <AdminSalesReportsScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminUsers') content = <AdminUsersScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminSettings') content = <AdminSettingsScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminAudit') content = <AdminAuditScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'staffWalkin') content = <StaffWalkinScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'staffCheckin') content = <StaffCheckinScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'staffBoarding') content = <StaffBoardingScreen setScreen={setScreen} t={t} onShowManifest={setShowManifestPreview} />;
+  else if (screen === 'nativeApp') content = <NativeAppPreviewScreen setScreen={setScreen} t={t} />;
 
   // Viewport dimensions per mode
   const viewports = {
@@ -16146,7 +17665,7 @@ export default function FandSMarineMockup() {
           </div>
 
           {/* Screen groups */}
-          {['Customer', 'Admin', 'Staff', 'Mobile'].map(group => {
+          {['Customer', 'Admin', 'Staff', 'Mobile', 'Meetings'].map(group => {
             const groupScreens = [
               { id: 'landing', label: 'Landing', group: 'Customer' },
               { id: 'calendar', label: 'Date Calendar', group: 'Customer' },
@@ -16188,11 +17707,13 @@ export default function FandSMarineMockup() {
               { id: 'staffCheckin', label: 'Check-in Scanner', group: 'Staff' },
               { id: 'staffBoarding', label: 'Boarding Officer', group: 'Staff' },
               { id: 'nativeApp', label: 'PWA Preview', group: 'Mobile' },
+              { id: 'meeting-2026-05-24', label: 'May 24, 2026', group: 'Meetings', href: '/meetings/2026-05-24' },
             ].filter(s => s.group === group);
 
             const groupColor = group === 'Customer' ? COLORS.primary
               : group === 'Admin' ? '#3B82F6'
               : group === 'Staff' ? '#7C3AED'
+              : group === 'Meetings' ? '#10B981'
               : '#F59E0B';
 
             return (
@@ -16206,7 +17727,10 @@ export default function FandSMarineMockup() {
                   {groupScreens.map(s => (
                     <button
                       key={s.id}
-                      onClick={() => { setScreen(s.id); setShowManifestPreview(false); }}
+                      onClick={() => {
+                        if (s.href) { window.open(s.href, '_blank'); return; }
+                        setScreen(s.id); setShowManifestPreview(false);
+                      }}
                       className="w-full text-left px-2.5 py-1.5 rounded-md text-xs transition-all truncate"
                       style={{
                         background: screen === s.id ? `${groupColor}22` : 'transparent',
@@ -16215,6 +17739,7 @@ export default function FandSMarineMockup() {
                         borderLeft: screen === s.id ? `2px solid ${groupColor}` : '2px solid transparent',
                       }}
                     >
+                      {s.href && <span style={{ marginRight: 4, fontSize: 10 }}>↗</span>}
                       {s.label}
                     </button>
                   ))}
@@ -16336,37 +17861,50 @@ export default function FandSMarineMockup() {
                     style={{ color: COLORS.primary, fontSize: effectiveViewMode === 'phone' ? 13 : 15 }}
                   >
                     <Ship size={effectiveViewMode === 'phone' ? 18 : 20} />
-                    <span className="truncate" style={{ maxWidth: effectiveViewMode === 'phone' ? 160 : 300 }}>
+                    <span className="truncate" style={{ maxWidth: effectiveViewMode === 'phone' ? 120 : 300 }}>
                       {effectiveViewMode === 'phone' ? 'F&S Marine' : 'F and S Marine Transport Inc.'}
                     </span>
                   </button>
-                  {isCustomer ? (
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => setScreen('dashboard')}
-                        className="text-xs font-medium px-2 py-1 rounded-md"
-                        style={{ color: COLORS.ink }}
-                      >
-                        {effectiveViewMode === 'phone' ? 'Bookings' : 'My Bookings'}
-                      </button>
-                      <button
-                        onClick={() => setScreen('login')}
-                        className="text-xs font-medium px-2.5 py-1 rounded-md border"
-                        style={{ color: COLORS.ink, borderColor: COLORS.border }}
-                      >
-                        Sign in
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
+                    {/* Language toggle */}
+                    <button
+                      onClick={() => setLang(lang === 'en' ? 'tl' : 'en')}
+                      className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold transition-all"
+                      style={{
+                        background: lang === 'tl' ? '#DBEAFE' : COLORS.bgMuted,
+                        color: lang === 'tl' ? '#1E40AF' : COLORS.inkMuted,
+                        border: `1px solid ${lang === 'tl' ? '#93C5FD' : COLORS.border}`,
+                      }}
+                      title={lang === 'en' ? 'Switch to Filipino' : 'Switch to English'}
+                    >
+                      {lang === 'en' ? '🇺🇸 EN' : '🇵🇭 TL'}
+                    </button>
+                    {isCustomer ? (
+                      <>
+                        <button
+                          onClick={() => setScreen('dashboard')}
+                          className="text-xs font-medium px-2 py-1 rounded-md"
+                          style={{ color: COLORS.ink }}
+                        >
+                          {effectiveViewMode === 'phone' ? t.bookings : t.myBookings}
+                        </button>
+                        <button
+                          onClick={() => setScreen('login')}
+                          className="text-xs font-medium px-2.5 py-1 rounded-md border"
+                          style={{ color: COLORS.ink, borderColor: COLORS.border }}
+                        >
+                          {t.signIn}
+                        </button>
+                      </>
+                    ) : (
                       <div
                         className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
                         style={{ background: COLORS.ink }}
                       >
                         MS
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
 
                 {/* Scrollable content area */}
