@@ -650,7 +650,7 @@ export default function MeetingMinutes20260524Screen() {
           </div>
         </SectionCard>
 
-        <SectionCard number={7} title="Vehicle Reservation for Online Bookings (RORO)" status="scope-change" expanded={expanded[7]} onToggle={() => toggle(7)}>
+        <SectionCard number={7} title="Vehicle Reservation for Online Bookings (RORO)" status="confirmed" expanded={expanded[7]} onToggle={() => toggle(7)}>
           <div className="pt-4 space-y-3">
             <p className="text-sm" style={{ color: COLORS.ink }}>
               The client discussed adding a vehicle reservation option to the online booking flow. This allows management to forecast vehicle capacity per sailing date.
@@ -691,12 +691,12 @@ export default function MeetingMinutes20260524Screen() {
               </div>
             </div>
 
-            <InfoBox type="scope">
-              <strong>Scope note:</strong> Vehicle/RORO booking is currently listed as <strong>Out of Scope for V1</strong> in the project spec (Item #1: "Cargo and vehicle (RORO) booking — passengers only"). Adding this feature will require additional development time. The dev team will provide a revised timeline and estimate once the client confirms they want this included.
+            <InfoBox type="success">
+              <strong>Implemented:</strong> Vehicle reservation UI has been added to the online booking flow (Passenger Forms screen), Review screen, and E-Ticket. Check-in staff vehicle billing modal added to the Check-in Scanner screen with 1 FREE passenger ride discount. Vehicle categories: Motorcycle, Sedan, SUV, Van, Light Truck.
             </InfoBox>
 
             <InfoBox type="warning">
-              <strong>Action needed:</strong> Client to provide the list of vehicle categories and corresponding fee structure so the vehicle type selector and staff billing interface can be designed.
+              <strong>Pending:</strong> Client to confirm final vehicle fee schedule. Current placeholder rates are used in the mockup. Vehicle sub-ticket format and receipt design pending final approval.
             </InfoBox>
           </div>
         </SectionCard>

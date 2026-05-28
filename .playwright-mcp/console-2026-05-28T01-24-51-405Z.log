@@ -1,0 +1,14 @@
+[      75ms] [WARNING] cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation @ https://cdn.tailwindcss.com/:63
+[     165ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5175/node_modules/.vite/deps/chunk-BCXODTBQ.js?v=37bb76b7:21548
+[ 1533263ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5175/src/MOCKUP.jsx?t=1779933024591:0
+[ 1533264ms] [ERROR] [hmr] Failed to reload /src/MOCKUP.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:175
+[ 1534314ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5175/src/MOCKUP.jsx?t=1779933025648:0
+[ 1534318ms] [ERROR] [hmr] Failed to reload /src/MOCKUP.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:175
+[ 1544311ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5175/src/MOCKUP.jsx?t=1779933035605:0
+[ 1544312ms] [ERROR] [hmr] Failed to reload /src/MOCKUP.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:175
+[ 1560069ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5175/src/MOCKUP.jsx?t=1779933051407:0
+[ 1560070ms] [ERROR] [hmr] Failed to reload /src/MOCKUP.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:175
+[ 1566800ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5175/src/MOCKUP.jsx?t=1779933058137:0
+[ 1566801ms] [ERROR] [hmr] Failed to reload /src/MOCKUP.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:175
+[ 1572057ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5175/src/MOCKUP.jsx?t=1779933063394:0
+[ 1572057ms] [ERROR] [hmr] Failed to reload /src/MOCKUP.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:175
