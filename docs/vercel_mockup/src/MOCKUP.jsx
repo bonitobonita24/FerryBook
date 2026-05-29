@@ -6755,16 +6755,19 @@ function AdminUsersScreen({ setScreen, t = T.en }) {
   const [activeTab, setActiveTab] = useState('admins'); // 'admins' | 'customers'
 
   const [admins, setAdmins] = useState([
-    { id: 'u1', name: 'Carmela Bautista', email: 'carmela@fandsmarine.ph', role: 'Super Admin', port: 'All ports', lastLogin: 'May 19 · 16:42', mfa: true, status: 'Active' },
-    { id: 'u2', name: 'Reynaldo Salonga', email: 'reynaldo@fandsmarine.ph', role: 'Operations Manager', port: 'All ports', lastLogin: 'May 19 · 15:08', mfa: true, status: 'Active' },
-    { id: 'u3', name: 'Patricia Aquino', email: 'patricia@fandsmarine.ph', role: 'Finance Manager', port: 'All ports', lastLogin: 'May 19 · 11:22', mfa: true, status: 'Active' },
-    { id: 'u4', name: 'Jose Antonio Castillo', email: 'jose.castillo@fandsmarine.ph', role: 'Ticketing Staff', port: 'BAT-NAS only', lastLogin: 'May 19 · 17:55', mfa: false, status: 'Active' },
-    { id: 'u5', name: 'Marisol Hidalgo', email: 'marisol@fandsmarine.ph', role: 'Ticketing Staff', port: 'BAT-NAS only', lastLogin: 'May 18 · 18:30', mfa: false, status: 'Active' },
-    { id: 'u6', name: 'Felipe Garcia', email: 'felipe.garcia@fandsmarine.ph', role: 'Ticketing Staff', port: 'BAT-CAL only', lastLogin: 'May 19 · 17:42', mfa: false, status: 'Active' },
-    { id: 'u7', name: 'Lourdes Maramag', email: 'lourdes.m@fandsmarine.ph', role: 'Ticketing Staff', port: 'BAT-CAL only', lastLogin: 'May 19 · 17:18', mfa: false, status: 'Active' },
-    { id: 'u8', name: 'Mariano Diokno', email: 'mariano@fandsmarine.ph', role: 'Ticketing Staff', port: 'BAT-NAS only', lastLogin: 'May 02 · 09:11', mfa: false, status: 'Suspended' },
-    { id: 'u9', name: 'Domingo Bayani', email: 'domingo.b@fandsmarine.ph', role: 'Boarding Officer', port: 'BAT-NAS only', lastLogin: 'May 19 · 17:50', mfa: true, status: 'Active' },
-    { id: 'u10', name: 'Teresita Villaruel', email: 'teresita.v@fandsmarine.ph', role: 'Boarding Officer', port: 'BAT-CAL only', lastLogin: 'May 19 · 13:15', mfa: true, status: 'Active' },
+    { id: 'u1', name: 'Carmela Bautista', email: 'carmela@fandsmarine.ph', role: 'Super Admin', port: 'All ports', assignedVessels: [], lastLogin: 'May 19 · 16:42', mfa: true, status: 'Active' },
+    { id: 'u2', name: 'Reynaldo Salonga', email: 'reynaldo@fandsmarine.ph', role: 'Operations Manager', port: 'All ports', assignedVessels: [], lastLogin: 'May 19 · 15:08', mfa: true, status: 'Active' },
+    { id: 'u3', name: 'Patricia Aquino', email: 'patricia@fandsmarine.ph', role: 'Finance Manager', port: 'All ports', assignedVessels: [], lastLogin: 'May 19 · 11:22', mfa: true, status: 'Active' },
+    { id: 'u4', name: 'Jose Antonio Castillo', email: 'jose.castillo@fandsmarine.ph', role: 'Ticketing Staff', port: 'BAT-NAS only', assignedVessels: [], lastLogin: 'May 19 · 17:55', mfa: false, status: 'Active' },
+    { id: 'u5', name: 'Marisol Hidalgo', email: 'marisol@fandsmarine.ph', role: 'Ticketing Staff', port: 'BAT-NAS only', assignedVessels: [], lastLogin: 'May 18 · 18:30', mfa: false, status: 'Active' },
+    { id: 'u6', name: 'Felipe Garcia', email: 'felipe.garcia@fandsmarine.ph', role: 'Ticketing Staff', port: 'BAT-CAL only', assignedVessels: [], lastLogin: 'May 19 · 17:42', mfa: false, status: 'Active' },
+    { id: 'u7', name: 'Lourdes Maramag', email: 'lourdes.m@fandsmarine.ph', role: 'Ticketing Staff', port: 'BAT-CAL only', assignedVessels: [], lastLogin: 'May 19 · 17:18', mfa: false, status: 'Active' },
+    { id: 'u8', name: 'Mariano Diokno', email: 'mariano@fandsmarine.ph', role: 'Ticketing Staff', port: 'BAT-NAS only', assignedVessels: [], lastLogin: 'May 02 · 09:11', mfa: false, status: 'Suspended' },
+    { id: 'u9', name: 'Domingo Bayani', email: 'domingo.b@fandsmarine.ph', role: 'Boarding Officer', port: 'BAT-NAS only', assignedVessels: [], lastLogin: 'May 19 · 17:50', mfa: true, status: 'Active' },
+    { id: 'u10', name: 'Teresita Villaruel', email: 'teresita.v@fandsmarine.ph', role: 'Boarding Officer', port: 'BAT-CAL only', assignedVessels: [], lastLogin: 'May 19 · 13:15', mfa: true, status: 'Active' },
+    { id: 'u11', name: 'Helena Sandoval', email: 'helena.sandoval@fandsmarine.ph', role: 'General Report Viewer', port: '—', assignedVessels: [ALL_VESSELS_SENTINEL], lastLogin: 'May 19 · 09:20', mfa: true, status: 'Active' },
+    { id: 'u12', name: 'Renato Almonte', email: 'renato.almonte@stakeholder.ph', role: 'Report Viewer', port: '—', assignedVessels: ['MV Our Lady of St Therese'], lastLogin: 'May 18 · 10:05', mfa: true, status: 'Active' },
+    { id: 'u13', name: 'Imelda Reyes-Bantug', email: 'imelda.rb@stakeholder.ph', role: 'Report Viewer', port: '—', assignedVessels: ['MV Our Mother of Perpetual Help'], lastLogin: 'May 17 · 14:30', mfa: true, status: 'Active' },
   ]);
 
   const [customers, setCustomers] = useState([
