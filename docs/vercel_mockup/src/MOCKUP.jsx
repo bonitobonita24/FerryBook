@@ -13107,6 +13107,33 @@ function AdminSalesReportsScreen({ setScreen, t = T.en, vesselFilter = 'all', re
 }
 
 // ============================================================================
+// Empty state for Report Viewers whose `assignedVessels` is empty.
+// Rendered by ReportViewerPortalScreen instead of the embedded report tabs.
+// ============================================================================
+function NoVesselsAssignedEmptyState({ userName }) {
+  return (
+    <div
+      className="bg-white rounded-2xl p-8 border text-center"
+      style={{ borderColor: COLORS.border }}
+    >
+      <div
+        className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
+        style={{ background: COLORS.bgMuted }}
+      >
+        <AlertCircle size={20} style={{ color: COLORS.warning }} />
+      </div>
+      <h2 className="text-lg font-bold mb-1" style={{ color: COLORS.ink }}>
+        No vessels assigned
+      </h2>
+      <p className="text-sm" style={{ color: COLORS.inkMuted }}>
+        {userName ? `Hi ${userName}, you ` : 'You '}
+        don&apos;t have any vessels assigned yet. Contact your administrator to grant access.
+      </p>
+    </div>
+  );
+}
+
+// ============================================================================
 // TIER 1: CUSTOMER NO-SHOW RECOVERY (Batch 11)
 // Only available to passengers marked 'no-show' on the Boarding Officer's
 // final signed manifest. Clock starts at manifest finalization time.
