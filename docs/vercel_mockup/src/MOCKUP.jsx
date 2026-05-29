@@ -13362,6 +13362,202 @@ function AdminSalesReportsScreen({ setScreen, t = T.en, vesselFilter = 'all', re
 }
 
 // ============================================================================
+// AdminGovHospitalApprovalsScreen — approval queue for walk-in Gov/Hospital
+// bookings. See spec:
+// docs/superpowers/specs/2026-05-29-reserved-seat-pools-design.md
+// Operations Manager and Super Admin can approve/reject.
+// ============================================================================
+function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBookings = [], setGovHospitalBookings = () => {} }) {
+  const [statusFilter, setStatusFilter] = useState('pending');
+  const [dateFilter, setDateFilter] = useState('all');
+  const [vesselFilter, setVesselFilter] = useState('all');
+  const [rejecting, setRejecting] = useState(null); // booking ref being rejected
+  const [rejectReason, setRejectReason] = useState('');
+
+  const pendingCount = govHospitalBookings.filter((b) => b.approvalStatus === 'pending').length;
+  const approvedToday = govHospitalBookings.filter((b) => b.approvalStatus === 'approved').length;
+  const rejectedToday = govHospitalBookings.filter((b) => b.approvalStatus === 'rejected').length;
+  // Mockup utilization figure: aggregate across all seeded sailings. Approved + pending count against capacity.
+  const poolUtilization = `${approvedToday + pendingCount}/40 seats`;
+
+  const filtered = govHospitalBookings.filter((b) => {
+    if (statusFilter !== 'all' && b.approvalStatus !== statusFilter) return false;
+    if (vesselFilter !== 'all' && b.vessel !== vesselFilter) return false;
+    return true;
+  });
+
+  const approve = (ref) => {
+    setGovHospitalBookings((prev) => prev.map((b) =>
+      b.ref === ref ? { ...b, approvalStatus: 'approved', approvedBy: 'Reynaldo Salonga' } : b
+    ));
+  };
+  const openReject = (ref) => { setRejecting(ref); setRejectReason(''); };
+  const confirmReject = () => {
+    const reason = rejectReason.trim() || 'No reason provided';
+    setGovHospitalBookings((prev) => prev.map((b) =>
+      b.ref === rejecting ? { ...b, approvalStatus: 'rejected', rejectionReason: reason } : b
+    ));
+    setRejecting(null);
+    setRejectReason('');
+  };
+
+  return (
+    <div>
+      <MobileBadge strategy="Mobile Ready" />
+
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div>
+          <div className="text-sm font-semibold mb-1" style={{ color: COLORS.inkMuted }}>
+            Admin · Approvals
+          </div>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.ink }}>Gov/Hospital Approvals</h1>
+          <p className="text-sm" style={{ color: COLORS.inkMuted }}>
+            Per-booking approval for government officials and hospital workers · walk-in only
+          </p>
+        </div>
+      </div>
+
+      {/* KPI tiles */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        {[
+          { label: 'Pending', value: pendingCount, color: '#92400E', bg: '#FEF3C7' },
+          { label: 'Approved today', value: approvedToday, color: '#166534', bg: '#DCFCE7' },
+          { label: 'Rejected today', value: rejectedToday, color: '#B91C1C', bg: '#FEE2E2' },
+          { label: 'Pool utilization (week)', value: poolUtilization, color: '#5B21B6', bg: '#E9D5FF' },
+        ].map((k, i) => (
+          <div key={i} className="rounded-2xl p-4 border" style={{ background: k.bg, borderColor: COLORS.border }}>
+            <div className="text-xs font-semibold mb-1" style={{ color: k.color }}>{k.label}</div>
+            <div className="text-2xl font-bold" style={{ color: k.color }}>{k.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white rounded-2xl p-4 mb-4 border flex flex-wrap gap-3 items-end" style={{ borderColor: COLORS.border }}>
+        <div>
+          <label className="block text-xs font-semibold mb-1" style={{ color: COLORS.inkMuted }}>Status</label>
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-9 px-3 rounded-lg border text-sm bg-white" style={{ borderColor: COLORS.border, color: COLORS.ink }}>
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-semibold mb-1" style={{ color: COLORS.inkMuted }}>Date</label>
+          <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}
+            className="h-9 px-3 rounded-lg border text-sm bg-white" style={{ borderColor: COLORS.border, color: COLORS.ink }}>
+            <option value="all">All dates</option>
+            <option value="today">Today</option>
+            <option value="7d">Last 7 days</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-semibold mb-1" style={{ color: COLORS.inkMuted }}>Vessel</label>
+          <select value={vesselFilter} onChange={(e) => setVesselFilter(e.target.value)}
+            className="h-9 px-3 rounded-lg border text-sm bg-white" style={{ borderColor: COLORS.border, color: COLORS.ink }}>
+            <option value="all">All vessels</option>
+            {VESSELS.map((v) => <option key={v}>{v}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: COLORS.border }}>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead style={{ background: COLORS.bgMuted }}>
+              <tr>
+                {['Ref', 'Voyage', 'Passenger', 'Agency / Designation', 'ID', 'Reason', 'Officer', 'Submitted', 'Status', 'Action'].map((h) => (
+                  <th key={h} className="text-left px-3 py-2 text-xs font-semibold" style={{ color: COLORS.inkMuted }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 && (
+                <tr><td colSpan={10} className="px-3 py-6 text-center text-sm" style={{ color: COLORS.inkMuted }}>No bookings match the current filters.</td></tr>
+              )}
+              {filtered.map((b) => {
+                const chip = b.approvalStatus === 'approved'
+                  ? { bg: '#DCFCE7', fg: '#166534', label: 'Approved' }
+                  : b.approvalStatus === 'rejected'
+                  ? { bg: '#FEE2E2', fg: '#B91C1C', label: 'Rejected' }
+                  : { bg: '#FEF3C7', fg: '#92400E', label: 'Pending' };
+                return (
+                  <tr key={b.ref} style={{ borderTop: `1px solid ${COLORS.border}` }}>
+                    <td className="px-3 py-2 font-mono text-xs font-bold" style={{ color: COLORS.ink }}>{b.ref}</td>
+                    <td className="px-3 py-2 text-xs" style={{ color: COLORS.ink }}>
+                      <div className="font-semibold">{b.voyageDate}</div>
+                      <div style={{ color: COLORS.inkMuted }}>{b.voyageTime} · {b.vessel}</div>
+                      <div style={{ color: COLORS.inkMuted }}>{b.route} · {b.class} · {b.seat}</div>
+                    </td>
+                    <td className="px-3 py-2 text-xs font-semibold" style={{ color: COLORS.ink }}>{b.passenger.name}</td>
+                    <td className="px-3 py-2 text-xs" style={{ color: COLORS.ink }}>
+                      <div className="font-semibold">{b.agency}</div>
+                      <div style={{ color: COLORS.inkMuted }}>{b.designation}</div>
+                    </td>
+                    <td className="px-3 py-2 text-xs" style={{ color: COLORS.ink }}>
+                      <div>{b.idType}</div>
+                      <div className="font-mono" style={{ color: COLORS.inkMuted }}>{b.idNumber}</div>
+                    </td>
+                    <td className="px-3 py-2 text-xs" style={{ color: COLORS.ink, maxWidth: 220 }}>{b.reasonForTravel}</td>
+                    <td className="px-3 py-2 text-xs" style={{ color: COLORS.inkMuted }}>{b.officer}</td>
+                    <td className="px-3 py-2 text-xs" style={{ color: COLORS.inkMuted }}>{b.submittedAt}</td>
+                    <td className="px-3 py-2">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: chip.bg, color: chip.fg }}>{chip.label}</span>
+                    </td>
+                    <td className="px-3 py-2">
+                      {b.approvalStatus === 'pending' ? (
+                        <div className="flex gap-1">
+                          <button onClick={() => approve(b.ref)} className="text-xs font-semibold px-2 py-1 rounded" style={{ background: COLORS.success, color: 'white' }}>Approve</button>
+                          <button onClick={() => openReject(b.ref)} className="text-xs font-semibold px-2 py-1 rounded" style={{ background: COLORS.destructive, color: 'white' }}>Reject</button>
+                        </div>
+                      ) : (
+                        <span className="text-xs" style={{ color: COLORS.inkMuted }}>—</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Reject modal */}
+      {rejecting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.45)' }}>
+          <div className="bg-white rounded-2xl p-5 max-w-md w-[90%] border" style={{ borderColor: COLORS.border }}>
+            <h3 className="font-bold text-base mb-2" style={{ color: COLORS.ink }}>Reject {rejecting}</h3>
+            <p className="text-xs mb-3" style={{ color: COLORS.inkMuted }}>
+              Pick a preset reason or type one. The walk-in officer will see this note and the held seat is released back to the pool.
+            </p>
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {['Missing ID', 'Voyage too full', 'Not eligible', 'Duplicate'].map((r) => (
+                <button key={r} onClick={() => setRejectReason(r)}
+                  className="text-xs font-semibold px-2 py-1 rounded border"
+                  style={{ borderColor: rejectReason === r ? COLORS.primary : COLORS.border, color: COLORS.ink, background: rejectReason === r ? '#E0F2FE' : 'white' }}>
+                  {r}
+                </button>
+              ))}
+            </div>
+            <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Or type a custom reason"
+              className="w-full h-20 px-2 py-2 rounded-lg border text-xs"
+              style={{ borderColor: COLORS.border, color: COLORS.ink }} />
+            <div className="flex gap-2 mt-3 justify-end">
+              <button onClick={() => setRejecting(null)} className="text-xs font-semibold px-3 py-2 rounded border" style={{ borderColor: COLORS.border, color: COLORS.ink, background: 'white' }}>Cancel</button>
+              <button onClick={confirmReject} className="text-xs font-semibold px-3 py-2 rounded" style={{ background: COLORS.destructive, color: 'white' }}>Confirm rejection</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
 // Empty state for Report Viewers whose `assignedVessels` is empty.
 // Rendered by ReportViewerPortalScreen instead of the embedded report tabs.
 // ============================================================================
@@ -18235,9 +18431,10 @@ export default function FandSMarineMockup() {
   else if (screen === 'adminReports') content = <AdminReportsScreen setScreen={setScreen} t={t} />;
   else if (screen === 'adminSalesReports') content = <AdminSalesReportsScreen setScreen={setScreen} t={t} />;
   else if (screen === 'adminUsers') content = <AdminUsersScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'adminGovHospital') content = <AdminGovHospitalApprovalsScreen setScreen={setScreen} t={t} govHospitalBookings={govHospitalBookings} setGovHospitalBookings={setGovHospitalBookings} />;
   else if (screen === 'adminSettings') content = <AdminSettingsScreen setScreen={setScreen} t={t} />;
   else if (screen === 'adminAudit') content = <AdminAuditScreen setScreen={setScreen} t={t} />;
-  else if (screen === 'staffWalkin') content = <StaffWalkinScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'staffWalkin') content = <StaffWalkinScreen setScreen={setScreen} t={t} govHospitalBookings={govHospitalBookings} setGovHospitalBookings={setGovHospitalBookings} />;
   else if (screen === 'staffCheckin') content = <StaffCheckinScreen setScreen={setScreen} t={t} />;
   else if (screen === 'staffBoarding') content = <StaffBoardingScreen setScreen={setScreen} t={t} onShowManifest={setShowManifestPreview} />;
   else if (screen === 'nativeApp') content = <NativeAppPreviewScreen setScreen={setScreen} t={t} />;
@@ -18282,7 +18479,7 @@ export default function FandSMarineMockup() {
       { id: 'adminManifest', label: 'Manifest' }, { id: 'adminFares', label: 'Fares' },
       { id: 'adminPromos', label: 'Promos' }, { id: 'adminRefunds', label: 'Refund Queue' },
       { id: 'adminReports', label: 'Sales Reports' }, { id: 'adminSalesReports', label: 'Daily Sales' },
-      { id: 'adminUsers', label: 'Users' }, { id: 'adminSettings', label: 'Settings' },
+      { id: 'adminUsers', label: 'Users' }, { id: 'adminGovHospital', label: 'Gov/Hospital Approvals' }, { id: 'adminSettings', label: 'Settings' },
       { id: 'adminAudit', label: 'Audit Log' }, { id: 'staffWalkin', label: 'Walk-in' },
       { id: 'staffCheckin', label: 'Check-in' }, { id: 'staffBoarding', label: 'Boarding Officer' },
       { id: 'nativeApp', label: 'PWA Preview' },
@@ -18381,6 +18578,7 @@ export default function FandSMarineMockup() {
               { id: 'adminReports', label: 'Sales Reports', group: 'Admin' },
               { id: 'adminSalesReports', label: 'Daily Sales', group: 'Admin' },
               { id: 'adminUsers', label: 'User Management', group: 'Admin' },
+              { id: 'adminGovHospital', label: 'Gov/Hospital Approvals', group: 'Admin', pendingCount: govHospitalBookings.filter((b) => b.approvalStatus === 'pending').length },
               { id: 'adminSettings', label: 'System Settings', group: 'Admin' },
               { id: 'adminAudit', label: 'Audit Log', group: 'Admin' },
               { id: 'staffWalkin', label: 'Walk-in Booking', group: 'Staff' },
@@ -18432,6 +18630,12 @@ export default function FandSMarineMockup() {
                       >
                         {s.href && <span style={{ marginRight: 4, fontSize: 10 }}>↗</span>}
                         {s.label}
+                        {s.pendingCount > 0 && (
+                          <span className="ml-2 inline-flex items-center justify-center text-[10px] font-bold rounded-full px-1.5 py-0.5"
+                            style={{ background: COLORS.destructive, color: 'white', minWidth: 18 }}>
+                            {s.pendingCount}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
