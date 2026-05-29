@@ -54,6 +54,15 @@
       "provider": "claude-code",
       "last_updated": "2026-05-28T02:54:17Z"
     },
+    "d116c528-20c5-4a31-9e75-57d93fc9bccb": {
+      "user_message_count": 8,
+      "agent_message_count": 528,
+      "start_timestamp": "2026-05-29T15:30:08.074Z",
+      "end_timestamp": "2026-05-29T15:26:51.978Z",
+      "markdown_size_bytes": 967571,
+      "provider": "claude-code",
+      "last_updated": "2026-05-29T21:16:27Z"
+    },
     "e40057c9-4d59-49e8-8170-61a415e4e1b7": {
       "user_message_count": 1,
       "agent_message_count": 12,
