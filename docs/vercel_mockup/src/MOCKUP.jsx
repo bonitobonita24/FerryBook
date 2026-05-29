@@ -8556,14 +8556,27 @@ function StaffWalkinScreen({ setScreen, t = T.en }) {
   // Staff session — terminal locked to Nasugbu Port
   const staff = { name: 'Marisol Hidalgo', port: 'BAT-NAS', portName: 'Nasugbu Port' };
 
-  // Today's sailings from this port — manifest status determines availability
+  // Today's sailings from this port — manifest status determines availability.
+  // Each sailing carries a per-class `pools` object — see consumePool/buildPools.
+  // taken values seeded so all three classes have some headroom for the demo.
   const sailings = [
     { id: 's1', time: '06:00', vessel: 'MV Our Lady of St Therese', manifestDeclared: true, departed: true,
-      seats: { openair: 0, aircon: 0, vip: 0 } },
+      seats: { openair: 0, aircon: 0, vip: 0 },
+      pools: { openair: buildPools(80), aircon: buildPools(30), vip: buildPools(10) } },
     { id: 's2', time: '11:30', vessel: 'MV Our Lady of St Therese', manifestDeclared: false, departed: false,
-      seats: { openair: 22, aircon: 14, vip: 4 }, status: 'Boarding now' },
+      seats: { openair: 22, aircon: 14, vip: 4 }, status: 'Boarding now',
+      pools: {
+        openair: { regular: { capacity: 71, taken: 58 }, govHospital: { capacity: 5, taken: 1, pending: 1 }, seniorPwd: { capacity: 4, taken: 2 } },
+        aircon:  { regular: { capacity: 21, taken: 16 }, govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 3 } },
+        vip:     { regular: { capacity: 1, taken: 1 },   govHospital: { capacity: 5, taken: 2, pending: 0 }, seniorPwd: { capacity: 4, taken: 1 } },
+      } },
     { id: 's3', time: '16:00', vessel: 'MV Our Lady of St Therese', manifestDeclared: false, departed: false,
-      seats: { openair: 50, aircon: 30, vip: 10 }, status: 'Next sailing' },
+      seats: { openair: 50, aircon: 30, vip: 10 }, status: 'Next sailing',
+      pools: {
+        openair: { regular: { capacity: 71, taken: 30 }, govHospital: { capacity: 5, taken: 0, pending: 1 }, seniorPwd: { capacity: 4, taken: 0 } },
+        aircon:  { regular: { capacity: 21, taken: 0 },  govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 0 } },
+        vip:     { regular: { capacity: 1, taken: 0 },   govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 0 } },
+      } },
   ];
 
   // Auto-select the first sailing that hasn't departed and whose manifest isn't declared
