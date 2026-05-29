@@ -13183,6 +13183,17 @@ function AdminSalesReportsScreen({ setScreen, t = T.en, vesselFilter = 'all', re
         </div>
       </div>
 
+      {/* Gov/Hospital walk-in summary (spec: 2026-05-29 reserved seat pools) */}
+      <div className="rounded-2xl p-4 mb-4 border" style={{ background: '#FAF5FF', borderColor: '#E9D5FF' }}>
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <div className="text-xs font-semibold mb-1" style={{ color: '#5B21B6' }}>Gov/Hospital walk-ins</div>
+            <div className="text-2xl font-bold" style={{ color: '#5B21B6' }}>14</div>
+            <div className="text-xs mt-1" style={{ color: COLORS.inkMuted }}>Approved + pending · ₱0 (admin-approved walk-in)</div>
+          </div>
+        </div>
+      </div>
+
       {/* === BOOKED SALES TAB === */}
       {tab === 'booked' && (
         <>
