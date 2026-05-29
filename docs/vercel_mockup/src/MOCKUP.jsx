@@ -9379,6 +9379,7 @@ function StaffCheckinScreen({ setScreen, t = T.en }) {
     { id: 'mp10', seat: 'O02-F', name: 'Andrea Patricia Lim', age: 25, idType: 'Passport', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0518-5J2H', ticket: 'BTN-2026-0518-3L7U', status: 'pending' },
     { id: 'mp11', seat: 'O02-G', name: 'Felipe Antonio Garcia', age: 38, idType: 'Driver License', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0517-2B5C', ticket: 'BTN-2026-0517-4M8V', status: 'noshow' },
     { id: 'mp12', seat: 'A05-A', name: 'Marisol Yulo-Carrasco', age: 64, idType: 'Senior Citizen ID', passengerType: 'Senior', class: 'Aircon', ref: 'BR-2026-0517-6T1D', ticket: 'BTN-2026-0517-5N9W', status: 'pending' },
+    { id: 'mp13', seat: 'V03-D', name: 'Hon. Maria Linda Bautista', age: 56, idType: 'Government ID', idNumber: 'PROV-BAT-08821', passengerType: 'Gov/Hospital', class: 'VIP', ref: 'GH-2026-0527-3T8B', ticket: 'BTN-2026-0519-9V3X', status: 'pending', agency: 'Office of the Provincial Governor — Batangas' },
   ]);
 
   // Map passenger type → required ID for verification at the counter
@@ -9406,6 +9407,7 @@ function StaffCheckinScreen({ setScreen, t = T.en }) {
       case 'Student': return { bg: '#DBEAFE', fg: '#1E40AF', label: 'Student · 20%' };
       case 'Child':   return { bg: '#FFE5E9', fg: '#9B1A3D', label: 'Child · 50%' };
       case 'Infant':  return { bg: '#FFE5E9', fg: '#9B1A3D', label: 'Infant · free' };
+      case 'Gov/Hospital': return { bg: '#E9D5FF', fg: '#5B21B6', label: 'GOV/HOSP' };
       default:        return { bg: COLORS.bgMuted, fg: COLORS.inkMuted, label: 'Adult' };
     }
   };
@@ -9418,7 +9420,9 @@ function StaffCheckinScreen({ setScreen, t = T.en }) {
   const discountedPending = manifest.filter((m) => m.status === 'pending' && requiresVerification(m.passengerType)).length;
 
   const filtered = manifest.filter((m) => {
-    if (statusFilter !== 'all' && m.status !== statusFilter) return false;
+    if (statusFilter === 'govonly') {
+      if (m.passengerType !== 'Gov/Hospital') return false;
+    } else if (statusFilter !== 'all' && m.status !== statusFilter) return false;
     if (search) {
       const q = search.toLowerCase();
       if (!m.name.toLowerCase().includes(q) && !m.ref.toLowerCase().includes(q) && !m.seat.toLowerCase().includes(q)) return false;
@@ -9878,6 +9882,17 @@ function StaffCheckinScreen({ setScreen, t = T.en }) {
             {f.label}
           </button>
         ))}
+            <button
+              onClick={() => setStatusFilter(statusFilter === 'govonly' ? 'all' : 'govonly')}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg border"
+              style={{
+                background: statusFilter === 'govonly' ? '#E9D5FF' : 'white',
+                color: statusFilter === 'govonly' ? '#5B21B6' : COLORS.ink,
+                borderColor: statusFilter === 'govonly' ? '#A78BFA' : COLORS.border,
+              }}
+            >
+              Gov/Hospital only
+            </button>
       </div>
 
       {/* Manifest cards */}
@@ -9948,7 +9963,7 @@ function StaffCheckinScreen({ setScreen, t = T.en }) {
                   <div className="text-xs flex items-center gap-1.5 flex-wrap" style={{ color: COLORS.inkMuted }}>
                     <span>Age {m.age}</span>
                     <span>·</span>
-                    <span>{m.idType}</span>
+                    <span>{m.idType}{m.idNumber ? ` · ${m.idNumber}` : ''}</span>
                     <span>·</span>
                     <span className="font-mono">{m.ref}</span>
                     {m.vehicle && (
@@ -9957,6 +9972,9 @@ function StaffCheckinScreen({ setScreen, t = T.en }) {
                       </span>
                     )}
                   </div>
+                  {m.passengerType === 'Gov/Hospital' && m.agency && (
+                    <div className="text-[10px] mt-0.5" style={{ color: '#5B21B6' }}>{m.agency}</div>
+                  )}
                 </div>
 
                 <div className="flex gap-1 flex-shrink-0">
