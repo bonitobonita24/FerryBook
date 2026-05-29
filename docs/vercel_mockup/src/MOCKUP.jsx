@@ -6398,10 +6398,19 @@ function AdminRefundsScreen({ setScreen, t = T.en }) {
 // AND a Batangas-port filter. Per-vessel drill-in includes a port-distribution
 // chart showing how often each vessel departed from each Batangas port.
 // ============================================================================
-function AdminReportsScreen({ setScreen, t = T.en }) {
+function AdminReportsScreen({ setScreen, t = T.en, vesselFilter = 'all', readOnly = false }) {
   const [vesselSelect, setVesselSelect] = useState('all');
   const [portFilter, setPortFilter] = useState('all');
   const [dateRange, setDateRange] = useState('30d');
+
+  // Derive the scope from the prop (set by the Reports Portal) overlaid on the
+  // local Vessel dropdown selection (used by full admins).
+  const assignedVesselsList = Array.isArray(vesselFilter) ? vesselFilter : null;
+  const effectiveVesselKey = assignedVesselsList
+    ? (assignedVesselsList.length === 1
+        ? (assignedVesselsList[0] === VESSELS[0] ? 'therese' : 'perpetual')
+        : 'all') // 2+ assigned ≈ aggregate
+    : vesselSelect;
 
   // Revenue by day (last 7 days)
   const revenueByDay = [
@@ -6455,10 +6464,10 @@ function AdminReportsScreen({ setScreen, t = T.en }) {
   ];
 
   // KPI scaling based on filters (illustrative — visual feedback only)
-  const filterScale = (portFilter === 'all' ? 1 : 0.55) * (vesselSelect === 'all' ? 1 : 0.55);
+  const filterScale = (portFilter === 'all' ? 1 : 0.55) * (effectiveVesselKey === 'all' ? 1 : 0.55);
   const totalRevenue = Math.round(621900 * filterScale);
   const totalBookings = Math.round(1164 * filterScale);
-  const avgOccupancy = vesselSelect === 'therese' ? 85 : vesselSelect === 'perpetual' ? 78 : 82;
+  const avgOccupancy = effectiveVesselKey === 'therese' ? 85 : effectiveVesselKey === 'perpetual' ? 78 : 82;
 
   return (
     <div>
@@ -6474,14 +6483,16 @@ function AdminReportsScreen({ setScreen, t = T.en }) {
             Filter every chart by vessel and Batangas port
           </p>
         </div>
-        <div className="flex gap-2">
-          <OutlineButton>
-            <FileSpreadsheet size={16} className="inline mr-1" /> Excel
-          </OutlineButton>
-          <OutlineButton>
-            <FileText size={16} className="inline mr-1" /> PDF
-          </OutlineButton>
-        </div>
+        {!readOnly && (
+          <div className="flex gap-2">
+            <OutlineButton>
+              <FileSpreadsheet size={16} className="inline mr-1" /> Excel
+            </OutlineButton>
+            <OutlineButton>
+              <FileText size={16} className="inline mr-1" /> PDF
+            </OutlineButton>
+          </div>
+        )}
       </div>
 
       {/* Filters bar */}
@@ -6491,16 +6502,27 @@ function AdminReportsScreen({ setScreen, t = T.en }) {
       >
         <div className="flex-1 min-w-[160px]">
           <label className="block text-xs font-semibold mb-1" style={{ color: COLORS.inkMuted }}>Vessel</label>
-          <select
-            value={vesselSelect}
-            onChange={(e) => setVesselSelect(e.target.value)}
-            className="w-full h-10 px-3 rounded-lg border outline-none text-sm bg-white"
-            style={{ borderColor: COLORS.border, color: COLORS.ink }}
-          >
-            <option value="all">All vessels</option>
-            <option value="therese">MV Our Lady of St Therese</option>
-            <option value="perpetual">MV Our Mother of Perpetual Help</option>
-          </select>
+          {assignedVesselsList ? (
+            <div
+              className="w-full h-10 px-3 rounded-lg border flex items-center text-sm"
+              style={{ borderColor: COLORS.border, background: COLORS.bgMuted, color: COLORS.inkMuted }}
+            >
+              {assignedVesselsList.length === 1
+                ? assignedVesselsList[0]
+                : `${assignedVesselsList.length} assigned vessels`}
+            </div>
+          ) : (
+            <select
+              value={vesselSelect}
+              onChange={(e) => setVesselSelect(e.target.value)}
+              className="w-full h-10 px-3 rounded-lg border outline-none text-sm bg-white"
+              style={{ borderColor: COLORS.border, color: COLORS.ink }}
+            >
+              <option value="all">All vessels</option>
+              <option value="therese">MV Our Lady of St Therese</option>
+              <option value="perpetual">MV Our Mother of Perpetual Help</option>
+            </select>
+          )}
         </div>
         <div className="flex-1 min-w-[160px]">
           <label className="block text-xs font-semibold mb-1" style={{ color: COLORS.inkMuted }}>Batangas port</label>
@@ -6637,8 +6659,12 @@ function AdminReportsScreen({ setScreen, t = T.en }) {
                 formatter={(v) => `${v}%`}
               />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Line type="monotone" dataKey="therese" name="MV Our Lady of St Therese" stroke={COLORS.primary} strokeWidth={2} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="perpetual" name="MV Our Mother of Perpetual Help" stroke="#1E40AF" strokeWidth={2} dot={{ r: 4 }} />
+              {(!assignedVesselsList || assignedVesselsList.includes(VESSELS[0])) && (
+                <Line type="monotone" dataKey="therese" name="MV Our Lady of St Therese" stroke={COLORS.primary} strokeWidth={2} dot={{ r: 4 }} />
+              )}
+              {(!assignedVesselsList || assignedVesselsList.includes(VESSELS[1])) && (
+                <Line type="monotone" dataKey="perpetual" name="MV Our Mother of Perpetual Help" stroke="#1E40AF" strokeWidth={2} dot={{ r: 4 }} />
+              )}
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -6653,7 +6679,7 @@ function AdminReportsScreen({ setScreen, t = T.en }) {
           How often each vessel departed from each Batangas port (last 30 days · count of sailings)
         </p>
         <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={portDistribution} layout="vertical">
+          <BarChart data={assignedVesselsList ? portDistribution.filter((p) => assignedVesselsList.includes(p.vessel)) : portDistribution} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" stroke={COLORS.border} />
             <XAxis type="number" stroke={COLORS.inkMuted} style={{ fontSize: 11 }} />
             <YAxis type="category" dataKey="vessel" stroke={COLORS.inkMuted} style={{ fontSize: 11 }} width={180} />
@@ -6734,16 +6760,18 @@ function AdminReportsScreen({ setScreen, t = T.en }) {
         </div>
       </div>
 
-      <div
-        className="rounded-xl p-3 flex items-start gap-2 border text-sm"
-        style={{ background: '#EFF6FF', borderColor: '#BFDBFE', color: '#1E40AF' }}
-      >
-        <Mail size={16} className="flex-shrink-0 mt-0.5" />
-        <div>
-          Weekly summary auto-emailed every Monday 06:00 to Finance Manager and Super Admin.
-          Monthly P&L on the 1st of each month.
+      {!readOnly && (
+        <div
+          className="rounded-xl p-3 flex items-start gap-2 border text-sm"
+          style={{ background: '#EFF6FF', borderColor: '#BFDBFE', color: '#1E40AF' }}
+        >
+          <Mail size={16} className="flex-shrink-0 mt-0.5" />
+          <div>
+            Weekly summary auto-emailed every Monday 06:00 to Finance Manager and Super Admin.
+            Monthly P&L on the 1st of each month.
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
