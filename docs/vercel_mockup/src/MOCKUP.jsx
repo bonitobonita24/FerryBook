@@ -11364,6 +11364,7 @@ function StaffBoardingScreen({ setScreen, t = T.en, onShowManifest }) {
     { id: 'p10', seat: 'O02-F', name: 'Andrea Patricia Lim', age: 25, sex: 'F', idType: 'Passport', idNumber: 'P1234567A', contact: '+63 945 112 6630', class: 'Open Air', ref: 'BR-2026-0518-5J2H', status: 'checked', category: 'adult' },
     { id: 'p11', seat: 'O02-G', name: 'Felipe Antonio Garcia', age: 38, sex: 'M', idType: 'Driver License', idNumber: 'N02-87-665544', contact: '+63 917 332 8821', class: 'Open Air', ref: 'BR-2026-0517-2B5C', status: 'noshow', category: 'adult' },
     { id: 'p12', seat: 'A05-A', name: 'Marisol Yulo-Carrasco', age: 44, sex: 'F', idType: 'UMID', idNumber: 'CRN-0023-1234567-8', contact: '+63 920 887 6655', class: 'Aircon', ref: 'BR-2026-0517-6T1D', status: 'boarded', category: 'adult' },
+    { id: 'bp_gh1', seat: 'V03-D', name: 'Hon. Maria Linda Bautista', age: 56, sex: 'F', idType: 'Government ID', idNumber: 'PROV-BAT-08821', contact: '+63 917 555 0188', class: 'VIP', ref: 'GH-2026-0527-3T8B', status: 'checked', category: 'adult', passengerType: 'Gov/Hospital', agency: 'Office of the Provincial Governor — Batangas', reasonForTravel: 'Official meeting with Lubang LGU' },
   ]);
 
   // Companions (under-3 children attached to an adult per MC 180 §3a)
@@ -11730,24 +11731,33 @@ function StaffBoardingScreen({ setScreen, t = T.en, onShowManifest }) {
               const classColor = p.class === 'Open Air' ? '#1E40AF' : p.class === 'Aircon' ? COLORS.primary : '#A16207';
               const classBg = p.class === 'Open Air' ? '#DBEAFE' : p.class === 'Aircon' ? '#FFE5E9' : '#FEF3C7';
               return (
-                <div key={p.id} className="flex items-center gap-2 py-1.5">
-                  <div
-                    className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0"
-                    style={{ background: classBg }}
-                  >
-                    <div className="text-xs font-mono font-bold" style={{ color: classColor }}>
-                      {p.seat}
+                <div key={p.id} className="py-1.5">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0"
+                      style={{ background: classBg }}
+                    >
+                      <div className="text-xs font-mono font-bold" style={{ color: classColor }}>
+                        {p.seat}
+                      </div>
                     </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold truncate" style={{ color: COLORS.ink }}>
+                        {p.name}
+                      </div>
+                      <div className="text-xs font-mono truncate" style={{ color: COLORS.inkMuted }}>
+                        {p.ref}
+                      </div>
+                    </div>
+                    <Check size={14} style={{ color: COLORS.success }} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold truncate" style={{ color: COLORS.ink }}>
-                      {p.name}
+                  {p.passengerType === 'Gov/Hospital' && (
+                    <div className="mt-1 p-1.5 rounded text-[10px]" style={{ background: '#FAF5FF', color: '#5B21B6' }}>
+                      <div className="font-bold">Gov/Hospital · sanity-check at gangway</div>
+                      {p.agency && <div>Agency: {p.agency}</div>}
+                      {p.reasonForTravel && <div>Reason: {p.reasonForTravel}</div>}
                     </div>
-                    <div className="text-xs font-mono truncate" style={{ color: COLORS.inkMuted }}>
-                      {p.ref}
-                    </div>
-                  </div>
-                  <Check size={14} style={{ color: COLORS.success }} />
+                  )}
                 </div>
               );
             })}
@@ -11879,6 +11889,13 @@ function StaffBoardingScreen({ setScreen, t = T.en, onShowManifest }) {
                           <><X size={11} /> No-show · never checked in</>
                         )}
                       </div>
+                      {p.passengerType === 'Gov/Hospital' && (
+                        <div className="mt-1 p-1.5 rounded text-[10px]" style={{ background: '#FAF5FF', color: '#5B21B6' }}>
+                          <div className="font-bold">Gov/Hospital · sanity-check at gangway</div>
+                          {p.agency && <div>Agency: {p.agency}</div>}
+                          {p.reasonForTravel && <div>Reason: {p.reasonForTravel}</div>}
+                        </div>
+                      )}
                     </div>
                   </div>
                   {p.status === 'checked' && (
