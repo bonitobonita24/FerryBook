@@ -122,6 +122,40 @@ function StatusBadge({ status }) {
 // The old standalone components have been removed to avoid duplicate screen lists.
 
 // ============================================================================
+// VESSEL-SCOPED REPORT VIEWER ROLES — constants
+// Used by AdminUsersScreen, AdminReportsScreen, AdminSalesReportsScreen, and
+// ReportViewerPortalScreen. See spec:
+// docs/superpowers/specs/2026-05-29-vessel-scoped-report-viewer-roles-design.md
+// ============================================================================
+const VESSELS = [
+  'MV Our Lady of St Therese',
+  'MV Our Mother of Perpetual Help',
+];
+
+const ALL_VESSELS_SENTINEL = '__ALL__';
+
+const VIEWER_ROLES = {
+  GENERAL: 'General Report Viewer',
+  VESSEL: 'Report Viewer',
+};
+
+const isViewerRole = (role) =>
+  role === VIEWER_ROLES.GENERAL || role === VIEWER_ROLES.VESSEL;
+
+// Resolve an admin record's `assignedVessels` into either 'all' or a string[]
+// of vessel names. Returns 'all' for General Report Viewer, a filtered array
+// for Report Viewer, and null for non-viewer roles (no vessel scoping applies).
+const resolveAssignedVessels = (record) => {
+  if (!record) return null;
+  if (record.role === VIEWER_ROLES.GENERAL) return 'all';
+  if (record.role === VIEWER_ROLES.VESSEL) {
+    const list = (record.assignedVessels || []).filter((v) => VESSELS.includes(v));
+    return list;
+  }
+  return null;
+};
+
+// ============================================================================
 // TIER 1: LANDING PAGE
 // ============================================================================
 function LandingScreen({ setScreen, t = T.en }) {
