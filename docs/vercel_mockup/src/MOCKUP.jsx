@@ -7005,19 +7005,62 @@ function AdminUsersScreen({ setScreen, t = T.en }) {
                       >
                         {a.role}
                       </span>
+                      {isViewerRole(a.role) && (
+                        <span
+                          className="text-[10px] px-1.5 py-0.5 rounded font-semibold ml-1.5 uppercase tracking-wide"
+                          style={{ background: COLORS.bgMuted, color: COLORS.inkMuted }}
+                        >
+                          Viewer
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 px-3">
-                      <span
-                        className="text-xs px-2 py-0.5 rounded-full font-mono"
-                        style={{
-                          background: a.port === 'BAT-NAS only' ? '#FFE5E9'
-                            : a.port === 'BAT-CAL only' ? '#FEF3C7' : COLORS.bgMuted,
-                          color: a.port === 'BAT-NAS only' ? COLORS.primary
-                            : a.port === 'BAT-CAL only' ? '#A16207' : COLORS.ink,
-                        }}
-                      >
-                        {a.port}
-                      </span>
+                      {a.role === VIEWER_ROLES.GENERAL ? (
+                        <span
+                          className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                          style={{ background: '#DCFCE7', color: COLORS.success }}
+                        >
+                          All vessels
+                        </span>
+                      ) : a.role === VIEWER_ROLES.VESSEL ? (
+                        (() => {
+                          const list = (a.assignedVessels || []).filter((v) => VESSELS.includes(v));
+                          if (list.length === 0) {
+                            return (
+                              <span
+                                className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                                style={{ background: '#FEE2E2', color: COLORS.destructive }}
+                              >
+                                No vessels
+                              </span>
+                            );
+                          }
+                          const shortName = (v) => v.replace('MV Our Lady of ', 'MV ').replace('MV Our Mother of ', 'MV ');
+                          const label = list.length === 1
+                            ? shortName(list[0])
+                            : `${shortName(list[0])} + ${list.length - 1} more`;
+                          return (
+                            <span
+                              className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                              style={{ background: '#DBEAFE', color: '#1E40AF' }}
+                            >
+                              {label}
+                            </span>
+                          );
+                        })()
+                      ) : (
+                        <span
+                          className="text-xs px-2 py-0.5 rounded-full font-mono"
+                          style={{
+                            background: a.port === 'BAT-NAS only' ? '#FFE5E9'
+                              : a.port === 'BAT-CAL only' ? '#FEF3C7' : COLORS.bgMuted,
+                            color: a.port === 'BAT-NAS only' ? COLORS.primary
+                              : a.port === 'BAT-CAL only' ? '#A16207' : COLORS.ink,
+                          }}
+                        >
+                          {a.port}
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 px-3">
                       {a.mfa ? (
