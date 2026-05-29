@@ -18008,6 +18008,50 @@ export default function FandSMarineMockup() {
   const [showManifestPreview, setShowManifestPreview] = useState(false);
   const [lang, setLang] = useState('en');
   const [currentUser, setCurrentUser] = useState(null);
+  // Shared Gov/Hospital pending/approved/rejected bookings — written by
+  // StaffWalkinScreen, mutated by AdminGovHospitalApprovalsScreen. See spec:
+  // docs/superpowers/specs/2026-05-29-reserved-seat-pools-design.md
+  const [govHospitalBookings, setGovHospitalBookings] = useState([
+    {
+      ref: 'GH-2026-0528-7K2A',
+      submittedAt: 'May 28 · 14:32',
+      sailingId: 's2', voyageDate: 'May 19, 2026', voyageTime: '11:30',
+      vessel: 'MV Our Lady of St Therese', route: 'BAT-NAS → MIN-TIL', class: 'Aircon',
+      seat: 'A06-E',
+      passenger: { name: 'Dr. Anselmo Ramirez', age: 47, sex: 'M' },
+      agency: 'DOH - Region IV-A', designation: 'Medical Director',
+      idType: 'DOH Issued ID', idNumber: 'DOH-2024-19283',
+      reasonForTravel: 'Outbreak investigation deployment — Lubang Island',
+      officer: 'Marisol Hidalgo', officerPort: 'BAT-NAS',
+      approvalStatus: 'pending', approvedBy: null, rejectionReason: null,
+    },
+    {
+      ref: 'GH-2026-0528-9V3M',
+      submittedAt: 'May 28 · 15:08',
+      sailingId: 's3', voyageDate: 'May 19, 2026', voyageTime: '16:00',
+      vessel: 'MV Our Lady of St Therese', route: 'BAT-NAS → MIN-TIL', class: 'Open Air',
+      seat: 'O09-G',
+      passenger: { name: 'Engr. Carlos Velasco', age: 52, sex: 'M' },
+      agency: 'DPWH - District Engineering Office', designation: 'District Engineer',
+      idType: 'Government ID', idNumber: 'DPWH-IV-44912',
+      reasonForTravel: 'Bridge inspection · Lubang causeway',
+      officer: 'Marisol Hidalgo', officerPort: 'BAT-NAS',
+      approvalStatus: 'pending', approvedBy: null, rejectionReason: null,
+    },
+    {
+      ref: 'GH-2026-0527-3T8B',
+      submittedAt: 'May 27 · 09:14',
+      sailingId: 's2', voyageDate: 'May 19, 2026', voyageTime: '11:30',
+      vessel: 'MV Our Lady of St Therese', route: 'BAT-NAS → MIN-TIL', class: 'VIP',
+      seat: 'V03-D',
+      passenger: { name: 'Hon. Maria Linda Bautista', age: 56, sex: 'F' },
+      agency: 'Office of the Provincial Governor — Batangas', designation: 'Provincial Administrator',
+      idType: 'Government ID', idNumber: 'PROV-BAT-08821',
+      reasonForTravel: 'Official meeting with Lubang LGU',
+      officer: 'Marisol Hidalgo', officerPort: 'BAT-NAS',
+      approvalStatus: 'approved', approvedBy: 'Reynaldo Salonga', rejectionReason: null,
+    },
+  ]);
   const t = T[lang];
 
   // Screen groups for the mockup navigator (outside the phone)
