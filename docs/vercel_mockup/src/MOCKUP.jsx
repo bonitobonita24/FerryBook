@@ -17890,6 +17890,7 @@ export default function FandSMarineMockup() {
   const [navCollapsed, setNavCollapsed] = useState(false);
   const [showManifestPreview, setShowManifestPreview] = useState(false);
   const [lang, setLang] = useState('en');
+  const [currentUser, setCurrentUser] = useState(null);
   const t = T[lang];
 
   // Screen groups for the mockup navigator (outside the phone)
@@ -17898,6 +17899,7 @@ export default function FandSMarineMockup() {
     'customerRefund', 'customerNoShowRecovery', 'customerReschedulePre', 'customerEmergencyRecovery',
     'creditWallet', 'login', 'profile'].includes(screen);
   const isStaff = ['staffWalkin', 'staffCheckin', 'staffBoarding', 'nativeApp'].includes(screen);
+  const isViewer = screen === 'reportViewerPortal';
 
   let content;
   if (screen === 'landing') content = <LandingScreen setScreen={setScreen} t={t} />;
@@ -17940,6 +17942,13 @@ export default function FandSMarineMockup() {
   else if (screen === 'staffCheckin') content = <StaffCheckinScreen setScreen={setScreen} t={t} />;
   else if (screen === 'staffBoarding') content = <StaffBoardingScreen setScreen={setScreen} t={t} onShowManifest={setShowManifestPreview} />;
   else if (screen === 'nativeApp') content = <NativeAppPreviewScreen setScreen={setScreen} t={t} />;
+  else if (screen === 'reportViewerPortal') content = (
+    <ReportViewerPortalScreen
+      setScreen={setScreen}
+      currentUser={currentUser}
+      onSignOut={() => setCurrentUser(null)}
+    />
+  );
 
   // Viewport dimensions per mode
   const viewports = {
@@ -17978,6 +17987,7 @@ export default function FandSMarineMockup() {
       { id: 'adminAudit', label: 'Audit Log' }, { id: 'staffWalkin', label: 'Walk-in' },
       { id: 'staffCheckin', label: 'Check-in' }, { id: 'staffBoarding', label: 'Boarding Officer' },
       { id: 'nativeApp', label: 'PWA Preview' },
+      { id: 'reportViewerPortal', label: 'Reports Portal' },
     ];
     return all.find(s => s.id === screen)?.label || screen;
   })();
@@ -18129,10 +18139,16 @@ export default function FandSMarineMockup() {
             {/* Screen label above the device */}
             <div className="text-center mb-3">
               <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{
-                background: isCustomer ? `${COLORS.primary}33` : isStaff ? '#7C3AED33' : '#3B82F633',
-                color: isCustomer ? COLORS.primary : isStaff ? '#A78BFA' : '#60A5FA',
+                background: isCustomer ? `${COLORS.primary}33`
+                  : isStaff ? '#7C3AED33'
+                  : isViewer ? '#10B98133'
+                  : '#3B82F633',
+                color: isCustomer ? COLORS.primary
+                  : isStaff ? '#A78BFA'
+                  : isViewer ? '#34D399'
+                  : '#60A5FA',
               }}>
-                {isCustomer ? 'Customer' : isStaff ? 'Staff' : 'Admin'} · {currentLabel}
+                {isCustomer ? 'Customer' : isStaff ? 'Staff' : isViewer ? 'Viewer' : 'Admin'} · {currentLabel}
               </span>
               {pcOnlyScreens.includes(screen) && viewMode === 'phone' && (
                 <div className="text-[10px] mt-1" style={{ color: '#F59E0B' }}>
