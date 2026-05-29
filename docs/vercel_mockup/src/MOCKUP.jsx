@@ -12682,40 +12682,40 @@ function AdminSalesReportsScreen({ setScreen, t = T.en }) {
   // 7 days of seed data ending today (May 19, 2026)
   // BOOKED data: gross from online bookings on this date, refunds processed on this date
   const bookedRows = [
-    { date: 'May 13, Wed', bookings: 18, pax: 47, gross: 38950, refunds: 1200, net: 37750, port: 'BAT-NAS' },
-    { date: 'May 13, Wed', bookings: 12, pax: 28, gross: 23800, refunds: 0, net: 23800, port: 'BAT-CAL' },
-    { date: 'May 14, Thu', bookings: 22, pax: 56, gross: 46200, refunds: 880, net: 45320, port: 'BAT-NAS' },
-    { date: 'May 14, Thu', bookings: 9, pax: 21, gross: 17850, refunds: 0, net: 17850, port: 'BAT-CAL' },
-    { date: 'May 15, Fri', bookings: 31, pax: 84, gross: 70800, refunds: 2300, net: 68500, port: 'BAT-NAS' },
-    { date: 'May 15, Fri', bookings: 16, pax: 38, gross: 32300, refunds: 550, net: 31750, port: 'BAT-CAL' },
-    { date: 'May 16, Sat', bookings: 42, pax: 109, gross: 92650, refunds: 1750, net: 90900, port: 'BAT-NAS' },
-    { date: 'May 16, Sat', bookings: 28, pax: 71, gross: 60350, refunds: 0, net: 60350, port: 'BAT-CAL' },
-    { date: 'May 17, Sun', bookings: 35, pax: 89, gross: 75650, refunds: 1100, net: 74550, port: 'BAT-NAS' },
-    { date: 'May 17, Sun', bookings: 23, pax: 58, gross: 49300, refunds: 0, net: 49300, port: 'BAT-CAL' },
-    { date: 'May 18, Mon', bookings: 14, pax: 33, gross: 28050, refunds: 0, net: 28050, port: 'BAT-NAS' },
-    { date: 'May 18, Mon', bookings: 8, pax: 19, gross: 16150, refunds: 0, net: 16150, port: 'BAT-CAL' },
-    { date: 'May 19, Tue', bookings: 19, pax: 48, gross: 40800, refunds: 0, net: 40800, port: 'BAT-NAS' },
-    { date: 'May 19, Tue', bookings: 11, pax: 26, gross: 22100, refunds: 0, net: 22100, port: 'BAT-CAL' },
+    { date: 'May 13, Wed', bookings: 18, pax: 47, gross: 38950, refunds: 1200, net: 37750, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 13, Wed', bookings: 12, pax: 28, gross: 23800, refunds: 0, net: 23800, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
+    { date: 'May 14, Thu', bookings: 22, pax: 56, gross: 46200, refunds: 880, net: 45320, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 14, Thu', bookings: 9, pax: 21, gross: 17850, refunds: 0, net: 17850, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
+    { date: 'May 15, Fri', bookings: 31, pax: 84, gross: 70800, refunds: 2300, net: 68500, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 15, Fri', bookings: 16, pax: 38, gross: 32300, refunds: 550, net: 31750, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
+    { date: 'May 16, Sat', bookings: 42, pax: 109, gross: 92650, refunds: 1750, net: 90900, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 16, Sat', bookings: 28, pax: 71, gross: 60350, refunds: 0, net: 60350, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
+    { date: 'May 17, Sun', bookings: 35, pax: 89, gross: 75650, refunds: 1100, net: 74550, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 17, Sun', bookings: 23, pax: 58, gross: 49300, refunds: 0, net: 49300, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
+    { date: 'May 18, Mon', bookings: 14, pax: 33, gross: 28050, refunds: 0, net: 28050, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 18, Mon', bookings: 8, pax: 19, gross: 16150, refunds: 0, net: 16150, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
+    { date: 'May 19, Tue', bookings: 19, pax: 48, gross: 40800, refunds: 0, net: 40800, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 19, Tue', bookings: 11, pax: 26, gross: 22100, refunds: 0, net: 22100, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
   ];
 
   // BOARDED data: realized revenue per departure date (not booking date)
   // Includes booked count vs actual boarded count from QR scan
   // No-shows forfeit fare per policy (less than 24h = no refund)
   const boardedRows = [
-    { date: 'May 13, Wed', booked: 47, boarded: 44, noShow: 3, realized: 36300, port: 'BAT-NAS' },
-    { date: 'May 13, Wed', booked: 28, boarded: 27, noShow: 1, realized: 22950, port: 'BAT-CAL' },
-    { date: 'May 14, Thu', booked: 56, boarded: 53, noShow: 3, realized: 43700, port: 'BAT-NAS' },
-    { date: 'May 14, Thu', booked: 21, boarded: 21, noShow: 0, realized: 17850, port: 'BAT-CAL' },
-    { date: 'May 15, Fri', booked: 84, boarded: 80, noShow: 4, realized: 67400, port: 'BAT-NAS' },
-    { date: 'May 15, Fri', booked: 38, boarded: 36, noShow: 2, realized: 30600, port: 'BAT-CAL' },
-    { date: 'May 16, Sat', booked: 109, boarded: 104, noShow: 5, realized: 88100, port: 'BAT-NAS' },
-    { date: 'May 16, Sat', booked: 71, boarded: 69, noShow: 2, realized: 58650, port: 'BAT-CAL' },
-    { date: 'May 17, Sun', booked: 89, boarded: 86, noShow: 3, realized: 72850, port: 'BAT-NAS' },
-    { date: 'May 17, Sun', booked: 58, boarded: 57, noShow: 1, realized: 48450, port: 'BAT-CAL' },
-    { date: 'May 18, Mon', booked: 33, boarded: 31, noShow: 2, realized: 26350, port: 'BAT-NAS' },
-    { date: 'May 18, Mon', booked: 19, boarded: 19, noShow: 0, realized: 16150, port: 'BAT-CAL' },
-    { date: 'May 19, Tue', booked: 48, boarded: 46, noShow: 2, realized: 38850, port: 'BAT-NAS' },
-    { date: 'May 19, Tue', booked: 26, boarded: 25, noShow: 1, realized: 21250, port: 'BAT-CAL' },
+    { date: 'May 13, Wed', booked: 47, boarded: 44, noShow: 3, realized: 36300, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 13, Wed', booked: 28, boarded: 27, noShow: 1, realized: 22950, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
+    { date: 'May 14, Thu', booked: 56, boarded: 53, noShow: 3, realized: 43700, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 14, Thu', booked: 21, boarded: 21, noShow: 0, realized: 17850, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
+    { date: 'May 15, Fri', booked: 84, boarded: 80, noShow: 4, realized: 67400, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 15, Fri', booked: 38, boarded: 36, noShow: 2, realized: 30600, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
+    { date: 'May 16, Sat', booked: 109, boarded: 104, noShow: 5, realized: 88100, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 16, Sat', booked: 71, boarded: 69, noShow: 2, realized: 58650, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
+    { date: 'May 17, Sun', booked: 89, boarded: 86, noShow: 3, realized: 72850, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 17, Sun', booked: 58, boarded: 57, noShow: 1, realized: 48450, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
+    { date: 'May 18, Mon', booked: 33, boarded: 31, noShow: 2, realized: 26350, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 18, Mon', booked: 19, boarded: 19, noShow: 0, realized: 16150, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
+    { date: 'May 19, Tue', booked: 48, boarded: 46, noShow: 2, realized: 38850, port: 'BAT-NAS', vessel: 'MV Our Lady of St Therese' },
+    { date: 'May 19, Tue', booked: 26, boarded: 25, noShow: 1, realized: 21250, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
   ];
 
   const bookedFiltered = bookedRows.filter((r) => portFilter === 'all' || r.port === portFilter);
