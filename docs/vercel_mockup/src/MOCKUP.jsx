@@ -8814,7 +8814,7 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
       )}
 
           {/* Today's Gov/Hospital submissions — visible to the officer in step 1 */}
-          {(() => {
+          {step === 1 && (() => {
             const mine = govHospitalBookings.filter((b) => b.officer === staff.name);
             if (mine.length === 0) return null;
             const chipStyle = (status) => status === 'approved'
