@@ -8327,6 +8327,8 @@ function AdminAuditScreen({ setScreen, t = T.en }) {
     { id: 'ev0c', ts: 'May 19 · 17:14:33', user: 'system', role: 'Automated', type: 'sms.failed', entity: 'msg/c8i2f77f-a759-8aef-ea2a', action: 'OTP SMS failed · +63 933 221 4488 · UniSMS reports invalid recipient · webhook message.failed', severity: 'medium' },
     { id: 'ev0b', ts: 'May 19 · 17:08:47', user: 'system', role: 'Automated', type: 'otp.verified', entity: 'customer/c12', action: 'OTP verified for login · phone +63 928 445 6701 · UniSMS reference msg_a6g0d55d', severity: 'low' },
     { id: 'ev0a', ts: 'May 19 · 16:55:21', user: 'system', role: 'Automated', type: 'sms.sent', entity: 'msg/95f9c44c-7426-57bc-b797', action: 'Booking confirmation SMS sent · BR-2026-0519-7K2A · +63 919 887 2210 · 1 credit', severity: 'low' },
+    { id: 'ev0e', ts: 'May 30 · 06:14:08', user: 'Reynaldo Salonga', role: 'Operations Manager', type: 'gov_hospital.approved', entity: 'booking/GH-2026-0527-3T8B', action: 'Approved Gov/Hospital booking · Hon. Maria Linda Bautista · Office of Provincial Governor · VIP class', severity: 'medium' },
+    { id: 'ev0d', ts: 'May 29 · 17:52:11', user: 'Reynaldo Salonga', role: 'Operations Manager', type: 'gov_hospital.rejected', entity: 'booking/GH-2026-0529-2K8M', action: 'Rejected Gov/Hospital booking · missing DOH ID · seat released to pool', severity: 'medium' },
     { id: 'ev1', ts: 'May 19 · 16:42:18', user: 'Carmela Bautista', role: 'Super Admin', type: 'user.update', entity: 'admin/u3', action: 'Promoted Patricia Aquino to Finance Manager', severity: 'high' },
     { id: 'ev2', ts: 'May 19 · 15:08:42', user: 'Reynaldo Salonga', role: 'Operations Manager', type: 'schedule.create', entity: 'schedule/sch-244', action: 'Created new sailing: Sat May 24, 06:00 · Nasugbu Port · MV Our Lady', severity: 'medium' },
     { id: 'ev3', ts: 'May 19 · 14:31:09', user: 'Patricia Aquino', role: 'Finance Manager', type: 'refund.approve', entity: 'refund/rf2', action: 'Approved ₱1,100 refund · BR-2026-0518-9V2K · Mariano Diokno III', severity: 'medium' },
@@ -8382,6 +8384,7 @@ function AdminAuditScreen({ setScreen, t = T.en }) {
     if (t.startsWith('auth.')) return Lock;
     if (t.startsWith('booking.')) return FileText;
     if (t.startsWith('manifest.')) return ScrollText;
+    if (t.startsWith('gov_hospital.')) return ShieldCheck;
     return Edit3;
   };
 
