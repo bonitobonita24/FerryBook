@@ -6399,7 +6399,7 @@ function AdminRefundsScreen({ setScreen, t = T.en }) {
 // chart showing how often each vessel departed from each Batangas port.
 // ============================================================================
 function AdminReportsScreen({ setScreen, t = T.en }) {
-  const [vesselFilter, setVesselFilter] = useState('all');
+  const [vesselSelect, setVesselSelect] = useState('all');
   const [portFilter, setPortFilter] = useState('all');
   const [dateRange, setDateRange] = useState('30d');
 
@@ -6455,10 +6455,10 @@ function AdminReportsScreen({ setScreen, t = T.en }) {
   ];
 
   // KPI scaling based on filters (illustrative — visual feedback only)
-  const filterScale = (portFilter === 'all' ? 1 : 0.55) * (vesselFilter === 'all' ? 1 : 0.55);
+  const filterScale = (portFilter === 'all' ? 1 : 0.55) * (vesselSelect === 'all' ? 1 : 0.55);
   const totalRevenue = Math.round(621900 * filterScale);
   const totalBookings = Math.round(1164 * filterScale);
-  const avgOccupancy = vesselFilter === 'therese' ? 85 : vesselFilter === 'perpetual' ? 78 : 82;
+  const avgOccupancy = vesselSelect === 'therese' ? 85 : vesselSelect === 'perpetual' ? 78 : 82;
 
   return (
     <div>
@@ -6492,8 +6492,8 @@ function AdminReportsScreen({ setScreen, t = T.en }) {
         <div className="flex-1 min-w-[160px]">
           <label className="block text-xs font-semibold mb-1" style={{ color: COLORS.inkMuted }}>Vessel</label>
           <select
-            value={vesselFilter}
-            onChange={(e) => setVesselFilter(e.target.value)}
+            value={vesselSelect}
+            onChange={(e) => setVesselSelect(e.target.value)}
             className="w-full h-10 px-3 rounded-lg border outline-none text-sm bg-white"
             style={{ borderColor: COLORS.border, color: COLORS.ink }}
           >
