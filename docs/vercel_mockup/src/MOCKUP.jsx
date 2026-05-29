@@ -8813,6 +8813,70 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
         </>
       )}
 
+          {/* Today's Gov/Hospital submissions — visible to the officer in step 1 */}
+          {(() => {
+            const mine = govHospitalBookings.filter((b) => b.officer === staff.name);
+            if (mine.length === 0) return null;
+            const chipStyle = (status) => status === 'approved'
+              ? { bg: '#DCFCE7', fg: '#166534', label: 'Approved' }
+              : status === 'rejected'
+              ? { bg: '#FEE2E2', fg: '#B91C1C', label: 'Rejected' }
+              : { bg: '#FEF3C7', fg: '#92400E', label: 'Awaiting Approval' };
+            const cancelBooking = (ref) => setGovHospitalBookings((prev) => prev.filter((b) => b.ref !== ref));
+            return (
+              <div className="bg-white rounded-2xl p-4 mt-4 border" style={{ borderColor: COLORS.border }}>
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <div className="text-xs font-semibold" style={{ color: COLORS.inkMuted }}>Walk-in officer</div>
+                    <h3 className="font-semibold text-base" style={{ color: COLORS.ink }}>Today's Gov/Hospital submissions</h3>
+                  </div>
+                  <ReservedPoolBadge pool="govHospital" size="md" />
+                </div>
+                <div className="space-y-2">
+                  {mine.map((b) => {
+                    const c = chipStyle(b.approvalStatus);
+                    return (
+                      <div key={b.ref} className="p-3 rounded-lg border flex items-start justify-between gap-3" style={{ borderColor: COLORS.border }}>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-mono text-xs font-bold" style={{ color: COLORS.ink }}>{b.ref}</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: c.bg, color: c.fg }}>{c.label}</span>
+                          </div>
+                          <div className="text-sm font-semibold" style={{ color: COLORS.ink }}>{b.passenger.name}</div>
+                          <div className="text-xs" style={{ color: COLORS.inkMuted }}>
+                            {b.voyageTime} · {b.class} · Seat {b.seat} · {b.agency}
+                          </div>
+                          {b.approvalStatus === 'rejected' && b.rejectionReason && (
+                            <div className="text-xs mt-1" style={{ color: '#B91C1C' }}>
+                              Reason: {b.rejectionReason}
+                            </div>
+                          )}
+                        </div>
+                        {b.approvalStatus === 'pending' && (
+                          <button
+                            onClick={() => cancelBooking(b.ref)}
+                            className="text-xs font-semibold px-2 py-1 rounded border"
+                            style={{ borderColor: COLORS.border, color: COLORS.destructive, background: 'white' }}
+                          >
+                            Cancel request
+                          </button>
+                        )}
+                        {b.approvalStatus === 'approved' && (
+                          <button
+                            className="text-xs font-semibold px-2 py-1 rounded"
+                            style={{ background: COLORS.primary, color: 'white' }}
+                          >
+                            Print ticket
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
       {/* STEP 2 — Passenger details + seat assignment */}
       {step === 2 && (
         <>
