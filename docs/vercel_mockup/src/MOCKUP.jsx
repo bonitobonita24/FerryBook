@@ -8606,6 +8606,11 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
     }
   }
 
+  const classCapacityFor = (cls) =>
+    cls === 'openair' ? 80 : cls === 'aircon' ? 30 : 10;
+  const currentClassCapacity = classCapacityFor(selectedClass);
+  const seatLabelPool = (seatCode) => poolForSeat(seatCode, currentClassCapacity);
+
   const updatePaxCount = (n) => {
     setPaxCount(n);
     const newPax = [];
@@ -8889,7 +8894,7 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
                       <button key={seatId}
                         onClick={() => !isTaken && assignSeat(assigningPaxIndex, seatId)}
                         disabled={isTaken}
-                        className="w-7 h-7 rounded text-[8px] font-bold flex items-center justify-center"
+                        className="w-7 h-7 rounded text-[8px] font-bold flex flex-col items-center justify-center gap-0.5"
                         style={{
                           background: isMyPick ? COLORS.primary : isTaken ? '#E5E7EB' : 'white',
                           color: isMyPick ? 'white' : isTaken ? '#9CA3AF' : COLORS.ink,
@@ -8897,6 +8902,9 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
                           cursor: isTaken ? 'not-allowed' : 'pointer',
                         }}>
                         {isMyPick ? `P${assignedTo + 1}` : seatGrid.colLabels[c]}
+                        <div className="mt-0.5">
+                          <ReservedPoolBadge pool={seatLabelPool(seatId)} />
+                        </div>
                       </button>
                     );
                   })
