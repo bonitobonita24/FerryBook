@@ -13134,6 +13134,128 @@ function NoVesselsAssignedEmptyState({ userName }) {
 }
 
 // ============================================================================
+// REPORTS PORTAL — non-admin shell for viewer roles.
+// Renders a slim top bar (no language switcher), scope banner, and a tab nav
+// that swaps between AdminReportsScreen and AdminSalesReportsScreen with
+// vesselFilter + readOnly props applied. See spec:
+// docs/superpowers/specs/2026-05-29-vessel-scoped-report-viewer-roles-design.md
+// ============================================================================
+function ReportViewerPortalScreen({ setScreen, currentUser, onSignOut }) {
+  const [tab, setTab] = useState('reports'); // 'reports' | 'dailySales'
+  const scope = resolveAssignedVessels(currentUser);
+  // Lock language to English in viewer portal per project convention.
+  const t = T.en;
+
+  const isGRV = currentUser?.role === VIEWER_ROLES.GENERAL;
+  const badgeBg = isGRV ? '#DCFCE7' : '#DBEAFE';
+  const badgeColor = isGRV ? COLORS.success : '#1E40AF';
+  const roleLabel = isGRV ? 'General Report Viewer' : 'Report Viewer';
+
+  // Compute the prop passed to the embedded report screens.
+  const reportVesselFilter = scope === 'all' ? 'all' : Array.isArray(scope) ? scope : [];
+
+  // Scope banner content
+  let scopeBannerText;
+  let scopeBannerBg;
+  let scopeBannerColor;
+  if (scope === 'all') {
+    scopeBannerText = 'Viewing all vessels';
+    scopeBannerBg = '#DCFCE7';
+    scopeBannerColor = COLORS.success;
+  } else if (Array.isArray(scope) && scope.length === 1) {
+    scopeBannerText = `Viewing: ${scope[0]}`;
+    scopeBannerBg = '#DBEAFE';
+    scopeBannerColor = '#1E40AF';
+  } else if (Array.isArray(scope) && scope.length >= 2) {
+    scopeBannerText = `Viewing ${scope.length} vessels: ${scope.join(', ')}`;
+    scopeBannerBg = '#DBEAFE';
+    scopeBannerColor = '#1E40AF';
+  } else {
+    scopeBannerText = 'No vessels assigned';
+    scopeBannerBg = '#FEE2E2';
+    scopeBannerColor = COLORS.destructive;
+  }
+
+  const showEmpty = Array.isArray(scope) && scope.length === 0;
+
+  return (
+    <div>
+      {/* Slim top bar */}
+      <div
+        className="flex items-center justify-between px-5 py-3 mb-3 rounded-2xl"
+        style={{ background: 'white', border: `1px solid ${COLORS.border}` }}
+      >
+        <div className="flex items-center gap-2">
+          <Ship size={18} style={{ color: COLORS.primary }} />
+          <span className="font-bold text-sm" style={{ color: COLORS.ink }}>F&amp;S Marine</span>
+          <span style={{ color: COLORS.inkMuted }}>·</span>
+          <span className="text-sm font-semibold" style={{ color: COLORS.ink }}>Reports Portal</span>
+        </div>
+        <div className="flex items-center gap-3 text-xs">
+          <span className="font-semibold" style={{ color: COLORS.ink }}>{currentUser?.name || '—'}</span>
+          <span
+            className="px-2 py-0.5 rounded-full font-semibold"
+            style={{ background: badgeBg, color: badgeColor }}
+          >
+            {roleLabel}
+          </span>
+          <button
+            onClick={() => { onSignOut?.(); setScreen('landing'); }}
+            className="font-semibold px-2 py-1 rounded border bg-white"
+            style={{ color: COLORS.ink, borderColor: COLORS.border }}
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+
+      {/* Scope banner */}
+      <div
+        className="rounded-xl px-4 py-2 mb-3 text-sm font-semibold inline-block"
+        style={{ background: scopeBannerBg, color: scopeBannerColor }}
+      >
+        {scopeBannerText}
+      </div>
+
+      {/* Tab nav */}
+      <div className="flex rounded-xl p-1 mb-4 max-w-md" style={{ background: COLORS.bgMuted }}>
+        <button
+          onClick={() => setTab('reports')}
+          className="flex-1 py-2 text-sm font-semibold rounded-lg transition-all"
+          style={{
+            background: tab === 'reports' ? 'white' : 'transparent',
+            color: tab === 'reports' ? COLORS.ink : COLORS.inkMuted,
+            boxShadow: tab === 'reports' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+          }}
+        >
+          Sales Reports
+        </button>
+        <button
+          onClick={() => setTab('dailySales')}
+          className="flex-1 py-2 text-sm font-semibold rounded-lg transition-all"
+          style={{
+            background: tab === 'dailySales' ? 'white' : 'transparent',
+            color: tab === 'dailySales' ? COLORS.ink : COLORS.inkMuted,
+            boxShadow: tab === 'dailySales' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+          }}
+        >
+          Daily Sales
+        </button>
+      </div>
+
+      {/* Body */}
+      {showEmpty ? (
+        <NoVesselsAssignedEmptyState userName={currentUser?.name} />
+      ) : tab === 'reports' ? (
+        <AdminReportsScreen setScreen={setScreen} t={t} vesselFilter={reportVesselFilter} readOnly={true} />
+      ) : (
+        <AdminSalesReportsScreen setScreen={setScreen} t={t} vesselFilter={reportVesselFilter} readOnly={true} />
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
 // TIER 1: CUSTOMER NO-SHOW RECOVERY (Batch 11)
 // Only available to passengers marked 'no-show' on the Boarding Officer's
 // final signed manifest. Clock starts at manifest finalization time.
