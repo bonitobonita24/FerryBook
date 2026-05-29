@@ -6812,6 +6812,8 @@ function AdminUsersScreen({ setScreen, t = T.en }) {
     : r === 'Operations Manager' ? '#1E40AF'
     : r === 'Finance Manager' ? COLORS.success
     : r === 'Boarding Officer' ? '#7C3AED'
+    : r === VIEWER_ROLES.GENERAL ? COLORS.success
+    : r === VIEWER_ROLES.VESSEL ? '#1E40AF'
     : COLORS.inkMuted;
 
   const roleBg = (r) =>
@@ -6819,6 +6821,8 @@ function AdminUsersScreen({ setScreen, t = T.en }) {
     : r === 'Operations Manager' ? '#DBEAFE'
     : r === 'Finance Manager' ? '#DCFCE7'
     : r === 'Boarding Officer' ? '#EDE9FE'
+    : r === VIEWER_ROLES.GENERAL ? '#DCFCE7'
+    : r === VIEWER_ROLES.VESSEL ? '#DBEAFE'
     : COLORS.bgMuted;
 
   return (
