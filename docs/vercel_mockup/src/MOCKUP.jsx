@@ -229,8 +229,18 @@ const buildPools = (classCapacity) => ({
 function ReservedPoolBadge({ pool, size = 'sm' }) {
   if (pool === 'regular' || !pool) return null;
   const palette = pool === 'govHospital'
-    ? { bg: '#E9D5FF', fg: '#5B21B6', label: 'GOV/HOSPITAL POOL' }
-    : { bg: '#FEF3C7', fg: '#92400E', label: 'SENIOR/PWD POOL' };
+    ? { bg: '#E9D5FF', fg: '#5B21B6', label: 'GOV/HOSPITAL POOL', short: 'GH' }
+    : { bg: '#FEF3C7', fg: '#92400E', label: 'SENIOR/PWD POOL', short: 'SP' };
+  if (size === 'xs') {
+    return (
+      <span
+        className="inline-block rounded font-bold leading-none px-1 text-[7px]"
+        style={{ background: palette.bg, color: palette.fg }}
+      >
+        {palette.short}
+      </span>
+    );
+  }
   const padding = size === 'sm' ? 'px-1.5 py-0.5' : 'px-2 py-1';
   const text = size === 'sm' ? 'text-[9px]' : 'text-[11px]';
   return (
@@ -8903,7 +8913,7 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
                         }}>
                         {isMyPick ? `P${assignedTo + 1}` : seatGrid.colLabels[c]}
                         <div className="mt-0.5">
-                          <ReservedPoolBadge pool={seatLabelPool(seatId)} />
+                          <ReservedPoolBadge pool={seatLabelPool(seatId)} size="xs" />
                         </div>
                       </button>
                     );
