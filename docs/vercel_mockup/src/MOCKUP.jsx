@@ -18046,7 +18046,7 @@ export default function FandSMarineMockup() {
           </div>
 
           {/* Screen groups */}
-          {['Customer', 'Admin', 'Staff', 'Mobile', 'Meetings'].map(group => {
+          {['Customer', 'Admin', 'Staff', 'Mobile', 'Reports Portal', 'Meetings'].map(group => {
             const groupScreens = [
               { id: 'landing', label: 'Landing', group: 'Customer' },
               { id: 'calendar', label: 'Date Calendar', group: 'Customer' },
@@ -18088,13 +18088,16 @@ export default function FandSMarineMockup() {
               { id: 'staffCheckin', label: 'Check-in Scanner', group: 'Staff' },
               { id: 'staffBoarding', label: 'Boarding Officer', group: 'Staff' },
               { id: 'nativeApp', label: 'PWA Preview', group: 'Mobile' },
+              { id: 'reportViewerPortal', label: 'General Report Viewer · Helena', group: 'Reports Portal', viewerSeed: { name: 'Helena Sandoval', role: 'General Report Viewer', assignedVessels: ['__ALL__'] } },
+              { id: 'reportViewerPortal', label: 'Report Viewer (MV St Therese) · Renato', group: 'Reports Portal', viewerSeed: { name: 'Renato Almonte', role: 'Report Viewer', assignedVessels: ['MV Our Lady of St Therese'] } },
               { id: 'meeting-2026-05-24', label: 'May 24, 2026', group: 'Meetings', href: '/meetings/2026-05-24' },
             ].filter(s => s.group === group);
 
             const groupColor = group === 'Customer' ? COLORS.primary
               : group === 'Admin' ? '#3B82F6'
               : group === 'Staff' ? '#7C3AED'
-              : group === 'Meetings' ? '#10B981'
+              : group === 'Reports Portal' ? '#10B981'
+              : group === 'Meetings' ? '#0EA5E9'
               : '#F59E0B';
 
             return (
@@ -18107,9 +18110,10 @@ export default function FandSMarineMockup() {
                 <div className="space-y-0.5">
                   {groupScreens.map(s => (
                     <button
-                      key={s.id}
+                      key={s.label}
                       onClick={() => {
                         if (s.href) { window.open(s.href, '_blank'); return; }
+                        if (s.viewerSeed) { setCurrentUser(s.viewerSeed); }
                         setScreen(s.id); setShowManifestPreview(false);
                       }}
                       className="w-full text-left px-2.5 py-1.5 rounded-md text-xs transition-all truncate"
