@@ -8659,6 +8659,26 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
       return `BTN-2026-${refDate}-${tRand}`;
     });
     setTicketNumbers(tickets);
+    if (hasGovHospitalPax) {
+      const newRef = `GH-2026-0530-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+      const govPax = passengers.filter((p) => p.passengerType === PASSENGER_TYPE_GOV_HOSPITAL);
+      const records = govPax.map((p, idx) => ({
+        ref: idx === 0 ? newRef : `${newRef}-${idx + 1}`,
+        submittedAt: 'May 30 · 06:25',
+        sailingId: activeSailing?.id, voyageDate: 'May 19, 2026', voyageTime: activeSailing?.time,
+        vessel: activeSailing?.vessel, route: `${staff.port} → MIN-TIL`,
+        class: selectedClass === 'openair' ? 'Open Air' : selectedClass === 'aircon' ? 'Aircon' : 'VIP',
+        seat: p.seat || '—',
+        passenger: { name: p.name || 'Unnamed', age: p.age || '—', sex: p.sex },
+        agency: p.agency || '—', designation: p.designation || '—',
+        idType: p.idType, idNumber: p.idNumber || '—',
+        reasonForTravel: p.reasonForTravel || '—',
+        officer: staff.name, officerPort: staff.port,
+        approvalStatus: 'pending', approvedBy: null, rejectionReason: null,
+      }));
+      setGovHospitalBookings((prev) => [...records, ...prev]);
+      setBookingRef(newRef);
+    }
     setStep(4);
   };
 
@@ -8671,6 +8691,8 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
     setTicketNumbers([]);
     setAssigningPaxIndex(0);
   };
+
+  const hasGovHospitalPax = passengers.some((p) => p.passengerType === PASSENGER_TYPE_GOV_HOSPITAL);
 
   return (
     <div>
@@ -9001,7 +9023,9 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
             <OutlineButton onClick={() => setStep(2)} className="flex-1">← Back</OutlineButton>
             <PrimaryButton onClick={handleConfirm} size="md" className="flex-[2]"
               disabled={paymentMethod === 'cash' && Number(cashTendered) < subtotal}>
-              Confirm payment →
+              {hasGovHospitalPax
+                ? `Submit for Admin Approval · ₱${subtotal.toLocaleString()}`
+                : `Confirm payment · ₱${subtotal.toLocaleString()}`}
             </PrimaryButton>
           </div>
         </>
@@ -9096,6 +9120,16 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
               </div>
               <div className="overflow-x-auto" style={{ background: 'white', border: '1px solid #ccc', boxShadow: '0 1px 6px rgba(0,0,0,0.08)' }}>
                 <div style={{ minWidth: 560, padding: '20px 24px', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: 11, color: '#111', lineHeight: 1.4 }}>
+
+                  {hasGovHospitalPax && (
+                    <div style={{
+                      background: '#FEF3C7', border: '1px solid #F59E0B', color: '#92400E',
+                      padding: '6px 10px', marginBottom: 10, fontSize: 10, fontWeight: 'bold',
+                      textAlign: 'center', letterSpacing: 0.5, textTransform: 'uppercase',
+                    }}>
+                      PROVISIONAL — PENDING ADMIN APPROVAL · DO NOT BOARD UNTIL APPROVED
+                    </div>
+                  )}
 
                   {/* HEADER */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #222', paddingBottom: 8, marginBottom: 10 }}>
