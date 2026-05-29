@@ -59,7 +59,7 @@ function MobileBadge({ strategy }) {
 // ============================================================================
 // REUSABLE: PRIMARY BUTTON
 // ============================================================================
-function PrimaryButton({ children, onClick, size = 'md', className = '' }) {
+function PrimaryButton({ children, onClick, size = 'md', className = '', disabled = false }) {
   const sizes = {
     sm: 'h-10 px-4 text-sm',
     md: 'h-12 px-6 text-base',
@@ -68,10 +68,11 @@ function PrimaryButton({ children, onClick, size = 'md', className = '' }) {
   return (
     <button
       onClick={onClick}
-      className={`${sizes[size]} rounded-xl font-semibold text-white transition-colors ${className}`}
+      disabled={disabled}
+      className={`${sizes[size]} rounded-xl font-semibold text-white transition-colors ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''} ${className}`}
       style={{ background: COLORS.primary }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.primaryHover)}
-      onMouseLeave={(e) => (e.currentTarget.style.background = COLORS.primary)}
+      onMouseEnter={(e) => { if (!disabled) e.currentTarget.style.background = COLORS.primaryHover; }}
+      onMouseLeave={(e) => { if (!disabled) e.currentTarget.style.background = COLORS.primary; }}
     >
       {children}
     </button>
@@ -7037,11 +7038,16 @@ function AdminUsersScreen({ setScreen, t = T.en }) {
             >
               Cancel
             </button>
-            <PrimaryButton onClick={handleSaveAdmin} size="sm">
-              <span className="flex items-center gap-1.5">
-                <Save size={14} /> {editingAdmin ? 'Save changes' : 'Create user · send invite'}
-              </span>
-            </PrimaryButton>
+            {(() => {
+              const isInvalid = draft.role === VIEWER_ROLES.VESSEL && (draft.assignedVessels || []).length === 0;
+              return (
+                <PrimaryButton onClick={handleSaveAdmin} size="sm" disabled={isInvalid}>
+                  <span className="flex items-center gap-1.5">
+                    <Save size={14} /> {editingAdmin ? 'Save changes' : 'Create user · send invite'}
+                  </span>
+                </PrimaryButton>
+              );
+            })()}
           </div>
         </div>
       )}
