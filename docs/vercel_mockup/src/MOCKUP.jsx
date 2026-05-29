@@ -157,6 +157,72 @@ const resolveAssignedVessels = (record) => {
 };
 
 // ============================================================================
+// RESERVED SEAT POOLS (Gov/Hospital + Senior/PWD) — constants + utilities
+// See spec:
+// docs/superpowers/specs/2026-05-29-reserved-seat-pools-design.md
+// ============================================================================
+const GOV_POOL_PER_CLASS = 5;
+const SENIOR_PWD_POOL_PER_CLASS = 4;
+const PASSENGER_TYPE_GOV_HOSPITAL = 'Gov/Hospital';
+
+// Returns 'regular' | 'govHospital' | 'seniorPwd' | null for sold out.
+// Pure function — does NOT mutate `pools`. Caller is responsible for applying
+// the consumption (incrementing `taken` or `pending`) once it accepts the result.
+const consumePool = (pools, passengerType) => {
+  if (!pools) return null;
+  const reg = pools.regular || { capacity: 0, taken: 0 };
+  const gov = pools.govHospital || { capacity: 0, taken: 0, pending: 0 };
+  const sp  = pools.seniorPwd || { capacity: 0, taken: 0 };
+  const regAvail = reg.taken < reg.capacity;
+  const govAvail = (gov.taken + (gov.pending || 0)) < gov.capacity;
+  const spAvail  = sp.taken < sp.capacity;
+
+  if (passengerType === PASSENGER_TYPE_GOV_HOSPITAL) {
+    return govAvail ? 'govHospital' : null;
+  }
+  if (passengerType === 'Senior' || passengerType === 'PWD') {
+    if (spAvail) return 'seniorPwd';
+    if (regAvail) return 'regular'; // Senior/PWD keeps 20% discount
+    return null; // never spills into Gov/Hospital
+  }
+  // Regular passenger (Adult / Student / Child / Infant)
+  if (regAvail) return 'regular';
+  if (govAvail) return 'govHospital';
+  if (spAvail)  return 'seniorPwd';
+  return null;
+};
+
+// Maps a seat label (e.g. "A03-B") to which pool slice it belongs to, based on
+// the seat grid for the class. Last GOV_POOL_PER_CLASS seats of the class are
+// the Gov/Hospital pool; the SENIOR_PWD_POOL_PER_CLASS seats before that are
+// the Senior/PWD pool; everything else is regular. This is the seat-picker's
+// visual contract — it does not affect the consumePool cascade.
+const poolForSeat = (seatLabel, classCapacity) => {
+  if (!seatLabel) return 'regular';
+  // Seats are ordered row-major; assume seatIndex is derivable from the label.
+  // For mockup purposes we just take a numeric tail to assign pools.
+  const m = seatLabel.match(/(\d+)-([A-Z])/);
+  if (!m) return 'regular';
+  const row = parseInt(m[1], 10);
+  const col = m[2].charCodeAt(0) - 'A'.charCodeAt(0);
+  // Pseudo seat index: (row-1) * 8 + col is good enough to bucket the tail.
+  const idx = (row - 1) * 8 + col;
+  const govStart = classCapacity - GOV_POOL_PER_CLASS;
+  const spStart  = classCapacity - GOV_POOL_PER_CLASS - SENIOR_PWD_POOL_PER_CLASS;
+  if (idx >= govStart) return 'govHospital';
+  if (idx >= spStart)  return 'seniorPwd';
+  return 'regular';
+};
+
+// Build the per-class `pools` object for a given total class capacity.
+// Pure helper used by sailing seed data.
+const buildPools = (classCapacity) => ({
+  regular:     { capacity: Math.max(0, classCapacity - GOV_POOL_PER_CLASS - SENIOR_PWD_POOL_PER_CLASS), taken: 0 },
+  govHospital: { capacity: GOV_POOL_PER_CLASS, taken: 0, pending: 0 },
+  seniorPwd:   { capacity: SENIOR_PWD_POOL_PER_CLASS, taken: 0 },
+});
+
+// ============================================================================
 // TIER 1: LANDING PAGE
 // ============================================================================
 function LandingScreen({ setScreen, t = T.en }) {
