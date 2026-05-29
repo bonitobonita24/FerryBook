@@ -12674,7 +12674,7 @@ function NativeAppPreviewScreen({ setScreen, t = T.en }) {
 // Filterable by port + date range. CSV export. Used for end-of-day cash
 // reconciliation; companion to AdminReportsScreen which is more analytical.
 // ============================================================================
-function AdminSalesReportsScreen({ setScreen, t = T.en }) {
+function AdminSalesReportsScreen({ setScreen, t = T.en, vesselFilter = 'all', readOnly = false }) {
   const [tab, setTab] = useState('booked'); // 'booked' | 'boarded'
   const [portFilter, setPortFilter] = useState('all'); // 'all' | 'BAT-NAS' | 'BAT-CAL'
   const [range, setRange] = useState('7d'); // '7d' | '30d' | 'custom'
@@ -12718,8 +12718,9 @@ function AdminSalesReportsScreen({ setScreen, t = T.en }) {
     { date: 'May 19, Tue', booked: 26, boarded: 25, noShow: 1, realized: 21250, port: 'BAT-CAL', vessel: 'MV Our Mother of Perpetual Help' },
   ];
 
-  const bookedFiltered = bookedRows.filter((r) => portFilter === 'all' || r.port === portFilter);
-  const boardedFiltered = boardedRows.filter((r) => portFilter === 'all' || r.port === portFilter);
+  const vesselAllowed = (r) => vesselFilter === 'all' || (Array.isArray(vesselFilter) && vesselFilter.includes(r.vessel));
+  const bookedFiltered = bookedRows.filter((r) => (portFilter === 'all' || r.port === portFilter) && vesselAllowed(r));
+  const boardedFiltered = boardedRows.filter((r) => (portFilter === 'all' || r.port === portFilter) && vesselAllowed(r));
 
   // Totals
   const bookedTotals = bookedFiltered.reduce(
@@ -12780,12 +12781,14 @@ function AdminSalesReportsScreen({ setScreen, t = T.en }) {
             Booked vs Boarded — separate the cash received online from the cash realized after sailing
           </p>
         </div>
-        <button
-          className="text-xs font-semibold px-3 py-2 rounded-lg border bg-white flex items-center gap-1.5"
-          style={{ color: COLORS.ink, borderColor: COLORS.border }}
-        >
-          <Download size={14} /> Export CSV
-        </button>
+        {!readOnly && (
+          <button
+            className="text-xs font-semibold px-3 py-2 rounded-lg border bg-white flex items-center gap-1.5"
+            style={{ color: COLORS.ink, borderColor: COLORS.border }}
+          >
+            <Download size={14} /> Export CSV
+          </button>
+        )}
       </div>
 
       {/* Tab switch — Booked vs Boarded */}
