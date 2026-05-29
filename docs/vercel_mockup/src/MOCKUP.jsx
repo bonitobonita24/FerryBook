@@ -6558,6 +6558,7 @@ function AdminReportsScreen({ setScreen, t = T.en, vesselFilter = 'all', readOnl
     { type: 'PWD', count: 38, value: 9200 },
     { type: 'Student', count: 71, value: 12800 },
     { type: 'Promo code', count: 364, value: 84200 },
+    { type: 'Gov/Hospital', count: 14, value: 0 },
   ];
 
   // KPI scaling based on filters (illustrative — visual feedback only).
@@ -6695,6 +6696,25 @@ function AdminReportsScreen({ setScreen, t = T.en, vesselFilter = 'all', readOnl
           </div>
         </div>
       </div>
+
+        {/* Reserved pool KPIs (last 30 days, illustrative) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div className="rounded-2xl p-4 border" style={{ background: '#FAF5FF', borderColor: '#E9D5FF' }}>
+            <div className="text-xs font-semibold mb-1" style={{ color: '#5B21B6' }}>Gov/Hospital pool utilization</div>
+            <div className="text-2xl font-bold" style={{ color: '#5B21B6' }}>{Math.round(18 * vesselScale)} / {Math.round(40 * vesselScale)} seats</div>
+            <div className="text-xs mt-1" style={{ color: COLORS.inkMuted }}>Approved + pending across selected range · 2 rejected</div>
+          </div>
+          <div className="rounded-2xl p-4 border" style={{ background: '#FEF3C7', borderColor: '#FCD34D' }}>
+            <div className="text-xs font-semibold mb-1" style={{ color: '#92400E' }}>Senior/PWD pool utilization</div>
+            <div className="text-2xl font-bold" style={{ color: '#92400E' }}>{Math.round(22 * vesselScale)} / {Math.round(32 * vesselScale)} seats</div>
+            <div className="text-xs mt-1" style={{ color: COLORS.inkMuted }}>Includes overflow absorbed by regular passengers</div>
+          </div>
+          <div className="rounded-2xl p-4 border" style={{ background: '#E0F2FE', borderColor: '#7DD3FC' }}>
+            <div className="text-xs font-semibold mb-1" style={{ color: '#0C4A6E' }}>Pool overflow events</div>
+            <div className="text-2xl font-bold" style={{ color: '#0C4A6E' }}>{Math.round(7 * vesselScale)} G/H · {Math.round(11 * vesselScale)} S/P</div>
+            <div className="text-xs mt-1" style={{ color: COLORS.inkMuted }}>Regular pax absorbed reserved seats in range</div>
+          </div>
+        </div>
 
       {/* Revenue by day — stacked bar */}
       <div className="bg-white rounded-2xl p-5 border mb-4" style={{ borderColor: COLORS.border }}>
