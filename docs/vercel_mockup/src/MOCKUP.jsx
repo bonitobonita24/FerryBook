@@ -6409,7 +6409,7 @@ function AdminReportsScreen({ setScreen, t = T.en, vesselFilter = 'all', readOnl
   const effectiveVesselKey = assignedVesselsList
     ? (assignedVesselsList.length === 1
         ? (assignedVesselsList[0] === VESSELS[0] ? 'therese' : 'perpetual')
-        : 'all') // 2+ assigned ≈ aggregate
+        : 'multi') // 2+ assigned — distinct from full-admin 'all' so KPI scale shrinks proportionally
     : vesselSelect;
 
   // Revenue by day (last 7 days)
@@ -6463,8 +6463,16 @@ function AdminReportsScreen({ setScreen, t = T.en, vesselFilter = 'all', readOnl
     { type: 'Promo code', count: 364, value: 84200 },
   ];
 
-  // KPI scaling based on filters (illustrative — visual feedback only)
-  const filterScale = (portFilter === 'all' ? 1 : 0.55) * (effectiveVesselKey === 'all' ? 1 : 0.55);
+  // KPI scaling based on filters (illustrative — visual feedback only).
+  // Viewer scope shrinks proportional to the share of vessels assigned; the
+  // port filter is disabled in readOnly viewer mode so portFilter stays at
+  // 'all' and never compounds with the vessel scope.
+  const vesselScale = assignedVesselsList
+    ? (assignedVesselsList.length >= VESSELS.length
+        ? 1
+        : assignedVesselsList.length / VESSELS.length)
+    : (vesselSelect === 'all' ? 1 : 0.55);
+  const filterScale = (portFilter === 'all' ? 1 : 0.55) * vesselScale;
   const totalRevenue = Math.round(621900 * filterScale);
   const totalBookings = Math.round(1164 * filterScale);
   const avgOccupancy = effectiveVesselKey === 'therese' ? 85 : effectiveVesselKey === 'perpetual' ? 78 : 82;
@@ -6526,16 +6534,25 @@ function AdminReportsScreen({ setScreen, t = T.en, vesselFilter = 'all', readOnl
         </div>
         <div className="flex-1 min-w-[160px]">
           <label className="block text-xs font-semibold mb-1" style={{ color: COLORS.inkMuted }}>Batangas port</label>
-          <select
-            value={portFilter}
-            onChange={(e) => setPortFilter(e.target.value)}
-            className="w-full h-10 px-3 rounded-lg border outline-none text-sm bg-white"
-            style={{ borderColor: COLORS.border, color: COLORS.ink }}
-          >
-            <option value="all">All Batangas ports</option>
-            <option value="nasugbu">Nasugbu only (BAT-NAS)</option>
-            <option value="calatagan">Calatagan only (BAT-CAL)</option>
-          </select>
+          {readOnly ? (
+            <div
+              className="w-full h-10 px-3 rounded-lg border flex items-center text-sm"
+              style={{ borderColor: COLORS.border, background: COLORS.bgMuted, color: COLORS.inkMuted }}
+            >
+              All Batangas ports
+            </div>
+          ) : (
+            <select
+              value={portFilter}
+              onChange={(e) => setPortFilter(e.target.value)}
+              className="w-full h-10 px-3 rounded-lg border outline-none text-sm bg-white"
+              style={{ borderColor: COLORS.border, color: COLORS.ink }}
+            >
+              <option value="all">All Batangas ports</option>
+              <option value="nasugbu">Nasugbu only (BAT-NAS)</option>
+              <option value="calatagan">Calatagan only (BAT-CAL)</option>
+            </select>
+          )}
         </div>
         <div className="flex-1 min-w-[160px]">
           <label className="block text-xs font-semibold mb-1" style={{ color: COLORS.inkMuted }}>Date range</label>
@@ -18108,26 +18125,34 @@ export default function FandSMarineMockup() {
                   {group} ({groupScreens.length})
                 </div>
                 <div className="space-y-0.5">
-                  {groupScreens.map(s => (
-                    <button
-                      key={s.label}
-                      onClick={() => {
-                        if (s.href) { window.open(s.href, '_blank'); return; }
-                        if (s.viewerSeed) { setCurrentUser(s.viewerSeed); }
-                        setScreen(s.id); setShowManifestPreview(false);
-                      }}
-                      className="w-full text-left px-2.5 py-1.5 rounded-md text-xs transition-all truncate"
-                      style={{
-                        background: screen === s.id ? `${groupColor}22` : 'transparent',
-                        color: screen === s.id ? '#E5E7EB' : '#9CA3AF',
-                        fontWeight: screen === s.id ? 600 : 400,
-                        borderLeft: screen === s.id ? `2px solid ${groupColor}` : '2px solid transparent',
-                      }}
-                    >
-                      {s.href && <span style={{ marginRight: 4, fontSize: 10 }}>↗</span>}
-                      {s.label}
-                    </button>
-                  ))}
+                  {groupScreens.map(s => {
+                    // Two Reports Portal entries share id='reportViewerPortal'
+                    // but seed different viewer identities. Disambiguate the
+                    // active highlight by the viewerSeed.name vs currentUser.
+                    const isActive = screen === s.id && (
+                      !s.viewerSeed || (currentUser && currentUser.name === s.viewerSeed.name)
+                    );
+                    return (
+                      <button
+                        key={s.label}
+                        onClick={() => {
+                          if (s.href) { window.open(s.href, '_blank'); return; }
+                          if (s.viewerSeed) { setCurrentUser(s.viewerSeed); }
+                          setScreen(s.id); setShowManifestPreview(false);
+                        }}
+                        className="w-full text-left px-2.5 py-1.5 rounded-md text-xs transition-all truncate"
+                        style={{
+                          background: isActive ? `${groupColor}22` : 'transparent',
+                          color: isActive ? '#E5E7EB' : '#9CA3AF',
+                          fontWeight: isActive ? 600 : 400,
+                          borderLeft: isActive ? `2px solid ${groupColor}` : '2px solid transparent',
+                        }}
+                      >
+                        {s.href && <span style={{ marginRight: 4, fontSize: 10 }}>↗</span>}
+                        {s.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             );
