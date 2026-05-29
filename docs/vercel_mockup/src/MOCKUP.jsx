@@ -223,6 +223,27 @@ const buildPools = (classCapacity) => ({
 });
 
 // ============================================================================
+// ReservedPoolBadge — small chip used in seat pickers, manifests, and the
+// walk-in daily list to mark seats/passengers belonging to a reserved pool.
+// ============================================================================
+function ReservedPoolBadge({ pool, size = 'sm' }) {
+  if (pool === 'regular' || !pool) return null;
+  const palette = pool === 'govHospital'
+    ? { bg: '#E9D5FF', fg: '#5B21B6', label: 'GOV/HOSPITAL POOL' }
+    : { bg: '#FEF3C7', fg: '#92400E', label: 'SENIOR/PWD POOL' };
+  const padding = size === 'sm' ? 'px-1.5 py-0.5' : 'px-2 py-1';
+  const text = size === 'sm' ? 'text-[9px]' : 'text-[11px]';
+  return (
+    <span
+      className={`inline-block rounded font-bold tracking-wide ${padding} ${text}`}
+      style={{ background: palette.bg, color: palette.fg }}
+    >
+      {palette.label}
+    </span>
+  );
+}
+
+// ============================================================================
 // TIER 1: LANDING PAGE
 // ============================================================================
 function LandingScreen({ setScreen, t = T.en }) {
