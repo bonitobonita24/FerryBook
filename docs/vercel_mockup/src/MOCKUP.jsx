@@ -8540,12 +8540,12 @@ function AdminAuditScreen({ setScreen, t = T.en }) {
 // Terminal-tablet booking flow. Staff at Nasugbu can only book BAT-NAS sailings;
 // staff at Calatagan can only book BAT-CAL sailings. Cash and card-at-counter.
 // ============================================================================
-function StaffWalkinScreen({ setScreen, t = T.en }) {
+function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setGovHospitalBookings = () => {} }) {
   const [step, setStep] = useState(1); // 1: sailing+class, 2: passengers+seats, 3: payment, 4: receipt
   const [selectedClass, setSelectedClass] = useState('aircon');
   const [paxCount, setPaxCount] = useState(1);
   const [passengers, setPassengers] = useState([
-    { name: '', age: '', sex: 'M', idType: 'National ID', idNumber: '', passengerType: 'Adult', seat: '' },
+    { name: '', age: '', sex: 'M', idType: 'National ID', idNumber: '', passengerType: 'Adult', seat: '', agency: '', designation: '', reasonForTravel: '' },
   ]);
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [cashTendered, setCashTendered] = useState('');
@@ -8610,7 +8610,7 @@ function StaffWalkinScreen({ setScreen, t = T.en }) {
     setPaxCount(n);
     const newPax = [];
     for (let i = 0; i < n; i++) {
-      newPax.push(passengers[i] || { name: '', age: '', sex: 'M', idType: 'National ID', idNumber: '', passengerType: 'Adult', seat: '' });
+      newPax.push(passengers[i] || { name: '', age: '', sex: 'M', idType: 'National ID', idNumber: '', passengerType: 'Adult', seat: '', agency: '', designation: '', reasonForTravel: '' });
     }
     setPassengers(newPax);
   };
@@ -8650,7 +8650,7 @@ function StaffWalkinScreen({ setScreen, t = T.en }) {
   const reset = () => {
     setStep(1);
     setPaxCount(1);
-    setPassengers([{ name: '', age: '', sex: 'M', idType: 'National ID', idNumber: '', passengerType: 'Adult', seat: '' }]);
+    setPassengers([{ name: '', age: '', sex: 'M', idType: 'National ID', idNumber: '', passengerType: 'Adult', seat: '', agency: '', designation: '', reasonForTravel: '' }]);
     setCashTendered('');
     setBookingRef('');
     setTicketNumbers([]);
@@ -8822,6 +8822,7 @@ function StaffWalkinScreen({ setScreen, t = T.en }) {
                     style={{ borderColor: COLORS.border, color: COLORS.ink }}>
                     <option>Adult</option><option>Senior (20%)</option><option>PWD (20%)</option>
                     <option>Student (20%)</option><option>Child 3-12 (50%)</option><option>Infant 0-3 (free)</option>
+                    <option>{PASSENGER_TYPE_GOV_HOSPITAL}</option>
                   </select>
                 </div>
                 <div className="flex gap-1.5">
@@ -8831,11 +8832,32 @@ function StaffWalkinScreen({ setScreen, t = T.en }) {
                     <option>National ID</option><option>Driver License</option><option>UMID</option><option>SSS</option>
                     <option>PhilHealth</option><option>Passport</option><option>Senior ID</option><option>PWD ID</option>
                     <option>Student ID</option><option>PSA Birth Cert</option>
+                    <option>Government ID</option><option>Hospital Worker ID</option>
+                    <option>PRC License</option><option>DOH Issued ID</option>
                   </select>
                   <input type="text" value={p.idNumber} onChange={(e) => updatePassenger(i, 'idNumber', e.target.value)}
                     placeholder="ID number" className="flex-1 h-9 px-2 rounded-lg border outline-none text-xs font-mono"
                     style={{ borderColor: COLORS.border, color: COLORS.ink }} />
                 </div>
+                {p.passengerType === PASSENGER_TYPE_GOV_HOSPITAL && (
+                  <div className="mt-2 p-2 rounded-lg border" style={{ background: '#FAF5FF', borderColor: '#E9D5FF' }}>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <ReservedPoolBadge pool="govHospital" />
+                      <span className="text-[10px] font-semibold" style={{ color: '#5B21B6' }}>Walk-in only · requires admin approval</span>
+                    </div>
+                    <div className="flex gap-1.5 mb-1.5">
+                      <input type="text" value={p.agency} onChange={(e) => updatePassenger(i, 'agency', e.target.value)}
+                        placeholder="Agency / Hospital name" className="flex-1 h-9 px-2 rounded-lg border outline-none text-xs"
+                        style={{ borderColor: COLORS.border, color: COLORS.ink }} />
+                      <input type="text" value={p.designation} onChange={(e) => updatePassenger(i, 'designation', e.target.value)}
+                        placeholder="Designation" className="flex-1 h-9 px-2 rounded-lg border outline-none text-xs"
+                        style={{ borderColor: COLORS.border, color: COLORS.ink }} />
+                    </div>
+                    <input type="text" value={p.reasonForTravel} onChange={(e) => updatePassenger(i, 'reasonForTravel', e.target.value)}
+                      placeholder="Reason for travel (surfaces to admin approver)" className="w-full h-9 px-2 rounded-lg border outline-none text-xs"
+                      style={{ borderColor: COLORS.border, color: COLORS.ink }} />
+                  </div>
+                )}
               </div>
             ))}
           </div>
