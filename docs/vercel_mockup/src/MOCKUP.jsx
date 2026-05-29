@@ -6783,26 +6783,48 @@ function AdminUsersScreen({ setScreen, t = T.en }) {
 
   const [showModal, setShowModal] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState(null);
-  const [draft, setDraft] = useState({ name: '', email: '', role: 'Ticketing Staff', port: 'BAT-NAS only' });
+  const [draft, setDraft] = useState({ name: '', email: '', role: 'Ticketing Staff', port: 'BAT-NAS only', assignedVessels: [] });
   const [confirmBlock, setConfirmBlock] = useState(null);
 
   const openCreate = () => {
     setEditingAdmin(null);
-    setDraft({ name: '', email: '', role: 'Ticketing Staff', port: 'BAT-NAS only' });
+    setDraft({ name: '', email: '', role: 'Ticketing Staff', port: 'BAT-NAS only', assignedVessels: [] });
     setShowModal(true);
   };
 
   const openEdit = (a) => {
     setEditingAdmin(a);
-    setDraft({ name: a.name, email: a.email, role: a.role, port: a.port });
+    setDraft({
+      name: a.name,
+      email: a.email,
+      role: a.role,
+      port: a.port,
+      assignedVessels: a.assignedVessels ? [...a.assignedVessels] : [],
+    });
     setShowModal(true);
   };
 
   const handleSaveAdmin = () => {
-    if (editingAdmin) {
-      setAdmins(admins.map((a) => (a.id === editingAdmin.id ? { ...a, ...draft } : a)));
+    // Normalise scope fields by role
+    let normalised = { ...draft };
+    if (draft.role === VIEWER_ROLES.GENERAL) {
+      normalised.port = '—';
+      normalised.assignedVessels = [ALL_VESSELS_SENTINEL];
+    } else if (draft.role === VIEWER_ROLES.VESSEL) {
+      normalised.port = '—';
+      // assignedVessels left as user-checked list
     } else {
-      setAdmins([...admins, { ...draft, id: `u${Date.now()}`, lastLogin: 'Never', mfa: false, status: 'Active' }]);
+      normalised.assignedVessels = [];
+    }
+    // Validation: RV must have ≥1 vessel
+    if (normalised.role === VIEWER_ROLES.VESSEL && normalised.assignedVessels.length === 0) {
+      // Silent no-op; the inline error in the form indicates the problem
+      return;
+    }
+    if (editingAdmin) {
+      setAdmins(admins.map((a) => (a.id === editingAdmin.id ? { ...a, ...normalised } : a)));
+    } else {
+      setAdmins([...admins, { ...normalised, id: `u${Date.now()}`, lastLogin: 'Never', mfa: false, status: 'Active' }]);
     }
     setShowModal(false);
   };
@@ -6927,34 +6949,85 @@ function AdminUsersScreen({ setScreen, t = T.en }) {
                 <option>Operations Manager</option>
                 <option>Finance Manager</option>
                 <option>Super Admin</option>
+                <option>General Report Viewer</option>
+                <option>Report Viewer</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1" style={{ color: COLORS.ink }}>Port assignment</label>
-              <select
-                value={draft.port}
-                onChange={(e) => setDraft({ ...draft, port: e.target.value })}
-                className="w-full h-10 px-3 rounded-lg border outline-none text-sm bg-white"
-                style={{ borderColor: COLORS.border, color: COLORS.ink }}
-              >
-                <option>All ports</option>
-                <option>BAT-NAS only</option>
-                <option>BAT-CAL only</option>
-              </select>
+              <label className="block text-xs font-semibold mb-1" style={{ color: COLORS.ink }}>Scope</label>
+              {draft.role === VIEWER_ROLES.GENERAL ? (
+                <div
+                  className="rounded-lg p-2.5 text-xs flex items-center gap-2"
+                  style={{ background: '#DCFCE7', color: COLORS.success, border: `1px solid #BBF7D0` }}
+                >
+                  <ShieldCheck size={14} />
+                  <span>All vessels (auto-assigned)</span>
+                </div>
+              ) : draft.role === VIEWER_ROLES.VESSEL ? (
+                <div className="space-y-1.5">
+                  {VESSELS.map((v) => {
+                    const checked = (draft.assignedVessels || []).includes(v);
+                    return (
+                      <label key={v} className="flex items-center gap-2 text-sm" style={{ color: COLORS.ink }}>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(e) => {
+                            const next = new Set(draft.assignedVessels || []);
+                            if (e.target.checked) next.add(v); else next.delete(v);
+                            setDraft({ ...draft, assignedVessels: Array.from(next) });
+                          }}
+                        />
+                        {v}
+                      </label>
+                    );
+                  })}
+                  {(draft.assignedVessels || []).length === 0 && (
+                    <div className="text-xs flex items-center gap-1.5 mt-1" style={{ color: COLORS.destructive }}>
+                      <AlertCircle size={12} /> Select at least one vessel
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <select
+                  value={draft.port}
+                  onChange={(e) => setDraft({ ...draft, port: e.target.value })}
+                  className="w-full h-10 px-3 rounded-lg border outline-none text-sm bg-white"
+                  style={{ borderColor: COLORS.border, color: COLORS.ink }}
+                >
+                  <option>All ports</option>
+                  <option>BAT-NAS only</option>
+                  <option>BAT-CAL only</option>
+                </select>
+              )}
             </div>
           </div>
 
-          <div
-            className="rounded-lg p-3 mb-4 text-xs flex items-start gap-2"
-            style={{ background: '#EFF6FF', color: '#1E40AF' }}
-          >
-            <Info size={14} className="flex-shrink-0 mt-0.5" />
-            <div>
-              <strong>Port assignment matters for Ticketing Staff.</strong> A staff
-              member at Nasugbu cannot book sailings from Calatagan. Operations
-              Manager, Finance Manager, and Super Admin always have all-port access.
+          {!isViewerRole(draft.role) ? (
+            <div
+              className="rounded-lg p-3 mb-4 text-xs flex items-start gap-2"
+              style={{ background: '#EFF6FF', color: '#1E40AF' }}
+            >
+              <Info size={14} className="flex-shrink-0 mt-0.5" />
+              <div>
+                <strong>Port assignment matters for Ticketing Staff.</strong> A staff
+                member at Nasugbu cannot book sailings from Calatagan. Operations
+                Manager, Finance Manager, and Super Admin always have all-port access.
+              </div>
             </div>
-          </div>
+          ) : (
+            <div
+              className="rounded-lg p-3 mb-4 text-xs flex items-start gap-2"
+              style={{ background: '#EFF6FF', color: '#1E40AF' }}
+            >
+              <Info size={14} className="flex-shrink-0 mt-0.5" />
+              <div>
+                <strong>Viewer roles are read-only.</strong> They can see reports for
+                their assigned vessels but cannot make bookings, refunds, or any
+                administrative changes.
+              </div>
+            </div>
+          )}
 
           <div className="flex gap-2 justify-end">
             <button
