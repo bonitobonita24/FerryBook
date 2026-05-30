@@ -13705,17 +13705,17 @@ function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBooki
                     <div style={{ color: COLORS.inkMuted }}>{b.vessel}</div>
                     <div style={{ color: COLORS.inkMuted }}>{b.route} · {b.class} · seat {b.seat}</div>
                   </div>
-                  {/* Two-column meta */}
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs mb-2">
+                  {/* Stacked meta — vertical on mobile to avoid horizontal compression; two-column at sm+ where there's room */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 sm:gap-x-3 text-xs mb-2">
                     <div>
                       <div className="text-[10px] uppercase font-semibold" style={{ color: COLORS.inkMuted }}>Agency</div>
-                      <div className="font-semibold" style={{ color: COLORS.ink }}>{b.agency}</div>
-                      <div style={{ color: COLORS.inkMuted }}>{b.designation}</div>
+                      <div className="font-semibold break-words" style={{ color: COLORS.ink }}>{b.agency}</div>
+                      <div className="break-words" style={{ color: COLORS.inkMuted }}>{b.designation}</div>
                     </div>
                     <div>
                       <div className="text-[10px] uppercase font-semibold" style={{ color: COLORS.inkMuted }}>ID</div>
-                      <div style={{ color: COLORS.ink }}>{b.idType}</div>
-                      <div className="font-mono" style={{ color: COLORS.inkMuted }}>{b.idNumber}</div>
+                      <div className="break-words" style={{ color: COLORS.ink }}>{b.idType}</div>
+                      <div className="font-mono break-all" style={{ color: COLORS.inkMuted }}>{b.idNumber}</div>
                     </div>
                   </div>
                   {/* Reason — full width */}
