@@ -1,0 +1,204 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e6]
+      - generic [ref=e10]: F and S Marine Transport Inc.
+      - generic [ref=e11]: ·
+      - generic [ref=e12]: Phase 2.8 · Batch 18 · 40 screens
+    - generic [ref=e14]: Powered by Powerbyte I.T. Solutions
+  - generic [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]: Preview mode
+        - generic [ref=e19]:
+          - button "📱 Phone" [ref=e20] [cursor=pointer]
+          - button "📟 Tablet" [ref=e21] [cursor=pointer]
+          - button "🖥️ Desktop" [ref=e22] [cursor=pointer]
+        - generic [ref=e23]: Desktop · 1280×800
+      - generic [ref=e24]:
+        - generic [ref=e25]: Customer (20)
+        - generic [ref=e27]:
+          - button "Landing" [ref=e28] [cursor=pointer]
+          - button "Date Calendar" [ref=e29] [cursor=pointer]
+          - button "Today's Sailings" [ref=e30] [cursor=pointer]
+          - button "Time Slot Picker" [ref=e31] [cursor=pointer]
+          - button "Class Picker" [ref=e32] [cursor=pointer]
+          - button "Passenger Forms" [ref=e33] [cursor=pointer]
+          - button "Seat Selection" [ref=e34] [cursor=pointer]
+          - button "Review + Pay" [ref=e35] [cursor=pointer]
+          - button "Confirmation Method" [ref=e36] [cursor=pointer]
+          - button "OTP Verification" [ref=e37] [cursor=pointer]
+          - button "E-Ticket" [ref=e38] [cursor=pointer]
+          - button "My Bookings" [ref=e39] [cursor=pointer]
+          - button "Booking Detail" [ref=e40] [cursor=pointer]
+          - button "Request Refund" [ref=e41] [cursor=pointer]
+          - button "No-Show Recovery" [ref=e42] [cursor=pointer]
+          - button "Reschedule" [ref=e43] [cursor=pointer]
+          - button "Emergency Recovery" [ref=e44] [cursor=pointer]
+          - button "Travel Credit Wallet" [ref=e45] [cursor=pointer]
+          - button "Login" [ref=e46] [cursor=pointer]
+          - button "Profile Edit" [ref=e47] [cursor=pointer]
+      - generic [ref=e48]:
+        - generic [ref=e49]: Admin (17)
+        - generic [ref=e51]:
+          - button "Ops Dashboard" [ref=e52] [cursor=pointer]
+          - button "Bookings List" [ref=e53] [cursor=pointer]
+          - button "Schedule" [ref=e54] [cursor=pointer]
+          - button "Port Management" [ref=e55] [cursor=pointer]
+          - button "Vessel Management" [ref=e56] [cursor=pointer]
+          - button "Date Blocking" [ref=e57] [cursor=pointer]
+          - button "Emergency Cancel" [ref=e58] [cursor=pointer]
+          - button "Fare Overrides" [ref=e59] [cursor=pointer]
+          - button "Promo Codes" [ref=e60] [cursor=pointer]
+          - button "Manifest Export" [ref=e61] [cursor=pointer]
+          - button "Refund Queue" [ref=e62] [cursor=pointer]
+          - button "Sales Reports" [ref=e63] [cursor=pointer]
+          - button "Daily Sales" [ref=e64] [cursor=pointer]
+          - button "User Management" [ref=e65] [cursor=pointer]
+          - button "Gov/Hospital Approvals 2" [active] [ref=e66] [cursor=pointer]:
+            - text: Gov/Hospital Approvals
+            - generic [ref=e67]: "2"
+          - button "System Settings" [ref=e68] [cursor=pointer]
+          - button "Audit Log" [ref=e69] [cursor=pointer]
+      - generic [ref=e70]:
+        - generic [ref=e71]: Staff (3)
+        - generic [ref=e73]:
+          - button "Walk-in Booking" [ref=e74] [cursor=pointer]
+          - button "Check-in Scanner" [ref=e75] [cursor=pointer]
+          - button "Boarding Officer" [ref=e76] [cursor=pointer]
+      - generic [ref=e77]:
+        - generic [ref=e78]: Mobile (1)
+        - button "PWA Preview" [ref=e81] [cursor=pointer]
+      - generic [ref=e82]:
+        - generic [ref=e83]: Reports Portal (2)
+        - generic [ref=e85]:
+          - button "General Report Viewer · Helena" [ref=e86] [cursor=pointer]
+          - button "Report Viewer (MV St Therese) · Renato" [ref=e87] [cursor=pointer]
+      - generic [ref=e88]:
+        - generic [ref=e89]: Meetings (1)
+        - button "↗May 24, 2026" [ref=e92] [cursor=pointer]
+    - generic [ref=e94]:
+      - generic [ref=e96]: Admin · Gov/Hospital Approvals
+      - generic [ref=e98]:
+        - generic [ref=e112]:
+          - button "F and S Marine Transport Inc." [ref=e224] [cursor=pointer]:
+            - img [ref=e114]
+            - generic [ref=e118]: F and S Marine Transport Inc.
+          - generic [ref=e119]:
+            - button "🇺🇸 EN" [ref=e120] [cursor=pointer]
+            - generic [ref=e226]: MS
+        - generic [ref=e123]:
+          - generic [ref=e227]:
+            - generic [ref=e228]:
+              - img [ref=e229]
+              - text: Mobile First
+            - generic [ref=e231]:
+              - generic [ref=e232]: Admin · Approvals
+              - heading "Gov/Hospital Approvals" [level=1] [ref=e233]
+              - paragraph [ref=e234]: Per-booking approval for government officials and hospital workers · walk-in only
+            - generic [ref=e235]:
+              - button "Pending 2" [ref=e236] [cursor=pointer]:
+                - text: Pending
+                - generic [ref=e237]: "2"
+              - button "Approved 0" [ref=e238] [cursor=pointer]:
+                - text: Approved
+                - generic [ref=e239]: "0"
+              - button "Rejected 0" [ref=e240] [cursor=pointer]:
+                - text: Rejected
+                - generic [ref=e241]: "0"
+              - button "All 3" [ref=e242] [cursor=pointer]:
+                - text: All
+                - generic [ref=e243]: "3"
+            - generic [ref=e244]:
+              - generic [ref=e245]:
+                - generic [ref=e246]: Pending
+                - generic [ref=e247]: "2"
+              - generic [ref=e248]:
+                - generic [ref=e249]: Approved today
+                - generic [ref=e250]: "0"
+              - generic [ref=e251]:
+                - generic [ref=e252]: Rejected today
+                - generic [ref=e253]: "0"
+              - generic [ref=e254]:
+                - generic [ref=e255]:
+                  - text: Pool utilization
+                  - generic [ref=e256]: · upcoming
+                - generic [ref=e257]: 5/30 seats
+            - generic [ref=e258]:
+              - generic [ref=e259]:
+                - generic [ref=e260]: Date
+                - combobox [ref=e261]:
+                  - option "All dates" [selected]
+                  - option "Today"
+                  - option "Last 7 days"
+              - generic [ref=e262]:
+                - generic [ref=e263]: Vessel
+                - combobox [ref=e264]:
+                  - option "All vessels" [selected]
+                  - option "MV Our Lady of St Therese"
+                  - option "MV Our Mother of Perpetual Help"
+            - generic [ref=e265]:
+              - generic [ref=e266]:
+                - generic [ref=e267]:
+                  - generic [ref=e268]: GH-2026-0528-7K2A
+                  - generic [ref=e269]: Pending
+                - generic [ref=e270]: Dr. Anselmo Ramirez
+                - generic [ref=e271]:
+                  - generic [ref=e272]: May 19, 2026 · 11:30
+                  - generic [ref=e273]: MV Our Lady of St Therese
+                  - generic [ref=e274]: BAT-NAS → MIN-TIL · Aircon · seat A06-E
+                - generic [ref=e275]:
+                  - generic [ref=e276]:
+                    - generic [ref=e277]: Agency
+                    - generic [ref=e278]: DOH - Region IV-A
+                    - generic [ref=e279]: Medical Director
+                  - generic [ref=e280]:
+                    - generic [ref=e281]: ID
+                    - generic [ref=e282]: DOH Issued ID
+                    - generic [ref=e283]: DOH-2024-19283
+                - generic [ref=e284]:
+                  - generic [ref=e285]: Reason for travel
+                  - generic [ref=e286]: Outbreak investigation deployment — Lubang Island
+                - generic [ref=e287]:
+                  - generic [ref=e288]: "Officer: Marisol Hidalgo"
+                  - generic [ref=e289]: "Submitted: May 28 · 14:32"
+                - generic [ref=e291]:
+                  - button "Approve" [ref=e292] [cursor=pointer]:
+                    - img [ref=e293]
+                    - text: Approve
+                  - button "Reject" [ref=e295] [cursor=pointer]:
+                    - img [ref=e296]
+                    - text: Reject
+              - generic [ref=e299]:
+                - generic [ref=e300]:
+                  - generic [ref=e301]: GH-2026-0528-9V3M
+                  - generic [ref=e302]: Pending
+                - generic [ref=e303]: Engr. Carlos Velasco
+                - generic [ref=e304]:
+                  - generic [ref=e305]: May 19, 2026 · 16:00
+                  - generic [ref=e306]: MV Our Lady of St Therese
+                  - generic [ref=e307]: BAT-NAS → MIN-TIL · Open Air · seat O09-G
+                - generic [ref=e308]:
+                  - generic [ref=e309]:
+                    - generic [ref=e310]: Agency
+                    - generic [ref=e311]: DPWH - District Engineering Office
+                    - generic [ref=e312]: District Engineer
+                  - generic [ref=e313]:
+                    - generic [ref=e314]: ID
+                    - generic [ref=e315]: Government ID
+                    - generic [ref=e316]: DPWH-IV-44912
+                - generic [ref=e317]:
+                  - generic [ref=e318]: Reason for travel
+                  - generic [ref=e319]: Bridge inspection · Lubang causeway
+                - generic [ref=e320]:
+                  - generic [ref=e321]: "Officer: Marisol Hidalgo"
+                  - generic [ref=e322]: "Submitted: May 28 · 15:08"
+                - generic [ref=e324]:
+                  - button "Approve" [ref=e325] [cursor=pointer]:
+                    - img [ref=e326]
+                    - text: Approve
+                  - button "Reject" [ref=e328] [cursor=pointer]:
+                    - img [ref=e329]
+                    - text: Reject
+          - contentinfo [ref=e221]: Powered by Powerbyte I.T. Solutions · © 2026
+      - generic [ref=e223]: Scroll inside the device · Desktop · 1280×800 · Not live — no data persists

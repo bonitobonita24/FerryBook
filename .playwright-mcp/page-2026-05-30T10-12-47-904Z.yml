@@ -1,0 +1,164 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e6]
+      - generic [ref=e10]: F and S Marine Transport Inc.
+      - generic [ref=e11]: ·
+      - generic [ref=e12]: Phase 2.8 · Batch 18 · 40 screens
+    - generic [ref=e14]: Powered by Powerbyte I.T. Solutions
+  - generic [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]: Preview mode
+        - generic [ref=e19]:
+          - button "📱 Phone" [ref=e20] [cursor=pointer]
+          - button "📟 Tablet" [ref=e21] [cursor=pointer]
+          - button "🖥️ Desktop" [active] [ref=e22] [cursor=pointer]
+        - generic [ref=e23]: Desktop · 1280×800
+      - generic [ref=e24]:
+        - generic [ref=e25]: Customer (20)
+        - generic [ref=e27]:
+          - button "Landing" [ref=e28] [cursor=pointer]
+          - button "Date Calendar" [ref=e29] [cursor=pointer]
+          - button "Today's Sailings" [ref=e30] [cursor=pointer]
+          - button "Time Slot Picker" [ref=e31] [cursor=pointer]
+          - button "Class Picker" [ref=e32] [cursor=pointer]
+          - button "Passenger Forms" [ref=e33] [cursor=pointer]
+          - button "Seat Selection" [ref=e34] [cursor=pointer]
+          - button "Review + Pay" [ref=e35] [cursor=pointer]
+          - button "Confirmation Method" [ref=e36] [cursor=pointer]
+          - button "OTP Verification" [ref=e37] [cursor=pointer]
+          - button "E-Ticket" [ref=e38] [cursor=pointer]
+          - button "My Bookings" [ref=e39] [cursor=pointer]
+          - button "Booking Detail" [ref=e40] [cursor=pointer]
+          - button "Request Refund" [ref=e41] [cursor=pointer]
+          - button "No-Show Recovery" [ref=e42] [cursor=pointer]
+          - button "Reschedule" [ref=e43] [cursor=pointer]
+          - button "Emergency Recovery" [ref=e44] [cursor=pointer]
+          - button "Travel Credit Wallet" [ref=e45] [cursor=pointer]
+          - button "Login" [ref=e46] [cursor=pointer]
+          - button "Profile Edit" [ref=e47] [cursor=pointer]
+      - generic [ref=e48]:
+        - generic [ref=e49]: Admin (17)
+        - generic [ref=e51]:
+          - button "Ops Dashboard" [ref=e52] [cursor=pointer]
+          - button "Bookings List" [ref=e53] [cursor=pointer]
+          - button "Schedule" [ref=e54] [cursor=pointer]
+          - button "Port Management" [ref=e55] [cursor=pointer]
+          - button "Vessel Management" [ref=e56] [cursor=pointer]
+          - button "Date Blocking" [ref=e57] [cursor=pointer]
+          - button "Emergency Cancel" [ref=e58] [cursor=pointer]
+          - button "Fare Overrides" [ref=e59] [cursor=pointer]
+          - button "Promo Codes" [ref=e60] [cursor=pointer]
+          - button "Manifest Export" [ref=e61] [cursor=pointer]
+          - button "Refund Queue" [ref=e62] [cursor=pointer]
+          - button "Sales Reports" [ref=e63] [cursor=pointer]
+          - button "Daily Sales" [ref=e64] [cursor=pointer]
+          - button "User Management" [ref=e65] [cursor=pointer]
+          - button "Gov/Hospital Approvals 2" [ref=e66] [cursor=pointer]:
+            - text: Gov/Hospital Approvals
+            - generic [ref=e67]: "2"
+          - button "System Settings" [ref=e68] [cursor=pointer]
+          - button "Audit Log" [ref=e69] [cursor=pointer]
+      - generic [ref=e70]:
+        - generic [ref=e71]: Staff (3)
+        - generic [ref=e73]:
+          - button "Walk-in Booking" [ref=e74] [cursor=pointer]
+          - button "Check-in Scanner" [ref=e75] [cursor=pointer]
+          - button "Boarding Officer" [ref=e76] [cursor=pointer]
+      - generic [ref=e77]:
+        - generic [ref=e78]: Mobile (1)
+        - button "PWA Preview" [ref=e81] [cursor=pointer]
+      - generic [ref=e82]:
+        - generic [ref=e83]: Reports Portal (2)
+        - generic [ref=e85]:
+          - button "General Report Viewer · Helena" [ref=e86] [cursor=pointer]
+          - button "Report Viewer (MV St Therese) · Renato" [ref=e87] [cursor=pointer]
+      - generic [ref=e88]:
+        - generic [ref=e89]: Meetings (1)
+        - button "↗May 24, 2026" [ref=e92] [cursor=pointer]
+    - generic [ref=e94]:
+      - generic [ref=e96]: Customer · Landing
+      - generic [ref=e98]:
+        - generic [ref=e112]:
+          - button "F and S Marine Transport Inc." [ref=e224] [cursor=pointer]:
+            - img [ref=e114]
+            - generic [ref=e118]: F and S Marine Transport Inc.
+          - generic [ref=e119]:
+            - button "🇺🇸 EN" [ref=e120] [cursor=pointer]
+            - button "My Bookings" [ref=e225] [cursor=pointer]
+            - button "Sign in" [ref=e122] [cursor=pointer]
+        - generic [ref=e123]:
+          - generic [ref=e125]:
+            - generic [ref=e126]:
+              - img [ref=e127]
+              - text: Mobile First
+            - generic [ref=e131]:
+              - generic [ref=e132]: 🚢 Batangas ↔ Lubang Island · Daily Departures
+              - heading "Book your trip to Lubang Island in just a minute." [level=1] [ref=e133]
+              - paragraph [ref=e134]: Pick your date, see live seat availability, book secure with GCash, Maya, or card.
+            - generic [ref=e135]:
+              - generic [ref=e136]:
+                - button "One-way" [ref=e137] [cursor=pointer]
+                - button "Round-trip · save 10%" [ref=e138] [cursor=pointer]
+              - generic [ref=e139]:
+                - generic [ref=e140]:
+                  - generic [ref=e141]: FROM
+                  - generic [ref=e142]:
+                    - img [ref=e143]
+                    - text: Batangas (any port)
+                - button "Swap direction" [ref=e146] [cursor=pointer]:
+                  - img [ref=e147]
+                - generic [ref=e150]:
+                  - generic [ref=e151]: TO
+                  - generic [ref=e152]:
+                    - img [ref=e153]
+                    - text: Tilik Port, Lubang
+              - button "DEPART Pick a date" [ref=e156] [cursor=pointer]:
+                - generic [ref=e157]: DEPART
+                - generic [ref=e158]:
+                  - img [ref=e159]
+                  - text: Pick a date
+              - button "Search available trips →" [ref=e161] [cursor=pointer]
+            - generic [ref=e162]:
+              - generic [ref=e163]:
+                - img [ref=e164]
+                - generic [ref=e166]: MARINA-licensed
+                - generic [ref=e167]: Cert. PSL-2019-04287
+              - generic [ref=e168]:
+                - img [ref=e169]
+                - generic [ref=e171]: 4.8 average rating
+                - generic [ref=e172]: 12,847 reviews
+              - generic [ref=e173]:
+                - img [ref=e174]
+                - generic [ref=e179]: 180,000+ passengers
+                - generic [ref=e180]: served in 2025
+              - generic [ref=e181]:
+                - img [ref=e182]
+                - generic [ref=e185]: 12 years operating
+                - generic [ref=e186]: since 2013
+            - heading "Three ways to sail" [level=2] [ref=e187]
+            - generic [ref=e188]:
+              - generic [ref=e189]:
+                - img [ref=e191]
+                - generic [ref=e195]:
+                  - generic [ref=e196]:
+                    - heading "Open Air" [level=3] [ref=e197]
+                    - generic [ref=e198]: from ₱350
+                  - paragraph [ref=e199]: Outdoor deck. Sea breeze, mountain views. Backpacker favorite.
+              - generic [ref=e200]:
+                - img [ref=e202]
+                - generic [ref=e207]:
+                  - generic [ref=e208]:
+                    - heading "Aircon" [level=3] [ref=e209]
+                    - generic [ref=e210]: from ₱550
+                  - paragraph [ref=e211]: Climate-controlled cabin with reclining seats and USB charging.
+              - generic [ref=e212]:
+                - img [ref=e214]
+                - generic [ref=e216]:
+                  - generic [ref=e217]:
+                    - heading "VIP" [level=3] [ref=e218]
+                    - generic [ref=e219]: from ₱850
+                  - paragraph [ref=e220]: Private lounge. Refreshments, expedited boarding, prime window seats.
+          - contentinfo [ref=e221]: Powered by Powerbyte I.T. Solutions · © 2026
+      - generic [ref=e223]: Scroll inside the device · Desktop · 1280×800 · Not live — no data persists
