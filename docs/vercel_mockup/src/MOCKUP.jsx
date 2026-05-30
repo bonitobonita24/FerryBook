@@ -13576,7 +13576,7 @@ function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBooki
 
   return (
     <div>
-      <MobileBadge strategy="Mobile Ready" />
+      <MobileBadge strategy="Mobile First" />
 
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
@@ -13636,74 +13636,162 @@ function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBooki
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: COLORS.border }}>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead style={{ background: COLORS.bgMuted }}>
-              <tr>
-                {['Ref', 'Voyage', 'Passenger', 'Agency / Designation', 'ID', 'Reason', 'Officer', 'Submitted', 'Status', 'Action'].map((h) => (
-                  <th key={h} className="text-left px-3 py-2 text-xs font-semibold" style={{ color: COLORS.inkMuted }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 && (
-                <tr><td colSpan={10} className="px-3 py-6 text-center text-sm" style={{ color: COLORS.inkMuted }}>No bookings match the current filters.</td></tr>
-              )}
-              {filtered.map((b) => {
-                const chip = b.approvalStatus === 'approved'
-                  ? { bg: '#DCFCE7', fg: '#166534', label: 'Approved' }
-                  : b.approvalStatus === 'rejected'
-                  ? { bg: '#FEE2E2', fg: '#B91C1C', label: 'Rejected' }
-                  : { bg: '#FEF3C7', fg: '#92400E', label: 'Pending' };
-                return (
-                  <tr key={b.ref} style={{ borderTop: `1px solid ${COLORS.border}` }}>
-                    <td className="px-3 py-2 font-mono text-xs font-bold" style={{ color: COLORS.ink }}>{b.ref}</td>
-                    <td className="px-3 py-2 text-xs" style={{ color: COLORS.ink }}>
-                      <div className="font-semibold">{b.voyageDate}</div>
-                      <div style={{ color: COLORS.inkMuted }}>{b.voyageTime} · {b.vessel}</div>
-                      <div style={{ color: COLORS.inkMuted }}>{b.route} · {b.class} · {b.seat}</div>
-                    </td>
-                    <td className="px-3 py-2 text-xs font-semibold" style={{ color: COLORS.ink }}>{b.passenger.name}</td>
-                    <td className="px-3 py-2 text-xs" style={{ color: COLORS.ink }}>
-                      <div className="font-semibold">{b.agency}</div>
-                      <div style={{ color: COLORS.inkMuted }}>{b.designation}</div>
-                    </td>
-                    <td className="px-3 py-2 text-xs" style={{ color: COLORS.ink }}>
-                      <div>{b.idType}</div>
-                      <div className="font-mono" style={{ color: COLORS.inkMuted }}>{b.idNumber}</div>
-                    </td>
-                    <td className="px-3 py-2 text-xs" style={{ color: COLORS.ink, maxWidth: 220 }}>{b.reasonForTravel}</td>
-                    <td className="px-3 py-2 text-xs" style={{ color: COLORS.inkMuted }}>{b.officer}</td>
-                    <td className="px-3 py-2 text-xs" style={{ color: COLORS.inkMuted }}>{b.submittedAt}</td>
-                    <td className="px-3 py-2">
-                      <span className="text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: chip.bg, color: chip.fg }}>{chip.label}</span>
-                    </td>
-                    <td className="px-3 py-2">
-                      {b.approvalStatus === 'pending' ? (
-                        isVoyageDeparted(b) ? (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded inline-flex items-center gap-1"
-                            style={{ background: COLORS.bgMuted, color: COLORS.inkMuted }}>
-                            <Lock size={10} /> Voyage departed
-                          </span>
-                        ) : (
-                          <div className="flex gap-1">
-                            <button onClick={() => approve(b.ref)} className="text-xs font-semibold px-2 py-1 rounded" style={{ background: COLORS.success, color: 'white' }}>Approve</button>
-                            <button onClick={() => openReject(b.ref)} className="text-xs font-semibold px-2 py-1 rounded" style={{ background: COLORS.destructive, color: 'white' }}>Reject</button>
-                          </div>
-                        )
-                      ) : (
-                        <span className="text-xs" style={{ color: COLORS.inkMuted }}>—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      {/* Bookings — mobile card stack and desktop table share one filtered list */}
+      {filtered.length === 0 ? (
+        <div className="bg-white rounded-2xl border px-3 py-8 text-center text-sm" style={{ borderColor: COLORS.border, color: COLORS.inkMuted }}>
+          No bookings match the current filters.
         </div>
-      </div>
+      ) : (
+        <>
+          {/* Mobile card view (≤ md) — every column from the desktop table is preserved here, stacked vertically */}
+          <div className="space-y-3 md:hidden">
+            {filtered.map((b) => {
+              const chip = b.approvalStatus === 'approved'
+                ? { bg: '#DCFCE7', fg: '#166534', label: 'Approved' }
+                : b.approvalStatus === 'rejected'
+                ? { bg: '#FEE2E2', fg: '#B91C1C', label: 'Rejected' }
+                : { bg: '#FEF3C7', fg: '#92400E', label: 'Pending' };
+              const departed = b.approvalStatus === 'pending' && isVoyageDeparted(b);
+              return (
+                <div key={b.ref} className="bg-white rounded-2xl border p-3" style={{ borderColor: COLORS.border }}>
+                  {/* Ref + status chip */}
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="font-mono text-xs font-bold break-all" style={{ color: COLORS.ink }}>{b.ref}</div>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded font-bold flex-shrink-0" style={{ background: chip.bg, color: chip.fg }}>{chip.label}</span>
+                  </div>
+                  {/* Passenger name */}
+                  <div className="text-sm font-bold mb-1" style={{ color: COLORS.ink }}>{b.passenger.name}</div>
+                  {/* Voyage block */}
+                  <div className="text-xs mb-2" style={{ color: COLORS.ink }}>
+                    <div className="font-semibold">{b.voyageDate} · {b.voyageTime}</div>
+                    <div style={{ color: COLORS.inkMuted }}>{b.vessel}</div>
+                    <div style={{ color: COLORS.inkMuted }}>{b.route} · {b.class} · seat {b.seat}</div>
+                  </div>
+                  {/* Two-column meta */}
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs mb-2">
+                    <div>
+                      <div className="text-[10px] uppercase font-semibold" style={{ color: COLORS.inkMuted }}>Agency</div>
+                      <div className="font-semibold" style={{ color: COLORS.ink }}>{b.agency}</div>
+                      <div style={{ color: COLORS.inkMuted }}>{b.designation}</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] uppercase font-semibold" style={{ color: COLORS.inkMuted }}>ID</div>
+                      <div style={{ color: COLORS.ink }}>{b.idType}</div>
+                      <div className="font-mono" style={{ color: COLORS.inkMuted }}>{b.idNumber}</div>
+                    </div>
+                  </div>
+                  {/* Reason — full width */}
+                  <div className="text-xs mb-2">
+                    <div className="text-[10px] uppercase font-semibold" style={{ color: COLORS.inkMuted }}>Reason for travel</div>
+                    <div style={{ color: COLORS.ink }}>{b.reasonForTravel}</div>
+                  </div>
+                  {/* Submitter footer */}
+                  <div className="text-[10px] pt-2 mt-2 border-t flex flex-wrap gap-x-3 gap-y-0.5" style={{ borderColor: COLORS.border, color: COLORS.inkMuted }}>
+                    <span>Officer: <span style={{ color: COLORS.ink }}>{b.officer}</span></span>
+                    <span>Submitted: <span style={{ color: COLORS.ink }}>{b.submittedAt}</span></span>
+                  </div>
+                  {/* Actions */}
+                  {b.approvalStatus === 'pending' && (
+                    <div className="mt-3">
+                      {departed ? (
+                        <div className="rounded-lg px-3 py-2 text-xs font-bold flex items-center justify-center gap-1.5"
+                          style={{ background: COLORS.bgMuted, color: COLORS.inkMuted }}>
+                          <Lock size={12} /> Voyage departed · approvals locked
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                          <button onClick={() => approve(b.ref)} className="h-10 rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5" style={{ background: COLORS.success, color: 'white' }}>
+                            <Check size={14} /> Approve
+                          </button>
+                          <button onClick={() => openReject(b.ref)} className="h-10 rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5" style={{ background: COLORS.destructive, color: 'white' }}>
+                            <X size={14} /> Reject
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {b.approvalStatus === 'rejected' && b.rejectionReason && (
+                    <div className="mt-2 text-[10px] rounded-lg px-2 py-1.5" style={{ background: '#FEE2E2', color: '#B91C1C' }}>
+                      Rejection reason: {b.rejectionReason}
+                    </div>
+                  )}
+                  {b.approvalStatus === 'approved' && b.approvedBy && (
+                    <div className="mt-2 text-[10px]" style={{ color: COLORS.inkMuted }}>
+                      Approved by <span style={{ color: COLORS.ink }}>{b.approvedBy}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop table (≥ md) */}
+          <div className="bg-white rounded-2xl border overflow-hidden hidden md:block" style={{ borderColor: COLORS.border }}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead style={{ background: COLORS.bgMuted }}>
+                  <tr>
+                    {['Ref', 'Voyage', 'Passenger', 'Agency / Designation', 'ID', 'Reason', 'Officer', 'Submitted', 'Status', 'Action'].map((h) => (
+                      <th key={h} className="text-left px-3 py-2 text-xs font-semibold" style={{ color: COLORS.inkMuted }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((b) => {
+                    const chip = b.approvalStatus === 'approved'
+                      ? { bg: '#DCFCE7', fg: '#166534', label: 'Approved' }
+                      : b.approvalStatus === 'rejected'
+                      ? { bg: '#FEE2E2', fg: '#B91C1C', label: 'Rejected' }
+                      : { bg: '#FEF3C7', fg: '#92400E', label: 'Pending' };
+                    return (
+                      <tr key={b.ref} style={{ borderTop: `1px solid ${COLORS.border}` }}>
+                        <td className="px-3 py-2 font-mono text-xs font-bold" style={{ color: COLORS.ink }}>{b.ref}</td>
+                        <td className="px-3 py-2 text-xs" style={{ color: COLORS.ink }}>
+                          <div className="font-semibold">{b.voyageDate}</div>
+                          <div style={{ color: COLORS.inkMuted }}>{b.voyageTime} · {b.vessel}</div>
+                          <div style={{ color: COLORS.inkMuted }}>{b.route} · {b.class} · {b.seat}</div>
+                        </td>
+                        <td className="px-3 py-2 text-xs font-semibold" style={{ color: COLORS.ink }}>{b.passenger.name}</td>
+                        <td className="px-3 py-2 text-xs" style={{ color: COLORS.ink }}>
+                          <div className="font-semibold">{b.agency}</div>
+                          <div style={{ color: COLORS.inkMuted }}>{b.designation}</div>
+                        </td>
+                        <td className="px-3 py-2 text-xs" style={{ color: COLORS.ink }}>
+                          <div>{b.idType}</div>
+                          <div className="font-mono" style={{ color: COLORS.inkMuted }}>{b.idNumber}</div>
+                        </td>
+                        <td className="px-3 py-2 text-xs" style={{ color: COLORS.ink, maxWidth: 220 }}>{b.reasonForTravel}</td>
+                        <td className="px-3 py-2 text-xs" style={{ color: COLORS.inkMuted }}>{b.officer}</td>
+                        <td className="px-3 py-2 text-xs" style={{ color: COLORS.inkMuted }}>{b.submittedAt}</td>
+                        <td className="px-3 py-2">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: chip.bg, color: chip.fg }}>{chip.label}</span>
+                        </td>
+                        <td className="px-3 py-2">
+                          {b.approvalStatus === 'pending' ? (
+                            isVoyageDeparted(b) ? (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+                                style={{ background: COLORS.bgMuted, color: COLORS.inkMuted }}>
+                                <Lock size={10} /> Voyage departed
+                              </span>
+                            ) : (
+                              <div className="flex gap-1">
+                                <button onClick={() => approve(b.ref)} className="text-xs font-semibold px-2 py-1 rounded" style={{ background: COLORS.success, color: 'white' }}>Approve</button>
+                                <button onClick={() => openReject(b.ref)} className="text-xs font-semibold px-2 py-1 rounded" style={{ background: COLORS.destructive, color: 'white' }}>Reject</button>
+                              </div>
+                            )
+                          ) : (
+                            <span className="text-xs" style={{ color: COLORS.inkMuted }}>—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Reject modal */}
       {rejecting && (
