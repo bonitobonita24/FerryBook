@@ -222,6 +222,21 @@ const buildPools = (classCapacity) => ({
   seniorPwd:   { capacity: SENIOR_PWD_POOL_PER_CLASS, taken: 0 },
 });
 
+// Total available seats in a class = sum of (capacity - taken - pending) across
+// all three pool slices. Pending counts as unavailable so walk-in officers can't
+// double-book a slot that's already awaiting admin approval.
+const seatsAvailableInClass = (classPools) => {
+  if (!classPools) return 0;
+  const r = classPools.regular     || { capacity: 0, taken: 0 };
+  const g = classPools.govHospital || { capacity: 0, taken: 0, pending: 0 };
+  const s = classPools.seniorPwd   || { capacity: 0, taken: 0 };
+  return (
+    Math.max(0, r.capacity - r.taken) +
+    Math.max(0, g.capacity - g.taken - (g.pending || 0)) +
+    Math.max(0, s.capacity - s.taken)
+  );
+};
+
 // ============================================================================
 // ReservedPoolBadge — small chip used in seat pickers, manifests, and the
 // walk-in daily list to mark seats/passengers belonging to a reserved pool.
@@ -8573,7 +8588,7 @@ function AdminAuditScreen({ setScreen, t = T.en }) {
 // Terminal-tablet booking flow. Staff at Nasugbu can only book BAT-NAS sailings;
 // staff at Calatagan can only book BAT-CAL sailings. Cash and card-at-counter.
 // ============================================================================
-function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setGovHospitalBookings = () => {} }) {
+function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setGovHospitalBookings = () => {}, sailings = [], setSailings = () => {} }) {
   const [step, setStep] = useState(1); // 1: sailing+class, 2: passengers+seats, 3: payment, 4: receipt
   const [selectedClass, setSelectedClass] = useState('aircon');
   const [paxCount, setPaxCount] = useState(1);
@@ -8589,30 +8604,9 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
   // Staff session — terminal locked to Nasugbu Port
   const staff = { name: 'Marisol Hidalgo', port: 'BAT-NAS', portName: 'Nasugbu Port' };
 
-  // Today's sailings from this port — manifest status determines availability.
-  // Each sailing carries a per-class `pools` object — see consumePool/buildPools.
-  // taken values seeded so all three classes have some headroom for the demo.
-  const sailings = [
-    { id: 's1', time: '06:00', vessel: 'MV Our Lady of St Therese', manifestDeclared: true, departed: true,
-      seats: { openair: 0, aircon: 0, vip: 0 },
-      pools: { openair: buildPools(80), aircon: buildPools(30), vip: buildPools(10) } },
-    { id: 's2', time: '11:30', vessel: 'MV Our Lady of St Therese', manifestDeclared: false, departed: false,
-      seats: { openair: 22, aircon: 14, vip: 4 }, status: 'Boarding now',
-      pools: {
-        openair: { regular: { capacity: 71, taken: 58 }, govHospital: { capacity: 5, taken: 1, pending: 1 }, seniorPwd: { capacity: 4, taken: 2 } },
-        aircon:  { regular: { capacity: 21, taken: 16 }, govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 3 } },
-        vip:     { regular: { capacity: 1, taken: 1 },   govHospital: { capacity: 5, taken: 2, pending: 0 }, seniorPwd: { capacity: 4, taken: 1 } },
-      } },
-    { id: 's3', time: '16:00', vessel: 'MV Our Lady of St Therese', manifestDeclared: false, departed: false,
-      seats: { openair: 50, aircon: 30, vip: 10 }, status: 'Next sailing',
-      pools: {
-        openair: { regular: { capacity: 71, taken: 30 }, govHospital: { capacity: 5, taken: 0, pending: 1 }, seniorPwd: { capacity: 4, taken: 0 } },
-        aircon:  { regular: { capacity: 21, taken: 0 },  govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 0 } },
-        vip:     { regular: { capacity: 1, taken: 0 },   govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 0 } },
-      } },
-  ];
-
-  // Auto-select the first sailing that hasn't departed and whose manifest isn't declared
+  // Auto-select the first sailing that hasn't departed and whose manifest isn't declared.
+  // `sailings` (with per-class `pools`) is lifted to root so admin approve/reject
+  // can mutate the same pools the walk-in flow reads from.
   const activeSailing = sailings.find(s => !s.departed && !s.manifestDeclared);
   const nextSailing = sailings.find(s => !s.departed && !s.manifestDeclared && s.id !== activeSailing?.id);
   // Staff can only book for activeSailing. nextSailing is shown as locked until manifest is declared.
@@ -8673,7 +8667,36 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
 
   const [assigningPaxIndex, setAssigningPaxIndex] = useState(0);
 
+  // Resolve which pool slice each passenger consumes against the active sailing's
+  // pool for the selected class. Returns { allocations: [...], soldOut: bool }.
+  // Pure: walks a cloned pool so callers see the full plan before mutation.
+  const resolveAllocations = () => {
+    const sourcePool = activeSailing?.pools?.[selectedClass];
+    if (!sourcePool) return { allocations: [], soldOut: true };
+    const work = {
+      regular:     { ...sourcePool.regular },
+      govHospital: { ...sourcePool.govHospital },
+      seniorPwd:   { ...sourcePool.seniorPwd },
+    };
+    const allocations = [];
+    for (const p of passengers) {
+      const slice = consumePool(work, p.passengerType);
+      if (!slice) return { allocations, soldOut: true };
+      if (slice === 'govHospital') {
+        work.govHospital.pending = (work.govHospital.pending || 0) + 1;
+      } else {
+        work[slice].taken = (work[slice].taken || 0) + 1;
+      }
+      allocations.push(slice);
+    }
+    return { allocations, soldOut: false };
+  };
+
   const handleConfirm = () => {
+    if (!activeSailing) return;
+    const { allocations, soldOut } = resolveAllocations();
+    if (soldOut) return; // CTA disabled state should prevent this, but guard anyway
+
     const refDate = '0519';
     const refRand = Math.random().toString(36).substring(2, 6).toUpperCase();
     setBookingRef(`BR-2026-${refDate}-${refRand}`);
@@ -8682,6 +8705,28 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
       return `BTN-2026-${refDate}-${tRand}`;
     });
     setTicketNumbers(tickets);
+
+    // Apply pool mutations: govHospital passengers bump pending (await admin
+    // approval); regular/senior/PWD bump taken (committed immediately).
+    setSailings((prev) => prev.map((s) => {
+      if (s.id !== activeSailing.id) return s;
+      const cls = s.pools?.[selectedClass];
+      if (!cls) return s;
+      const next = {
+        regular:     { ...cls.regular },
+        govHospital: { ...cls.govHospital },
+        seniorPwd:   { ...cls.seniorPwd },
+      };
+      for (const slice of allocations) {
+        if (slice === 'govHospital') {
+          next.govHospital.pending = (next.govHospital.pending || 0) + 1;
+        } else {
+          next[slice].taken = (next[slice].taken || 0) + 1;
+        }
+      }
+      return { ...s, pools: { ...s.pools, [selectedClass]: next } };
+    }));
+
     if (hasGovHospitalPax) {
       const newRef = `GH-2026-0530-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
       const govPax = passengers.filter((p) => p.passengerType === PASSENGER_TYPE_GOV_HOSPITAL);
@@ -8756,9 +8801,9 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
           </div>
           <div className="text-xs" style={{ color: COLORS.inkMuted }}>{activeSailing.vessel} · Today</div>
           <div className="flex gap-1.5 mt-1.5">
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#DBEAFE', color: '#1E40AF' }}>OA {activeSailing.seats.openair}</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#FFE5E9', color: COLORS.primary }}>AC {activeSailing.seats.aircon}</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#FEF3C7', color: '#A16207' }}>VIP {activeSailing.seats.vip}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#DBEAFE', color: '#1E40AF' }}>OA {seatsAvailableInClass(activeSailing.pools?.openair)}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#FFE5E9', color: COLORS.primary }}>AC {seatsAvailableInClass(activeSailing.pools?.aircon)}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#FEF3C7', color: '#A16207' }}>VIP {seatsAvailableInClass(activeSailing.pools?.vip)}</span>
           </div>
         </div>
       )}
@@ -13436,7 +13481,7 @@ function AdminSalesReportsScreen({ setScreen, t = T.en, vesselFilter = 'all', re
 // docs/superpowers/specs/2026-05-29-reserved-seat-pools-design.md
 // Operations Manager and Super Admin can approve/reject.
 // ============================================================================
-function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBookings = [], setGovHospitalBookings = () => {} }) {
+function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBookings = [], setGovHospitalBookings = () => {}, sailings = [], setSailings = () => {} }) {
   const [statusFilter, setStatusFilter] = useState('pending');
   const [dateFilter, setDateFilter] = useState('all');
   const [vesselFilter, setVesselFilter] = useState('all');
@@ -13455,13 +13500,43 @@ function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBooki
     return true;
   });
 
+  // Map a booking record's class label to the sailing.pools key.
+  const poolKeyForClass = (label) =>
+    label === 'Open Air' ? 'openair' : label === 'Aircon' ? 'aircon' : label === 'VIP' ? 'vip' : null;
+
+  // Mutate the matching sailing's gov/hospital pool: approve commits a pending
+  // slot (pending--, taken++); reject just releases the slot (pending--).
+  // Skips bookings already in a terminal state to keep the action idempotent.
+  const mutateGovPool = (booking, action) => {
+    const classKey = poolKeyForClass(booking.class);
+    if (!classKey) return;
+    setSailings((prev) => prev.map((s) => {
+      if (s.id !== booking.sailingId) return s;
+      const cls = s.pools?.[classKey];
+      if (!cls) return s;
+      const gov = { ...cls.govHospital };
+      const currentPending = gov.pending || 0;
+      if (currentPending <= 0) return s; // nothing to release/commit
+      gov.pending = currentPending - 1;
+      if (action === 'approve') gov.taken = (gov.taken || 0) + 1;
+      return { ...s, pools: { ...s.pools, [classKey]: { ...cls, govHospital: gov } } };
+    }));
+  };
+
   const approve = (ref) => {
+    const target = govHospitalBookings.find((b) => b.ref === ref);
+    if (!target || target.approvalStatus !== 'pending') return;
+    mutateGovPool(target, 'approve');
     setGovHospitalBookings((prev) => prev.map((b) =>
       b.ref === ref ? { ...b, approvalStatus: 'approved', approvedBy: 'Reynaldo Salonga' } : b
     ));
   };
   const openReject = (ref) => { setRejecting(ref); setRejectReason(''); };
   const confirmReject = () => {
+    const target = govHospitalBookings.find((b) => b.ref === rejecting);
+    if (target && target.approvalStatus === 'pending') {
+      mutateGovPool(target, 'reject');
+    }
     const reason = rejectReason.trim() || 'No reason provided';
     setGovHospitalBookings((prev) => prev.map((b) =>
       b.ref === rejecting ? { ...b, approvalStatus: 'rejected', rejectionReason: reason } : b
@@ -18455,6 +18530,25 @@ export default function FandSMarineMockup() {
       approvalStatus: 'approved', approvedBy: 'Reynaldo Salonga', rejectionReason: null,
     },
   ]);
+  // Today's sailings from BAT-NAS — lifted to root so walk-in submit and admin
+  // approve/reject both mutate per-voyage per-class pools.taken/pending.
+  // Each sailing carries the `pools` object — see consumePool/buildPools.
+  const [sailings, setSailings] = useState([
+    { id: 's1', time: '06:00', vessel: 'MV Our Lady of St Therese', manifestDeclared: true, departed: true,
+      pools: { openair: buildPools(80), aircon: buildPools(30), vip: buildPools(10) } },
+    { id: 's2', time: '11:30', vessel: 'MV Our Lady of St Therese', manifestDeclared: false, departed: false, status: 'Boarding now',
+      pools: {
+        openair: { regular: { capacity: 71, taken: 58 }, govHospital: { capacity: 5, taken: 1, pending: 1 }, seniorPwd: { capacity: 4, taken: 2 } },
+        aircon:  { regular: { capacity: 21, taken: 16 }, govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 3 } },
+        vip:     { regular: { capacity: 1, taken: 1 },   govHospital: { capacity: 5, taken: 2, pending: 0 }, seniorPwd: { capacity: 4, taken: 1 } },
+      } },
+    { id: 's3', time: '16:00', vessel: 'MV Our Lady of St Therese', manifestDeclared: false, departed: false, status: 'Next sailing',
+      pools: {
+        openair: { regular: { capacity: 71, taken: 30 }, govHospital: { capacity: 5, taken: 0, pending: 1 }, seniorPwd: { capacity: 4, taken: 0 } },
+        aircon:  { regular: { capacity: 21, taken: 0 },  govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 0 } },
+        vip:     { regular: { capacity: 1, taken: 0 },   govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 0 } },
+      } },
+  ]);
   const t = T[lang];
 
   // Screen groups for the mockup navigator (outside the phone)
@@ -18500,10 +18594,10 @@ export default function FandSMarineMockup() {
   else if (screen === 'adminReports') content = <AdminReportsScreen setScreen={setScreen} t={t} />;
   else if (screen === 'adminSalesReports') content = <AdminSalesReportsScreen setScreen={setScreen} t={t} />;
   else if (screen === 'adminUsers') content = <AdminUsersScreen setScreen={setScreen} t={t} />;
-  else if (screen === 'adminGovHospital') content = <AdminGovHospitalApprovalsScreen setScreen={setScreen} t={t} govHospitalBookings={govHospitalBookings} setGovHospitalBookings={setGovHospitalBookings} />;
+  else if (screen === 'adminGovHospital') content = <AdminGovHospitalApprovalsScreen setScreen={setScreen} t={t} govHospitalBookings={govHospitalBookings} setGovHospitalBookings={setGovHospitalBookings} sailings={sailings} setSailings={setSailings} />;
   else if (screen === 'adminSettings') content = <AdminSettingsScreen setScreen={setScreen} t={t} />;
   else if (screen === 'adminAudit') content = <AdminAuditScreen setScreen={setScreen} t={t} />;
-  else if (screen === 'staffWalkin') content = <StaffWalkinScreen setScreen={setScreen} t={t} govHospitalBookings={govHospitalBookings} setGovHospitalBookings={setGovHospitalBookings} />;
+  else if (screen === 'staffWalkin') content = <StaffWalkinScreen setScreen={setScreen} t={t} govHospitalBookings={govHospitalBookings} setGovHospitalBookings={setGovHospitalBookings} sailings={sailings} setSailings={setSailings} />;
   else if (screen === 'staffCheckin') content = <StaffCheckinScreen setScreen={setScreen} t={t} />;
   else if (screen === 'staffBoarding') content = <StaffBoardingScreen setScreen={setScreen} t={t} onShowManifest={setShowManifestPreview} />;
   else if (screen === 'nativeApp') content = <NativeAppPreviewScreen setScreen={setScreen} t={t} />;
