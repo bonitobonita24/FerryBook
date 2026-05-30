@@ -2260,3 +2260,125 @@ Recap of the fix (`docs/vercel_mockup/src/MOCKUP.jsx`, mobile card meta block):
 - Added `break-words` on agency/designation/ID-type and `break-all` on the ID number so nothing overflows the card boundary at narrow widths.
 
 Outer card list was already `grid-cols-1` at all mobile widths (multi-column only kicks in at `lg`/`xl` desktop), so cards themselves were never being packed horizontally on phone — the compression was happening inside each card.
+
+---
+
+_**User (2026-05-30 11:29:22Z)**_
+
+ok lets save this session
+
+---
+
+_**Agent (claude-opus-4-7 2026-05-30 11:29:38Z)**_
+
+_**Agent (claude-opus-4-7 2026-05-30 11:29:38Z)**_
+
+Saving the durable learnings from this session.
+
+_**Agent (claude-opus-4-7 2026-05-30 11:29:41Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+List existing memory files
+
+`ls /home/me/.claude/projects/-home-me-UbuntuDevFiles-1-COMPANY-DEV-FerryBook-SAAS-FerryBook/memory/ 2>&1 | head -30`
+
+```text
+MEMORY.md
+feedback_meeting_minutes_no_mobile_frame.md
+feedback_no_lang_switcher_admin.md
+project_2026_05_29_specs_pending_plans.md
+project_vercel_mockup_layout.md
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-05-30 11:29:46Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `/home/me/.claude/projects/-home-me-UbuntuDevFiles-1-COMPANY-DEV-FerryBook-SAAS-FerryBook/memory/MEMORY.md`
+
+```text
+1	- [Meeting minutes — no mobile/phone frame](feedback_meeting_minutes_no_mobile_frame.md) — render `/meetings/<slug>` natively responsive; never wrap in iPhone shell or force 390px width
+2	- [Vercel mockup lives at docs/vercel_mockup](project_vercel_mockup_layout.md) — Root Directory set; deploy from repo root with `.vercel/` copied up to avoid path stacking; explains recurring 404 alias issue
+3	- [No language switcher on admin pages](feedback_no_lang_switcher_admin.md) — EN/TL toggle is customer-facing only; omit from all admin/staff/portal screens
+4	- [2026-05-29 specs status](project_2026_05_29_specs_pending_plans.md) — BOTH IMPLEMENTED 2026-05-30: viewer roles (14 commits + 3 follow-ups in 5bf5bcd); reserved seat pools (16 commits 30535ad..6538bfe, 7 deferred follow-ups noted)
+5
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-05-30 11:30:09Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Write"><details>
+<summary>Tool use: **Write**</summary>
+
+```md
+---
+name: feedback-mobile-first-strict
+description: User defines "mobile-first" strictly — vertical stacking everywhere on phones, no inner side-by-side grids inside cards, no horizontal card grids on mobile, no desktop tables masquerading as a mobile layout
+metadata:
+  type: feedback
+---
+
+When the user asks for a mobile-first screen in the FerryBook mockup, this is what they expect — checked iteratively in 2026-05-30 GMT+8 session:
+
+1. **Cards must stack vertically on mobile**, never side-by-side. Outer container should be `grid grid-cols-1` until at least `lg` (1024px) — only widen to 2/3 cols at `lg:`/`xl:`.
+2. **No inner side-by-side grids inside a card on mobile.** Meta blocks like "Agency | ID" must be `grid-cols-1 sm:grid-cols-2`, not plain `grid-cols-2`. Long agency names like "DPWH - District Engineering Office" wrap to 3 lines and visibly overlap the neighbor column on narrow phones (~360px), which they explicitly call out as "fonts overlapping the boundaries".
+3. **No `hidden md:block` desktop tables** parallel to the card view. Drop the table; let one responsive card layout handle every viewport.
+4. **Replace dropdown filters with mobile-native controls** — pill-tab segmented control for primary status (with live counts), collapsible disclosures for secondary filters and KPI summary.
+5. **44pt touch targets** (`h-11`) on primary actions, bottom-sheet modals on mobile (`items-end sm:items-center`, `rounded-t-2xl sm:rounded-2xl`).
+6. Apply `break-words` / `break-all` on long content (agency names, ID numbers) so nothing escapes the card boundary.
+
+**Why:** User tested on their actual Chrome on phone (not just the mockup's iPhone-frame preview) and rejected multiple iterations that *looked* mobile-friendly in dev devtools but compressed content on real narrow viewports. They are precise — "force to display in horizontal view because it will compress" means inner content too, not just outer columns.
+
+**How to apply:** Any time you build or refactor a screen marked mobile-first in this repo, walk the DOM top-down and check every `grid-cols-N` / `flex` row at mobile width — including ones nested inside cards. Default everything to vertical stacking; only opt into horizontal layout with an explicit `sm:` / `md:` / `lg:` breakpoint. Verify on a 360px viewport, not just 390px iPhone preview.
+
+Related: [[feedback-meeting-minutes-no-mobile-frame]] (avoid the iPhone-frame shell for natively responsive routes).
+
+```
+
+```text
+File created successfully at: /home/me/.claude/projects/-home-me-UbuntuDevFiles-1-COMPANY-DEV-FerryBook-SAAS-FerryBook/memory/feedback_mobile_first_strict.md (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-05-30 11:30:19Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file /home/me/.claude/projects/-home-me-UbuntuDevFiles-1-COMPANY-DEV-FerryBook-SAAS-FerryBook/memory/MEMORY.md has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-05-30 11:30:31Z)**_
+
+_**Agent (claude-opus-4-7 2026-05-30 11:30:36Z)**_
+
+Session saved. New memory:
+
+- **`feedback_mobile_first_strict.md`** — captures your strict definition of mobile-first (vertical stacking everywhere on phones, no inner side-by-side grids inside cards, no parallel desktop tables, pill-tab filters, 44pt targets, verify at 360px not 390px) plus the *why* — you test on real Chrome on phone, not just devtools emulation, and reject layouts that look fine in preview but compress on narrow viewports.
+- **`MEMORY.md`** — index updated.
+
+Shipped this session (deployed live):
+- `b9373f3` — full mobile-first refactor (pill tabs, collapsible Summary/Filters, responsive card grid, table dropped)
+- `53d7825` — Agency/ID stacked vertically inside each card
+
+Dev server still running on `localhost:5173` if you want to keep iterating.
+
+---
+
+_**User (2026-05-30 11:46:38Z)**_
+
+<command-name>/exit</command-name>
+            <command-message>exit</command-message>
+            <command-args></command-args>
+
+_**User (2026-05-30 11:46:38Z)**_
+
+<local-command-stdout>Catch you later!</local-command-stdout>
+
+_**User (2026-05-30 11:46:38Z)**_
+
+<local-command-caveat>Caveat: The messages below were generated by the user while running local commands. DO NOT respond to these messages or otherwise consider them in your response unless the user explicitly asks you to.</local-command-caveat>
