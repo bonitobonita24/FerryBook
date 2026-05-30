@@ -11376,6 +11376,19 @@ function CustomerRefundScreen({ setScreen, t = T.en }) {
   );
 }
 
+// Inline Gov/Hospital callout shown in boarding scan list and anomaly review.
+// Kept null-safe so callers can pass any pax record without guarding the type.
+function GovHospitalGangwayNote({ pax }) {
+  if (!pax || pax.passengerType !== 'Gov/Hospital') return null;
+  return (
+    <div className="mt-1 p-1.5 rounded text-[10px]" style={{ background: '#FAF5FF', color: '#5B21B6' }}>
+      <div className="font-bold">Gov/Hospital · sanity-check at gangway</div>
+      {pax.agency && <div>Agency: {pax.agency}</div>}
+      {pax.reasonForTravel && <div>Reason: {pax.reasonForTravel}</div>}
+    </div>
+  );
+}
+
 // ============================================================================
 // TIER 1: BOARDING OFFICER — GANGWAY SCAN + FINAL MANIFEST (Batch 8)
 // Three modes:
@@ -11816,13 +11829,7 @@ function StaffBoardingScreen({ setScreen, t = T.en, onShowManifest }) {
                     </div>
                     <Check size={14} style={{ color: COLORS.success }} />
                   </div>
-                  {p.passengerType === 'Gov/Hospital' && (
-                    <div className="mt-1 p-1.5 rounded text-[10px]" style={{ background: '#FAF5FF', color: '#5B21B6' }}>
-                      <div className="font-bold">Gov/Hospital · sanity-check at gangway</div>
-                      {p.agency && <div>Agency: {p.agency}</div>}
-                      {p.reasonForTravel && <div>Reason: {p.reasonForTravel}</div>}
-                    </div>
-                  )}
+                  <GovHospitalGangwayNote pax={p} />
                 </div>
               );
             })}
@@ -11954,13 +11961,7 @@ function StaffBoardingScreen({ setScreen, t = T.en, onShowManifest }) {
                           <><X size={11} /> No-show · never checked in</>
                         )}
                       </div>
-                      {p.passengerType === 'Gov/Hospital' && (
-                        <div className="mt-1 p-1.5 rounded text-[10px]" style={{ background: '#FAF5FF', color: '#5B21B6' }}>
-                          <div className="font-bold">Gov/Hospital · sanity-check at gangway</div>
-                          {p.agency && <div>Agency: {p.agency}</div>}
-                          {p.reasonForTravel && <div>Reason: {p.reasonForTravel}</div>}
-                        </div>
-                      )}
+                      <GovHospitalGangwayNote pax={p} />
                     </div>
                   </div>
                   {p.status === 'checked' && (
@@ -13488,11 +13489,29 @@ function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBooki
   const [rejecting, setRejecting] = useState(null); // booking ref being rejected
   const [rejectReason, setRejectReason] = useState('');
 
+  // Mockup "today" anchor — submittedAt is stored as "May 30 · HH:MM"; we scope
+  // approved/rejected KPI tiles to bookings submitted today.
+  const TODAY_PREFIX = 'May 30';
+  const submittedToday = (b) => typeof b.submittedAt === 'string' && b.submittedAt.startsWith(TODAY_PREFIX);
+
   const pendingCount = govHospitalBookings.filter((b) => b.approvalStatus === 'pending').length;
-  const approvedToday = govHospitalBookings.filter((b) => b.approvalStatus === 'approved').length;
-  const rejectedToday = govHospitalBookings.filter((b) => b.approvalStatus === 'rejected').length;
-  // Mockup utilization figure: aggregate across all seeded sailings. Approved + pending count against capacity.
-  const poolUtilization = `${approvedToday + pendingCount}/40 seats`;
+  const approvedToday = govHospitalBookings.filter((b) => b.approvalStatus === 'approved' && submittedToday(b)).length;
+  const rejectedToday = govHospitalBookings.filter((b) => b.approvalStatus === 'rejected' && submittedToday(b)).length;
+
+  // Pool utilization aggregates across upcoming (non-departed) sailings. Capacity
+  // and used (taken + pending) are derived from live sailings.pools state so the
+  // tile updates as approvals and walk-in submits land.
+  const { utilizationUsed, utilizationCapacity } = sailings.reduce((acc, s) => {
+    if (s.departed) return acc;
+    for (const cls of ['openair', 'aircon', 'vip']) {
+      const gov = s.pools?.[cls]?.govHospital;
+      if (!gov) continue;
+      acc.utilizationCapacity += gov.capacity || 0;
+      acc.utilizationUsed     += (gov.taken || 0) + (gov.pending || 0);
+    }
+    return acc;
+  }, { utilizationUsed: 0, utilizationCapacity: 0 });
+  const poolUtilization = `${utilizationUsed}/${utilizationCapacity} seats`;
 
   const filtered = govHospitalBookings.filter((b) => {
     if (statusFilter !== 'all' && b.approvalStatus !== statusFilter) return false;
@@ -13503,6 +13522,11 @@ function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBooki
   // Map a booking record's class label to the sailing.pools key.
   const poolKeyForClass = (label) =>
     label === 'Open Air' ? 'openair' : label === 'Aircon' ? 'aircon' : label === 'VIP' ? 'vip' : null;
+
+  // Voyage-departure guard: once a sailing has departed the booking's outcome is
+  // frozen — approve/reject buttons hide and the row shows a "Voyage departed" lock.
+  const sailingById = (id) => sailings.find((s) => s.id === id);
+  const isVoyageDeparted = (booking) => Boolean(sailingById(booking?.sailingId)?.departed);
 
   // Mutate the matching sailing's gov/hospital pool: approve commits a pending
   // slot (pending--, taken++); reject just releases the slot (pending--).
@@ -13526,15 +13550,20 @@ function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBooki
   const approve = (ref) => {
     const target = govHospitalBookings.find((b) => b.ref === ref);
     if (!target || target.approvalStatus !== 'pending') return;
+    if (isVoyageDeparted(target)) return;
     mutateGovPool(target, 'approve');
     setGovHospitalBookings((prev) => prev.map((b) =>
       b.ref === ref ? { ...b, approvalStatus: 'approved', approvedBy: 'Reynaldo Salonga' } : b
     ));
   };
-  const openReject = (ref) => { setRejecting(ref); setRejectReason(''); };
+  const openReject = (ref) => {
+    const target = govHospitalBookings.find((b) => b.ref === ref);
+    if (!target || isVoyageDeparted(target)) return;
+    setRejecting(ref); setRejectReason('');
+  };
   const confirmReject = () => {
     const target = govHospitalBookings.find((b) => b.ref === rejecting);
-    if (target && target.approvalStatus === 'pending') {
+    if (target && target.approvalStatus === 'pending' && !isVoyageDeparted(target)) {
       mutateGovPool(target, 'reject');
     }
     const reason = rejectReason.trim() || 'No reason provided';
@@ -13567,7 +13596,7 @@ function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBooki
           { label: 'Pending', value: pendingCount, color: '#92400E', bg: '#FEF3C7' },
           { label: 'Approved today', value: approvedToday, color: '#166534', bg: '#DCFCE7' },
           { label: 'Rejected today', value: rejectedToday, color: '#B91C1C', bg: '#FEE2E2' },
-          { label: 'Pool utilization (week)', value: poolUtilization, color: '#5B21B6', bg: '#E9D5FF' },
+          { label: 'Pool utilization (upcoming)', value: poolUtilization, color: '#5B21B6', bg: '#E9D5FF' },
         ].map((k, i) => (
           <div key={i} className="rounded-2xl p-4 border" style={{ background: k.bg, borderColor: COLORS.border }}>
             <div className="text-xs font-semibold mb-1" style={{ color: k.color }}>{k.label}</div>
@@ -13653,10 +13682,17 @@ function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBooki
                     </td>
                     <td className="px-3 py-2">
                       {b.approvalStatus === 'pending' ? (
-                        <div className="flex gap-1">
-                          <button onClick={() => approve(b.ref)} className="text-xs font-semibold px-2 py-1 rounded" style={{ background: COLORS.success, color: 'white' }}>Approve</button>
-                          <button onClick={() => openReject(b.ref)} className="text-xs font-semibold px-2 py-1 rounded" style={{ background: COLORS.destructive, color: 'white' }}>Reject</button>
-                        </div>
+                        isVoyageDeparted(b) ? (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+                            style={{ background: COLORS.bgMuted, color: COLORS.inkMuted }}>
+                            <Lock size={10} /> Voyage departed
+                          </span>
+                        ) : (
+                          <div className="flex gap-1">
+                            <button onClick={() => approve(b.ref)} className="text-xs font-semibold px-2 py-1 rounded" style={{ background: COLORS.success, color: 'white' }}>Approve</button>
+                            <button onClick={() => openReject(b.ref)} className="text-xs font-semibold px-2 py-1 rounded" style={{ background: COLORS.destructive, color: 'white' }}>Reject</button>
+                          </div>
+                        )
                       ) : (
                         <span className="text-xs" style={{ color: COLORS.inkMuted }}>—</span>
                       )}
