@@ -17091,9 +17091,16 @@ function SeatSelectionScreen({ setScreen, t = T.en }) {
           <div className="text-[10px] uppercase tracking-widest px-3 py-1 rounded-full" style={{ background: COLORS.bgMuted, color: COLORS.inkMuted }}>Stern · rear of vessel</div>
         </div>
 
-        {/* Block layout — rows top (back) to bottom (front) */}
-        <div className="overflow-x-auto -mx-2 px-2 flex justify-center">
-          <div className="inline-block">
+        {/* Block layout — horizontally scrollable on narrow viewports.
+            Mobile-first sizing: 26px seats on phones (fits 14-wide row at 390px
+            without scroll for most classes), 32px on md+ for comfortable
+            desktop interaction. The scroll wrapper deliberately AVOIDS
+            `flex justify-center` — that anti-pattern clips the left edge of
+            overflowing content and breaks scroll-to-start. Instead the inner
+            block is `w-max mx-auto`, which centers when content fits and lets
+            the wrapper scroll naturally when it doesn't. */}
+        <div className="overflow-x-auto -mx-4 px-4 pb-2 touch-pan-x" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="w-max mx-auto">
             {classPlan.rows.map((row, rIdx) => {
               const isDivider = classPlan.dividers && classPlan.dividers.includes(rIdx);
               return (
@@ -17105,11 +17112,11 @@ function SeatSelectionScreen({ setScreen, t = T.en }) {
                       <div className="flex-1 h-px" style={{ background: COLORS.border }} />
                     </div>
                   )}
-                  <div className="flex items-center justify-center gap-3 mb-1.5">
+                  <div className="flex items-center justify-center gap-2.5 mb-1">
                     {row.map((block, bIdx) => (
                       <div key={bIdx} className="flex items-center gap-1">
                         {block.length === 0 ? (
-                          <div className="w-8 h-8 md:w-9 md:h-9 flex-shrink-0" />
+                          <div className="w-[26px] h-[26px] md:w-9 md:h-9 flex-shrink-0" />
                         ) : (
                           block.map((seatNum) => {
                             const seatId = `${selectedClass}-${seatNum}`;
@@ -17119,7 +17126,7 @@ function SeatSelectionScreen({ setScreen, t = T.en }) {
                             const slot = passengerSlotFor(seatId);
                             return (
                               <button key={seatId} onClick={() => handleSeatTap(seatId)} disabled={isOccupied}
-                                className="w-8 h-8 md:w-9 md:h-9 rounded-md border-2 flex items-center justify-center font-bold transition-all flex-shrink-0 relative"
+                                className="w-[26px] h-[26px] md:w-9 md:h-9 rounded-md border-2 flex items-center justify-center font-bold transition-all flex-shrink-0 relative"
                                 style={{
                                   background: isSelected ? meta.themeFg : isOccupied ? '#E4E4E4' : isPriority(seatId) ? '#EDE9FE' : 'white',
                                   borderColor: isSelected ? meta.themeFg : isOccupied ? '#D1D5DB' : isPriority(seatId) ? '#7C3AED' : COLORS.border,
@@ -17129,7 +17136,7 @@ function SeatSelectionScreen({ setScreen, t = T.en }) {
                                   fontSize: 9, lineHeight: 1,
                                 }}
                                 title={isOccupied ? `${seatId} (taken)` : isPriority(seatId) ? `${seatId} (PWD/Senior priority)` : seatId}>
-                                {isOccupied ? <X size={12} /> : isSelected ? `P${slot}` : seatNum}
+                                {isOccupied ? <X size={11} /> : isSelected ? `P${slot}` : seatNum}
                                 {isPriority(seatId) && !isOccupied && !isSelected && (
                                   <span className="absolute -top-1 -right-1 text-[7px] leading-none" style={{ color: '#7C3AED' }}>♿</span>
                                 )}
@@ -17144,6 +17151,10 @@ function SeatSelectionScreen({ setScreen, t = T.en }) {
               );
             })}
           </div>
+        </div>
+        {/* Hint that wide rows can be scrolled on mobile */}
+        <div className="text-[9px] text-center mt-1 md:hidden" style={{ color: COLORS.inkMuted }}>
+          ← swipe to see all seats →
         </div>
 
         {/* Bow indicator — front of vessel */}
