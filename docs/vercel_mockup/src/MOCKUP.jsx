@@ -18,6 +18,10 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   AreaChart, Area
 } from 'recharts';
+import {
+  VESSEL_SEAT_PLANS, CLASS_CODES, CLASS_META, CLASS_DEFAULT_FARE,
+  seatLabelsForClass,
+} from './data/vesselSeatPlans.js';
 
 // ============================================================================
 // F AND S MARINE TRANSPORT INC. — PHASE 2.8 MOCKUP (V31)
@@ -192,21 +196,20 @@ const consumePool = (pools, passengerType) => {
   return null;
 };
 
-// Maps a seat label (e.g. "A03-B") to which pool slice it belongs to, based on
+// Maps a seat label (e.g. "E-25") to which pool slice it belongs to, based on
 // the seat grid for the class. Last GOV_POOL_PER_CLASS seats of the class are
 // the Gov/Hospital pool; the SENIOR_PWD_POOL_PER_CLASS seats before that are
 // the Senior/PWD pool; everything else is regular. This is the seat-picker's
 // visual contract — it does not affect the consumePool cascade.
 const poolForSeat = (seatLabel, classCapacity) => {
   if (!seatLabel) return 'regular';
-  // Seats are ordered row-major; assume seatIndex is derivable from the label.
-  // For mockup purposes we just take a numeric tail to assign pools.
-  const m = seatLabel.match(/(\d+)-([A-Z])/);
+  // Flat seat labels: "TE-25", "TA-15", "E-44", "D-3". Seat number drives the
+  // pool slice: the highest numbers are Gov/Hospital, then Senior/PWD below
+  // that, then regular. This is the seat-picker's visual contract — it does
+  // not affect the consumePool cascade.
+  const m = seatLabel.match(/-(\d+)$/);
   if (!m) return 'regular';
-  const row = parseInt(m[1], 10);
-  const col = m[2].charCodeAt(0) - 'A'.charCodeAt(0);
-  // Pseudo seat index: (row-1) * 8 + col is good enough to bucket the tail.
-  const idx = (row - 1) * 8 + col;
+  const idx = parseInt(m[1], 10);
   const govStart = classCapacity - GOV_POOL_PER_CLASS;
   const spStart  = classCapacity - GOV_POOL_PER_CLASS - SENIOR_PWD_POOL_PER_CLASS;
   if (idx >= govStart) return 'govHospital';
@@ -460,14 +463,16 @@ function CalendarScreen({ setScreen, t = T.en }) {
 
     // Pseudo-random but stable availability data based on date components
     const seed = (viewYear * 372) + (viewMonth * 31) + day;
-    let openAir = Math.floor(40 + Math.sin(seed * 1.3) * 20);
-    let aircon = Math.floor(25 + Math.cos(seed * 0.9) * 15);
-    let vip = Math.floor(8 + Math.sin(seed * 0.5) * 5);
-    if (openAir < 0) openAir = 0;
-    if (aircon < 0) aircon = 0;
-    if (vip < 0) vip = 0;
+    let TE = Math.floor(40 + Math.sin(seed * 1.3) * 20);
+    let E  = Math.floor(25 + Math.cos(seed * 0.9) * 15);
+    let TA = Math.floor(20 + Math.cos(seed * 1.1) * 12);
+    let D  = Math.floor(8 + Math.sin(seed * 0.5) * 5);
+    if (TE < 0) TE = 0;
+    if (E < 0) E = 0;
+    if (TA < 0) TA = 0;
+    if (D < 0) D = 0;
 
-    return { day, past, blocked, tooFarAhead, openAir, aircon, vip };
+    return { day, past, blocked, tooFarAhead, TE, E, TA, D };
   };
 
   const cells = Array.from({ length: totalDays }, (_, i) => buildDay(i + 1));
@@ -617,9 +622,9 @@ function CalendarScreen({ setScreen, t = T.en }) {
                   <div
                     className="w-1.5 h-1.5 rounded-full mt-1"
                     style={{
-                      background: (d.openAir + d.aircon + d.vip) > 60
+                      background: (d.TE + d.E + d.TA + d.D) > 60
                         ? COLORS.success
-                        : (d.openAir + d.aircon + d.vip) > 20
+                        : (d.TE + d.E + d.TA + d.D) > 20
                         ? COLORS.warning
                         : COLORS.destructive,
                     }}
@@ -681,7 +686,7 @@ function CalendarScreen({ setScreen, t = T.en }) {
 // ============================================================================
 function SailingsListScreen({ setScreen, t = T.en }) {
   const [selectedSailing, setSelectedSailing] = useState('sail-1');
-  const [selectedClass, setSelectedClass] = useState('aircon');
+  const [selectedClass, setSelectedClass] = useState('E');
 
   // Same vessel (MV Our Lady) departs from Nasugbu at 06:00 AND from Calatagan at 14:00 on same day
   // This is the architecture decision: vessel-port assignment is per-sailing, not per-day
@@ -695,9 +700,10 @@ function SailingsListScreen({ setScreen, t = T.en }) {
       arriveTime: '10:00',
       duration: '4h 00m',
       classes: [
-        { id: 'openair', name: 'Open Air', seats: 42, fare: 350 },
-        { id: 'aircon', name: 'Aircon', seats: 28, fare: 550 },
-        { id: 'vip', name: 'VIP', seats: 9, fare: 850 },
+        { id: 'TE', name: 'Tourist Economy', seats: 28, fare: 350 },
+        { id: 'TA', name: 'Tourist Aircon', seats: 41, fare: 450 },
+        { id: 'E',  name: 'Economy',         seats: 88, fare: 550 },
+        { id: 'D',  name: 'De Luxe',         seats: 74, fare: 850 },
       ],
     },
     {
@@ -710,9 +716,10 @@ function SailingsListScreen({ setScreen, t = T.en }) {
       duration: '3h 30m',
       hasOverride: true,
       classes: [
-        { id: 'openair', name: 'Open Air', seats: 35, fare: 350 },
-        { id: 'aircon', name: 'Aircon', seats: 22, fare: 550 },
-        { id: 'vip', name: 'VIP', seats: 6, fare: 900, originalFare: 850 },
+        { id: 'TE', name: 'Tourist Economy', seats: 52, fare: 350 },
+        { id: 'TA', name: 'Tourist Aircon', seats: 48, fare: 450 },
+        { id: 'E',  name: 'Economy',         seats: 79, fare: 550 },
+        { id: 'D',  name: 'De Luxe',         seats: 56, fare: 900, originalFare: 850 },
       ],
     },
     {
@@ -726,9 +733,10 @@ function SailingsListScreen({ setScreen, t = T.en }) {
       hasOverride: true,
       sameVesselNote: 'Same vessel as 06:00 — repositions to Calatagan after morning sailing',
       classes: [
-        { id: 'openair', name: 'Open Air', seats: 38, fare: 350 },
-        { id: 'aircon', name: 'Aircon', seats: 24, fare: 550 },
-        { id: 'vip', name: 'VIP', seats: 8, fare: 900, originalFare: 850 },
+        { id: 'TE', name: 'Tourist Economy', seats: 22, fare: 350 },
+        { id: 'TA', name: 'Tourist Aircon', seats: 35, fare: 450 },
+        { id: 'E',  name: 'Economy',         seats: 64, fare: 550 },
+        { id: 'D',  name: 'De Luxe',         seats: 51, fare: 900, originalFare: 850 },
       ],
     },
   ];
@@ -844,11 +852,11 @@ function SailingsListScreen({ setScreen, t = T.en }) {
                   <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: COLORS.inkMuted }}>
                     {t.pickYourClass}
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {s.classes.map((c) => {
                       const classSelected = selectedClass === c.id;
-                      const bgMap = { openair: '#DBEAFE', aircon: '#FFE5E9', vip: '#FEF3C7' };
-                      const fgMap = { openair: '#1E40AF', aircon: COLORS.primary, vip: '#A16207' };
+                      const bgMap = { TE: CLASS_META.TE.themeBg, TA: CLASS_META.TA.themeBg, E: CLASS_META.E.themeBg, D: CLASS_META.D.themeBg };
+                      const fgMap = { TE: CLASS_META.TE.themeFg, TA: CLASS_META.TA.themeFg, E: CLASS_META.E.themeFg, D: CLASS_META.D.themeFg };
                       return (
                         <button
                           key={c.id}
@@ -1363,9 +1371,9 @@ function ReviewScreen({ setScreen, t = T.en }) {
           <div className="bg-white rounded-2xl p-6 border" style={{ borderColor: COLORS.border }}>
             <h3 className="font-bold text-lg mb-4" style={{ color: COLORS.ink }}>3 {t.paxCount}</h3>
             {[
-              { name: 'Maria Cristina B. Reyes', type: 'Adult', fare: 550, discount: 0, seat: 'A03-B', ticket: 'BTN-2026-0518-3B7K' },
-              { name: 'Joaquin Miguel S. Reyes', type: 'Child (3–12)', fare: 550, discount: 275, seat: 'A03-C', ticket: 'BTN-2026-0518-4C8L' },
-              { name: 'Lola Salvacion C. Bautista', type: 'Senior (RA 9994)', fare: 550, discount: 110, seat: 'A03-D', ticket: 'BTN-2026-0518-5D9M' },
+              { name: 'Maria Cristina B. Reyes', type: 'Adult', fare: 550, discount: 0, seat: 'E-25', ticket: 'BTN-2026-0518-3B7K' },
+              { name: 'Joaquin Miguel S. Reyes', type: 'Child (3–12)', fare: 550, discount: 275, seat: 'E-26', ticket: 'BTN-2026-0518-4C8L' },
+              { name: 'Lola Salvacion C. Bautista', type: 'Senior (RA 9994)', fare: 550, discount: 110, seat: 'E-27', ticket: 'BTN-2026-0518-5D9M' },
             ].map((p, i) => (
               <div key={i} className="flex items-center justify-between py-2 text-sm border-b last:border-0" style={{ borderColor: COLORS.border }}>
                 <div>
@@ -2042,9 +2050,9 @@ function ConfirmationScreen({ setScreen, t = T.en }) {
               <div className="text-xs font-semibold uppercase mb-2" style={{ color: COLORS.inkMuted }}>Passengers</div>
               <div className="text-sm space-y-2" style={{ color: COLORS.ink }}>
                 {[
-                  { name: 'Maria Cristina B. Reyes', type: 'Adult', seat: 'A03-B', ticket: 'BTN-2026-0518-3B7K' },
-                  { name: 'Joaquin Miguel S. Reyes', type: 'Child (3–12)', seat: 'A03-C', ticket: 'BTN-2026-0518-4C8L' },
-                  { name: 'Lola Salvacion C. Bautista', type: 'Senior', seat: 'A03-D', ticket: 'BTN-2026-0518-5D9M' },
+                  { name: 'Maria Cristina B. Reyes', type: 'Adult', seat: 'E-25', ticket: 'BTN-2026-0518-3B7K' },
+                  { name: 'Joaquin Miguel S. Reyes', type: 'Child (3–12)', seat: 'E-26', ticket: 'BTN-2026-0518-4C8L' },
+                  { name: 'Lola Salvacion C. Bautista', type: 'Senior', seat: 'E-27', ticket: 'BTN-2026-0518-5D9M' },
                 ].map((p, i) => (
                   <div key={i} className="rounded-lg p-2 border" style={{ borderColor: COLORS.border }}>
                     <div className="flex items-center justify-between">
@@ -2236,9 +2244,9 @@ function ConfirmationScreen({ setScreen, t = T.en }) {
               </div>
               <div className="mt-2 pt-2 border-t text-xs" style={{ borderColor: '#D1D5DB' }}>
                 <div className="font-semibold mb-1">Your Ticket Numbers:</div>
-                <div>1. Maria Cristina — BTN-2026-0518-3B7K · A03-B</div>
-                <div>2. Joaquin Miguel — BTN-2026-0518-4C8L · A03-C</div>
-                <div>3. Lola Salvacion — BTN-2026-0518-5D9M · A03-D</div>
+                <div>1. Maria Cristina — BTN-2026-0518-3B7K · E-25</div>
+                <div>2. Joaquin Miguel — BTN-2026-0518-4C8L · E-26</div>
+                <div>3. Lola Salvacion — BTN-2026-0518-5D9M · E-27</div>
               </div>
               <div className="mt-1 text-[10px]" style={{ color: COLORS.inkMuted }}>
                 Each ticket has its own QR. Show at counter + gangway.
@@ -2258,9 +2266,9 @@ function ConfirmationScreen({ setScreen, t = T.en }) {
               <div className="font-semibold mb-1">F&S Marine: ID reminder</div>
               <div className="space-y-0.5 text-xs">
                 <div>Booking: <span className="font-mono font-bold">BR-2026-0518-7K2A</span></div>
-                <div>1. Maria Cristina (Adult) · <span className="font-mono">BTN-3B7K</span> · A03-B → valid govt ID</div>
-                <div>2. Joaquin Miguel (Child) · <span className="font-mono">BTN-4C8L</span> · A03-C → PSA birth cert</div>
-                <div>3. Lola Salvacion (Senior) · <span className="font-mono">BTN-5D9M</span> · A03-D → OSCA Senior ID</div>
+                <div>1. Maria Cristina (Adult) · <span className="font-mono">BTN-3B7K</span> · E-25 → valid govt ID</div>
+                <div>2. Joaquin Miguel (Child) · <span className="font-mono">BTN-4C8L</span> · E-26 → PSA birth cert</div>
+                <div>3. Lola Salvacion (Senior) · <span className="font-mono">BTN-5D9M</span> · E-27 → OSCA Senior ID</div>
               </div>
               <div className="mt-2 text-[10px]" style={{ color: '#92400E' }}>
                 ⚠ Discount forfeited if ID not presented at counter.
@@ -2529,8 +2537,8 @@ function AdminOpsScreen({ setScreen, t = T.en }) {
           </div>
           <div className="space-y-3">
             {[
-              { time: '08:00', vessel: 'MV Our Lady of St Therese', route: 'Nasugbu Port → Tilik Port', routeCode: 'BAT-NAS → MIN-TIL', oa: 38, oaCap: 50, ac: 22, acCap: 30, vip: 8, vipCap: 10, status: 'Departed' },
-              { time: '14:00', vessel: 'MV Our Mother of Perpetual Help', route: 'Calatagan Port → Tilik Port', routeCode: 'BAT-CAL → MIN-TIL', oa: 45, oaCap: 60, ac: 18, acCap: 30, vip: 6, vipCap: 12, status: 'Boarding' },
+              { time: '08:00', vessel: 'MV Our Lady of St Therese', route: 'Nasugbu Port → Tilik Port', routeCode: 'BAT-NAS → MIN-TIL', oa: 38, oaCap: 50, ac: 22, acCap: 30, D: 8, vipCap: 10, status: 'Departed' },
+              { time: '14:00', vessel: 'MV Our Mother of Perpetual Help', route: 'Calatagan Port → Tilik Port', routeCode: 'BAT-CAL → MIN-TIL', oa: 45, oaCap: 60, ac: 18, acCap: 30, D: 6, vipCap: 12, status: 'Boarding' },
             ].map((v, i) => (
               <div key={i} className="p-4 rounded-xl border" style={{ borderColor: COLORS.border }}>
                 <div className="flex items-center justify-between mb-3">
@@ -2554,7 +2562,7 @@ function AdminOpsScreen({ setScreen, t = T.en }) {
                   </div>
                   <div className="p-2 rounded-lg" style={{ background: '#FEF3C7' }}>
                     <div className="font-semibold" style={{ color: '#A16207' }}>VIP</div>
-                    <div className="text-lg font-bold" style={{ color: '#A16207' }}>{v.vip}/{v.vipCap}</div>
+                    <div className="text-lg font-bold" style={{ color: '#A16207' }}>{v.D}/{v.vipCap}</div>
                   </div>
                 </div>
               </div>
@@ -3101,7 +3109,7 @@ function TimeSlotScreen({ setScreen, t = T.en }) {
       duration: '4h 00m',
       label: 'Sunrise sailing',
       icon: Sunrise,
-      seats: { openair: 42, aircon: 28, vip: 9 },
+      seats: { TE: 28, TA: 41, E: 88, D: 74 },
       note: null,
     },
     {
@@ -3111,7 +3119,7 @@ function TimeSlotScreen({ setScreen, t = T.en }) {
       duration: '4h 00m',
       label: 'Midday sailing',
       icon: Sun,
-      seats: { openair: 22, aircon: 14, vip: 4 },
+      seats: { TE: 12, TA: 14, E: 41, D: 38 },
       note: 'Filling up fast',
     },
     {
@@ -3121,12 +3129,12 @@ function TimeSlotScreen({ setScreen, t = T.en }) {
       duration: '4h 00m',
       label: 'Sunset sailing',
       icon: Sunset,
-      seats: { openair: 50, aircon: 30, vip: 10 },
+      seats: { TE: 34, TA: 48, E: 95, D: 81 },
       note: 'Best photo opportunities',
     },
   ];
 
-  const totalSeats = (s) => s.seats.openair + s.seats.aircon + s.seats.vip;
+  const totalSeats = (s) => s.seats.TE + s.seats.TA + s.seats.E + s.seats.D;
 
   return (
     <div>
@@ -3202,24 +3210,14 @@ function TimeSlotScreen({ setScreen, t = T.en }) {
                     {s.label}
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    <span
-                      className="text-xs px-2 py-0.5 rounded-full"
-                      style={{ background: '#DBEAFE', color: '#1E40AF' }}
-                    >
-                      {t.openAirLabel} · {s.seats.openair} {t.left}
-                    </span>
-                    <span
-                      className="text-xs px-2 py-0.5 rounded-full"
-                      style={{ background: '#FFE5E9', color: COLORS.primary }}
-                    >
-                      {t.airconLabel} · {s.seats.aircon} {t.left}
-                    </span>
-                    <span
-                      className="text-xs px-2 py-0.5 rounded-full"
-                      style={{ background: '#FEF3C7', color: '#A16207' }}
-                    >
-                      {t.vipLabel} · {s.seats.vip} {t.left}
-                    </span>
+                    {CLASS_CODES.map((cc) => (
+                      <span key={cc}
+                        className="text-xs px-2 py-0.5 rounded-full"
+                        style={{ background: CLASS_META[cc].themeBg, color: CLASS_META[cc].themeFg }}
+                      >
+                        {CLASS_META[cc].short} · {s.seats[cc]} {t.left}
+                      </span>
+                    ))}
                   </div>
                   {s.note && (
                     <div className="text-xs mt-2 flex items-center gap-1" style={{ color: COLORS.warning }}>
@@ -3267,38 +3265,55 @@ function TimeSlotScreen({ setScreen, t = T.en }) {
 // class picker is nested inline inside the Today's Sailings card.
 // ============================================================================
 function ClassPickerScreen({ setScreen, t = T.en }) {
-  const [selectedClass, setSelectedClass] = useState('aircon');
+  const [selectedClass, setSelectedClass] = useState('E');
 
   const classes = [
     {
-      id: 'openair',
-      name: 'Open Air',
-      tagline: 'Sea breeze and a view',
+      id: 'TE',
+      name: CLASS_META.TE.label,
+      tagline: '3rd floor · open-air tourist seating',
       icon: Wind,
-      color: '#1E40AF',
-      bg: '#DBEAFE',
+      color: CLASS_META.TE.themeFg,
+      bg: CLASS_META.TE.themeBg,
       fare: 350,
-      seats: 42,
-      capacity: 60,
+      seats: 28,
+      capacity: 36,
       features: [
-        'Open-deck bench seating',
+        '3rd floor open-deck bench seating',
         'Sea breeze and panoramic views',
         'Best value fare',
         'Life jacket provided',
       ],
     },
     {
-      id: 'aircon',
-      name: 'Aircon',
-      tagline: 'Indoor comfort with AC',
+      id: 'TA',
+      name: CLASS_META.TA.label,
+      tagline: '3rd floor · air-conditioned tourist cabin',
       icon: Snowflake,
-      color: COLORS.primary,
-      bg: '#FFE5E9',
-      fare: 550,
-      seats: 28,
-      capacity: 40,
+      color: CLASS_META.TA.themeFg,
+      bg: CLASS_META.TA.themeBg,
+      fare: 450,
+      seats: 41,
+      capacity: 55,
       features: [
-        'Enclosed air-conditioned cabin',
+        '3rd floor air-conditioned tourist cabin',
+        'Padded seating',
+        'Sheltered from sea spray',
+        'Life jacket provided',
+      ],
+    },
+    {
+      id: 'E',
+      name: CLASS_META.E.label,
+      tagline: 'Main cabin comfort, mid floor',
+      icon: Wind,
+      color: CLASS_META.E.themeFg,
+      bg: CLASS_META.E.themeBg,
+      fare: 550,
+      seats: 88,
+      capacity: 112,
+      features: [
+        '2nd floor main cabin',
         'Reclining seats',
         'TV / entertainment',
         'Life jacket provided',
@@ -3306,17 +3321,17 @@ function ClassPickerScreen({ setScreen, t = T.en }) {
       recommended: true,
     },
     {
-      id: 'vip',
-      name: 'VIP',
-      tagline: 'Private suite, premium service',
+      id: 'D',
+      name: CLASS_META.D.label,
+      tagline: 'Premium 1st-floor cabin',
       icon: Crown,
-      color: '#A16207',
-      bg: '#FEF3C7',
+      color: CLASS_META.D.themeFg,
+      bg: CLASS_META.D.themeBg,
       fare: 850,
-      seats: 9,
-      capacity: 12,
+      seats: 74,
+      capacity: 96,
       features: [
-        'Private VIP suite with privacy curtain',
+        '1st floor De Luxe cabin',
         'Complimentary snacks and drinks',
         'Priority boarding',
         'Premium reclining seats',
@@ -5288,18 +5303,18 @@ function AdminManifestScreen({ setScreen, t = T.en }) {
   const [exportToast, setExportToast] = useState(null);
 
   const samplePassengers = [
-    { seat: 'A03-B', name: 'Maria Cristina Reyes', age: 34, sex: 'F', id: 'PhilHealth · 12-345678901-2', contact: '+63 917 234 5678', class: 'Aircon', ref: 'BR-2026-0518-7K2A' },
-    { seat: 'A03-C', name: 'Jose Antonio Reyes', age: 36, sex: 'M', id: 'Driver License · N01-23-456789', contact: '+63 917 234 5678', class: 'Aircon', ref: 'BR-2026-0518-7K2A' },
-    { seat: 'A03-D', name: 'Sofia Margarita Reyes', age: 8, sex: 'F', id: 'PSA Birth Cert · 2018-NAS-04421', contact: 'with parent', class: 'Aircon', ref: 'BR-2026-0518-7K2A' },
-    { seat: 'V01-A', name: 'Eduardo Magtanggol', age: 52, sex: 'M', id: 'UMID · CRN-0012-3456789-0', contact: '+63 919 887 2210', class: 'VIP', ref: 'BR-2026-0518-1A6F' },
-    { seat: 'V01-B', name: 'Lourdes Magtanggol', age: 49, sex: 'F', id: 'Senior Citizen · SEN-2024-04421', contact: '+63 919 887 2210', class: 'VIP', ref: 'BR-2026-0518-1A6F' },
-    { seat: 'O02-D', name: 'Roberto Pangilinan', age: 28, sex: 'M', id: 'National ID · PCN 1234-5678-9012-3456', contact: '+63 928 445 6701', class: 'Open Air', ref: 'BR-2026-0518-4N8G' },
-    { seat: 'O02-E', name: 'Cristina Pangilinan', age: 26, sex: 'F', id: 'National ID · PCN 9876-5432-1098-7654', contact: '+63 928 445 6701', class: 'Open Air', ref: 'BR-2026-0518-4N8G' },
-    { seat: 'A04-A', name: 'Beatriz Salonga-Cruz', age: 41, sex: 'F', id: 'PWD ID · PWD-2022-NAS-00832', contact: '+63 917 882 1144', class: 'Aircon', ref: 'BR-2026-0518-5C8R' },
-    { seat: 'A04-B', name: 'Ramon Aquino Jr.', age: 31, sex: 'M', id: 'SSS · 34-5678901-2', contact: '+63 906 778 9921', class: 'Aircon', ref: 'BR-2026-0518-3X9M' },
-    { seat: 'O02-F', name: 'Andrea Patricia Lim', age: 25, sex: 'F', id: 'Passport · P1234567A', contact: '+63 945 112 6630', class: 'Open Air', ref: 'BR-2026-0518-5J2H' },
-    { seat: 'O02-G', name: 'Felipe Antonio Garcia', age: 38, sex: 'M', id: 'Driver License · N02-87-665544', contact: '+63 917 332 8821', class: 'Open Air', ref: 'BR-2026-0517-2B5C' },
-    { seat: 'A05-A', name: 'Marisol Yulo-Carrasco', age: 44, sex: 'F', id: 'UMID · CRN-0023-1234567-8', contact: '+63 920 887 6655', class: 'Aircon', ref: 'BR-2026-0517-6T1D' },
+    { seat: 'E-25', name: 'Maria Cristina Reyes', age: 34, sex: 'F', id: 'PhilHealth · 12-345678901-2', contact: '+63 917 234 5678', class: 'Aircon', ref: 'BR-2026-0518-7K2A' },
+    { seat: 'E-26', name: 'Jose Antonio Reyes', age: 36, sex: 'M', id: 'Driver License · N01-23-456789', contact: '+63 917 234 5678', class: 'Aircon', ref: 'BR-2026-0518-7K2A' },
+    { seat: 'E-27', name: 'Sofia Margarita Reyes', age: 8, sex: 'F', id: 'PSA Birth Cert · 2018-NAS-04421', contact: 'with parent', class: 'Aircon', ref: 'BR-2026-0518-7K2A' },
+    { seat: 'D-1', name: 'Eduardo Magtanggol', age: 52, sex: 'M', id: 'UMID · CRN-0012-3456789-0', contact: '+63 919 887 2210', class: 'VIP', ref: 'BR-2026-0518-1A6F' },
+    { seat: 'D-2', name: 'Lourdes Magtanggol', age: 49, sex: 'F', id: 'Senior Citizen · SEN-2024-04421', contact: '+63 919 887 2210', class: 'VIP', ref: 'BR-2026-0518-1A6F' },
+    { seat: 'TE-58', name: 'Roberto Pangilinan', age: 28, sex: 'M', id: 'National ID · PCN 1234-5678-9012-3456', contact: '+63 928 445 6701', class: 'Open Air', ref: 'BR-2026-0518-4N8G' },
+    { seat: 'TE-59', name: 'Cristina Pangilinan', age: 26, sex: 'F', id: 'National ID · PCN 9876-5432-1098-7654', contact: '+63 928 445 6701', class: 'Open Air', ref: 'BR-2026-0518-4N8G' },
+    { seat: 'E-44', name: 'Beatriz Salonga-Cruz', age: 41, sex: 'F', id: 'PWD ID · PWD-2022-NAS-00832', contact: '+63 917 882 1144', class: 'Aircon', ref: 'BR-2026-0518-5C8R' },
+    { seat: 'E-45', name: 'Ramon Aquino Jr.', age: 31, sex: 'M', id: 'SSS · 34-5678901-2', contact: '+63 906 778 9921', class: 'Aircon', ref: 'BR-2026-0518-3X9M' },
+    { seat: 'TE-60', name: 'Andrea Patricia Lim', age: 25, sex: 'F', id: 'Passport · P1234567A', contact: '+63 945 112 6630', class: 'Open Air', ref: 'BR-2026-0518-5J2H' },
+    { seat: 'TE-61', name: 'Felipe Antonio Garcia', age: 38, sex: 'M', id: 'Driver License · N02-87-665544', contact: '+63 917 332 8821', class: 'Open Air', ref: 'BR-2026-0517-2B5C' },
+    { seat: 'E-58', name: 'Marisol Yulo-Carrasco', age: 44, sex: 'F', id: 'UMID · CRN-0023-1234567-8', contact: '+63 920 887 6655', class: 'Aircon', ref: 'BR-2026-0517-6T1D' },
   ];
 
   const handleExport = (fmt) => {
@@ -5566,7 +5581,7 @@ function AdminManifestScreen({ setScreen, t = T.en }) {
 // ============================================================================
 function AdminFaresScreen({ setScreen, t = T.en }) {
   const [globalFares, setGlobalFares] = useState({
-    openair: 350, aircon: 550, vip: 850,
+    TE: 350, TA: 450, E: 550, D: 850,
   });
   const [discounts, setDiscounts] = useState({
     roundTrip: 10, senior: 20, pwd: 20, student: 15,
@@ -5659,9 +5674,10 @@ function AdminFaresScreen({ setScreen, t = T.en }) {
 
           <div className="grid md:grid-cols-3 gap-3">
             {[
-              { id: 'openair', name: 'Open Air', color: '#1E40AF', bg: '#DBEAFE', icon: Wind },
-              { id: 'aircon', name: 'Aircon', color: COLORS.primary, bg: '#FFE5E9', icon: Snowflake },
-              { id: 'vip', name: 'VIP', color: '#A16207', bg: '#FEF3C7', icon: Crown },
+              { id: 'TE', name: CLASS_META.TE.label, color: CLASS_META.TE.themeFg, bg: CLASS_META.TE.themeBg, icon: Wind },
+              { id: 'TA', name: CLASS_META.TA.label, color: CLASS_META.TA.themeFg, bg: CLASS_META.TA.themeBg, icon: Snowflake },
+              { id: 'E',  name: CLASS_META.E.label,  color: CLASS_META.E.themeFg,  bg: CLASS_META.E.themeBg,  icon: Wind },
+              { id: 'D',  name: CLASS_META.D.label,  color: CLASS_META.D.themeFg,  bg: CLASS_META.D.themeBg,  icon: Crown },
             ].map((c) => {
               const Icon = c.icon;
               return (
@@ -8590,7 +8606,7 @@ function AdminAuditScreen({ setScreen, t = T.en }) {
 // ============================================================================
 function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setGovHospitalBookings = () => {}, sailings = [], setSailings = () => {} }) {
   const [step, setStep] = useState(1); // 1: sailing+class, 2: passengers+seats, 3: payment, 4: receipt
-  const [selectedClass, setSelectedClass] = useState('aircon');
+  const [selectedClass, setSelectedClass] = useState('E');
   const [paxCount, setPaxCount] = useState(1);
   const [passengers, setPassengers] = useState([
     { name: '', age: '', sex: 'M', idType: 'National ID', idNumber: '', passengerType: 'Adult', seat: '', agency: '', designation: '', reasonForTravel: '' },
@@ -8611,31 +8627,35 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
   const nextSailing = sailings.find(s => !s.departed && !s.manifestDeclared && s.id !== activeSailing?.id);
   // Staff can only book for activeSailing. nextSailing is shown as locked until manifest is declared.
 
-  const fares = { openair: 350, aircon: 550, vip: 850 };
+  const fares = { TE: 350, TA: 450, E: 550, D: 850 };
   const subtotal = fares[selectedClass] * paxCount;
   const change = paymentMethod === 'cash' && cashTendered ? Math.max(0, Number(cashTendered) - subtotal) : 0;
 
-  // Seat grids per class
-  const seatGrid = selectedClass === 'openair'
-    ? { rows: 10, cols: 8, prefix: 'O', colLabels: 'ABCDEFGH'.split('') }
-    : selectedClass === 'aircon'
-    ? { rows: 10, cols: 5, prefix: 'A', colLabels: 'ABCDE'.split('') }
-    : { rows: 3, cols: 4, prefix: 'V', colLabels: 'ABCD'.split('') };
+  // Seat grid sourced from real vessel seat plan. Staff walk-in operates on
+  // the active sailing's vessel; we render a flat uniform grid of the class's
+  // real seat labels (e.g. TE-1..TE-36).
+  const walkinVesselKey = (activeSailing?.vessel || '').toUpperCase().includes('PERPETUAL')
+    ? 'OUR MOTHER OF PERPETUAL HELP'
+    : 'OUR LADY OF ST. THERESE';
+  const walkinSeatLabels = seatLabelsForClass(walkinVesselKey, selectedClass);
+  const classCapacityFor = (cls) => VESSEL_SEAT_PLANS[walkinVesselKey]?.classes?.[cls]?.capacity || 0;
+  const currentClassCapacity = walkinSeatLabels.length;
+  const walkinCols = Math.min(8, Math.max(4, Math.ceil(Math.sqrt(currentClassCapacity * 1.6))));
+  const seatGrid = { cols: walkinCols, labels: walkinSeatLabels };
 
-  // Mock taken seats (pseudo-random based on class)
+  // Pseudo-deterministic taken seats per vessel+class for the demo.
   const takenSeats = new Set();
-  const seed = selectedClass === 'openair' ? 3 : selectedClass === 'aircon' ? 7 : 2;
-  for (let r = 1; r <= seatGrid.rows; r++) {
-    for (let c = 0; c < seatGrid.cols; c++) {
-      if ((r * (c + 1) * seed) % 5 === 0) {
-        takenSeats.add(`${seatGrid.prefix}${String(r).padStart(2, '0')}-${seatGrid.colLabels[c]}`);
-      }
+  {
+    const seedStr = walkinVesselKey + ':' + selectedClass;
+    let h = 0;
+    for (let i = 0; i < seedStr.length; i++) h = (h * 31 + seedStr.charCodeAt(i)) >>> 0;
+    const occCount = Math.round(currentClassCapacity * 0.22);
+    let cur = h;
+    for (let i = 0; i < occCount; i++) {
+      cur = (cur * 1103515245 + 12345) >>> 0;
+      takenSeats.add(walkinSeatLabels[cur % currentClassCapacity]);
     }
   }
-
-  const classCapacityFor = (cls) =>
-    cls === 'openair' ? 80 : cls === 'aircon' ? 30 : 10;
-  const currentClassCapacity = classCapacityFor(selectedClass);
   const seatLabelPool = (seatCode) => poolForSeat(seatCode, currentClassCapacity);
 
   const updatePaxCount = (n) => {
@@ -8735,7 +8755,7 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
         submittedAt: 'May 30 · 06:25',
         sailingId: activeSailing?.id, voyageDate: 'May 19, 2026', voyageTime: activeSailing?.time,
         vessel: activeSailing?.vessel, route: `${staff.port} → MIN-TIL`,
-        class: selectedClass === 'openair' ? 'Open Air' : selectedClass === 'aircon' ? 'Aircon' : 'VIP',
+        class: CLASS_META[selectedClass].label,
         seat: p.seat || '—',
         passenger: { name: p.name || 'Unnamed', age: p.age || '—', sex: p.sex },
         agency: p.agency || '—', designation: p.designation || '—',
@@ -8801,9 +8821,9 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
           </div>
           <div className="text-xs" style={{ color: COLORS.inkMuted }}>{activeSailing.vessel} · Today</div>
           <div className="flex gap-1.5 mt-1.5">
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#DBEAFE', color: '#1E40AF' }}>OA {seatsAvailableInClass(activeSailing.pools?.openair)}</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#FFE5E9', color: COLORS.primary }}>AC {seatsAvailableInClass(activeSailing.pools?.aircon)}</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#FEF3C7', color: '#A16207' }}>VIP {seatsAvailableInClass(activeSailing.pools?.vip)}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#DBEAFE', color: '#1E40AF' }}>OA {seatsAvailableInClass(activeSailing.pools?.TE)}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#FFE5E9', color: COLORS.primary }}>AC {seatsAvailableInClass(activeSailing.pools?.E)}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#FEF3C7', color: '#A16207' }}>VIP {seatsAvailableInClass(activeSailing.pools?.D)}</span>
           </div>
         </div>
       )}
@@ -8848,19 +8868,20 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
       {step === 1 && (
         <>
           <h2 className="text-lg font-bold mb-1" style={{ color: COLORS.ink }}>Select class</h2>
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            {[
-              { id: 'openair', name: 'Open Air', color: '#1E40AF', bg: '#DBEAFE', fare: 350 },
-              { id: 'aircon', name: 'Aircon', color: COLORS.primary, bg: '#FFE5E9', fare: 550 },
-              { id: 'vip', name: 'VIP', color: '#A16207', bg: '#FEF3C7', fare: 850 },
-            ].map((c) => (
-              <button key={c.id} onClick={() => setSelectedClass(c.id)}
-                className="rounded-xl p-2.5 border-2 text-center"
-                style={{ background: c.bg, borderColor: selectedClass === c.id ? c.color : 'transparent' }}>
-                <div className="text-[10px] font-semibold" style={{ color: c.color }}>{c.name}</div>
-                <div className="text-base font-bold font-mono" style={{ color: c.color }}>₱{c.fare}</div>
-              </button>
-            ))}
+          <div className="grid grid-cols-4 gap-1.5 mb-4">
+            {CLASS_CODES.map((cc) => {
+              const cm = CLASS_META[cc];
+              const cFare = fares[cc];
+              const active = selectedClass === cc;
+              return (
+                <button key={cc} onClick={() => setSelectedClass(cc)}
+                  className="rounded-xl p-2 border-2 text-center"
+                  style={{ background: cm.themeBg, borderColor: active ? cm.themeFg : 'transparent' }}>
+                  <div className="text-[9px] font-semibold leading-tight" style={{ color: cm.themeFg }}>{cm.short}</div>
+                  <div className="text-sm font-bold font-mono mt-0.5" style={{ color: cm.themeFg }}>₱{cFare}</div>
+                </button>
+              );
+            })}
           </div>
 
           <h3 className="text-sm font-semibold mb-2" style={{ color: COLORS.ink }}>How many passengers?</h3>
@@ -9035,7 +9056,7 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
           <div className="bg-white rounded-xl p-3 border mb-4" style={{ borderColor: COLORS.border }}>
             <div className="flex items-center justify-between mb-2">
               <div className="text-xs font-bold" style={{ color: COLORS.ink }}>
-                Seat map — {selectedClass === 'openair' ? 'Open Air' : selectedClass === 'aircon' ? 'Aircon' : 'VIP'}
+                Seat map — {CLASS_META[selectedClass].label}
               </div>
               <div className="text-[10px]" style={{ color: COLORS.inkMuted }}>
                 Assigning for: <span className="font-semibold" style={{ color: COLORS.primary }}>Pax {assigningPaxIndex + 1}</span>
@@ -9048,31 +9069,30 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
             </div>
             <div className="overflow-x-auto flex justify-center">
               <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${seatGrid.cols}, 28px)` }}>
-                {Array.from({ length: seatGrid.rows }).map((_, r) =>
-                  Array.from({ length: seatGrid.cols }).map((_, c) => {
-                    const seatId = `${seatGrid.prefix}${String(r + 1).padStart(2, '0')}-${seatGrid.colLabels[c]}`;
-                    const isTaken = takenSeats.has(seatId);
-                    const assignedTo = passengers.findIndex(p => p.seat === seatId);
-                    const isMyPick = assignedTo >= 0;
-                    return (
-                      <button key={seatId}
-                        onClick={() => !isTaken && assignSeat(assigningPaxIndex, seatId)}
-                        disabled={isTaken}
-                        className="w-7 h-7 rounded text-[8px] font-bold flex flex-col items-center justify-center gap-0.5"
-                        style={{
-                          background: isMyPick ? COLORS.primary : isTaken ? '#E5E7EB' : 'white',
-                          color: isMyPick ? 'white' : isTaken ? '#9CA3AF' : COLORS.ink,
-                          border: `1px solid ${isMyPick ? COLORS.primary : '#D1D5DB'}`,
-                          cursor: isTaken ? 'not-allowed' : 'pointer',
-                        }}>
-                        {isMyPick ? `P${assignedTo + 1}` : seatGrid.colLabels[c]}
-                        <div className="mt-0.5">
-                          <ReservedPoolBadge pool={seatLabelPool(seatId)} size="xs" />
-                        </div>
-                      </button>
-                    );
-                  })
-                )}
+                {seatGrid.labels.map((seatId) => {
+                  const isTaken = takenSeats.has(seatId);
+                  const assignedTo = passengers.findIndex(p => p.seat === seatId);
+                  const isMyPick = assignedTo >= 0;
+                  const seatNum = seatId.split('-')[1];
+                  return (
+                    <button key={seatId}
+                      onClick={() => !isTaken && assignSeat(assigningPaxIndex, seatId)}
+                      disabled={isTaken}
+                      className="w-7 h-7 rounded text-[8px] font-bold flex flex-col items-center justify-center gap-0.5"
+                      style={{
+                        background: isMyPick ? COLORS.primary : isTaken ? '#E5E7EB' : 'white',
+                        color: isMyPick ? 'white' : isTaken ? '#9CA3AF' : COLORS.ink,
+                        border: `1px solid ${isMyPick ? COLORS.primary : '#D1D5DB'}`,
+                        cursor: isTaken ? 'not-allowed' : 'pointer',
+                      }}
+                      title={seatId}>
+                      {isMyPick ? `P${assignedTo + 1}` : seatNum}
+                      <div className="mt-0.5">
+                        <ReservedPoolBadge pool={seatLabelPool(seatId)} size="xs" />
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -9093,7 +9113,7 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
             <div className="text-[10px] opacity-70 mb-0.5">Total due</div>
             <div className="text-3xl font-bold font-mono">₱{subtotal.toLocaleString()}.00</div>
             <div className="text-xs opacity-80">
-              {paxCount} × {selectedClass === 'openair' ? 'Open Air' : selectedClass === 'aircon' ? 'Aircon' : 'VIP'} · ₱{fares[selectedClass]} each
+              {paxCount} × {CLASS_META[selectedClass].label} · ₱{fares[selectedClass]} each
             </div>
           </div>
 
@@ -9292,7 +9312,7 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
                       <table style={{ width: '100%', fontSize: 10, borderCollapse: 'collapse' }}>
                         <tbody>
                           <tr><td style={{ padding: '2px 0', color: '#555', width: 90 }}>Vessel:</td><td>MV Our Lady of St Therese</td></tr>
-                          <tr><td style={{ padding: '2px 0', color: '#555' }}>Class:</td><td style={{ fontWeight: 'bold' }}>{selectedClass === 'openair' ? 'Open Air' : selectedClass === 'aircon' ? 'Aircon' : 'VIP'}</td></tr>
+                          <tr><td style={{ padding: '2px 0', color: '#555' }}>Class:</td><td style={{ fontWeight: 'bold' }}>{CLASS_META[selectedClass].label}</td></tr>
                           <tr><td style={{ padding: '2px 0', color: '#555' }}>Staff:</td><td>{staff.name} · {staff.port}</td></tr>
                           <tr><td style={{ padding: '2px 0', color: '#555' }}>Payment:</td><td>{paymentMethod === 'cash' ? 'Cash' : 'Card POS'}</td></tr>
                         </tbody>
@@ -9334,7 +9354,7 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
                     <table style={{ fontSize: 10, borderCollapse: 'collapse', minWidth: 220 }}>
                       <tbody>
-                        <tr><td style={{ padding: '2px 8px', color: '#555' }}>{paxCount} × ₱{fares[selectedClass].toLocaleString()} ({selectedClass === 'openair' ? 'Open Air' : selectedClass === 'aircon' ? 'Aircon' : 'VIP'})</td><td style={{ padding: '2px 8px', textAlign: 'right' }}>₱{subtotal.toLocaleString()}.00</td></tr>
+                        <tr><td style={{ padding: '2px 8px', color: '#555' }}>{paxCount} × ₱{fares[selectedClass].toLocaleString()} ({CLASS_META[selectedClass].label})</td><td style={{ padding: '2px 8px', textAlign: 'right' }}>₱{subtotal.toLocaleString()}.00</td></tr>
                         <tr style={{ borderTop: '2px solid #222' }}><td style={{ padding: '4px 8px', fontWeight: 'bold', fontSize: 12 }}>TOTAL</td><td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 'bold', fontSize: 12, fontFamily: 'Courier New, monospace' }}>₱{subtotal.toLocaleString()}.00</td></tr>
                         <tr><td style={{ padding: '2px 8px', color: '#555' }}>Payment</td><td style={{ padding: '2px 8px', textAlign: 'right' }}>{paymentMethod === 'cash' ? 'CASH' : 'CARD POS'}</td></tr>
                         {paymentMethod === 'cash' && cashTendered && (
@@ -9372,7 +9392,7 @@ function StaffWalkinScreen({ setScreen, t = T.en, govHospitalBookings = [], setG
                           </div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
                             <span>Seat: <strong style={{ fontFamily: 'Courier New, monospace' }}>{p.seat || '—'}</strong></span>
-                            <span>Class: <strong>{selectedClass === 'openair' ? 'OA' : selectedClass === 'aircon' ? 'AC' : 'VIP'}</strong></span>
+                            <span>Class: <strong>{selectedClass}</strong></span>
                           </div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
                             <span>{activeSailing?.time} · May 19</span>
@@ -9432,19 +9452,19 @@ function StaffCheckinScreen({ setScreen, t = T.en }) {
   //   Infant   → free (0-3y), MUST present a PSA birth certificate (age proof)
   //   Adult    → any valid government ID
   const [manifest, setManifest] = useState([
-    { id: 'mp1', seat: 'A03-B', name: 'Maria Cristina Reyes', age: 34, idType: 'PhilHealth', passengerType: 'Adult', class: 'Aircon', ref: 'BR-2026-0518-7K2A', ticket: 'BTN-2026-0518-3B7K', status: 'pending', vehicle: { type: 'SUV', declared: true } },
-    { id: 'mp2', seat: 'A03-C', name: 'Jose Antonio Reyes', age: 36, idType: 'Driver License', passengerType: 'Adult', class: 'Aircon', ref: 'BR-2026-0518-7K2A', ticket: 'BTN-2026-0518-4C8L', status: 'pending' },
-    { id: 'mp3', seat: 'A03-D', name: 'Sofia Margarita Reyes', age: 8, idType: 'PSA Birth Cert', passengerType: 'Child', class: 'Aircon', ref: 'BR-2026-0518-7K2A', ticket: 'BTN-2026-0518-5D9M', status: 'pending' },
-    { id: 'mp4', seat: 'V01-A', name: 'Eduardo Magtanggol', age: 52, idType: 'UMID', passengerType: 'Adult', class: 'VIP', ref: 'BR-2026-0518-1A6F', ticket: 'BTN-2026-0518-6E1N', status: 'checked' },
-    { id: 'mp5', seat: 'V01-B', name: 'Lourdes Magtanggol', age: 49, idType: 'Senior Citizen ID', passengerType: 'Senior', class: 'VIP', ref: 'BR-2026-0518-1A6F', ticket: 'BTN-2026-0518-7F2P', status: 'checked' },
-    { id: 'mp6', seat: 'O02-D', name: 'Roberto Pangilinan', age: 28, idType: 'National ID', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0518-4N8G', ticket: 'BTN-2026-0518-8G3Q', status: 'checked', vehicle: { type: 'Motorcycle', declared: true } },
-    { id: 'mp7', seat: 'O02-E', name: 'Cristina Pangilinan', age: 26, idType: 'National ID', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0518-4N8G', ticket: 'BTN-2026-0518-9H4R', status: 'checked' },
-    { id: 'mp8', seat: 'A04-A', name: 'Beatriz Salonga-Cruz', age: 41, idType: 'PWD ID', passengerType: 'PWD', class: 'Aircon', ref: 'BR-2026-0518-5C8R', ticket: 'BTN-2026-0518-1J5S', status: 'pending' },
-    { id: 'mp9', seat: 'A04-B', name: 'Ramon Aquino Jr.', age: 21, idType: 'Student ID', passengerType: 'Student', class: 'Aircon', ref: 'BR-2026-0518-3X9M', ticket: 'BTN-2026-0518-2K6T', status: 'pending' },
-    { id: 'mp10', seat: 'O02-F', name: 'Andrea Patricia Lim', age: 25, idType: 'Passport', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0518-5J2H', ticket: 'BTN-2026-0518-3L7U', status: 'pending' },
-    { id: 'mp11', seat: 'O02-G', name: 'Felipe Antonio Garcia', age: 38, idType: 'Driver License', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0517-2B5C', ticket: 'BTN-2026-0517-4M8V', status: 'noshow' },
-    { id: 'mp12', seat: 'A05-A', name: 'Marisol Yulo-Carrasco', age: 64, idType: 'Senior Citizen ID', passengerType: 'Senior', class: 'Aircon', ref: 'BR-2026-0517-6T1D', ticket: 'BTN-2026-0517-5N9W', status: 'pending' },
-    { id: 'mp13', seat: 'V03-D', name: 'Hon. Maria Linda Bautista', age: 56, idType: 'Government ID', idNumber: 'PROV-BAT-08821', passengerType: 'Gov/Hospital', class: 'VIP', ref: 'GH-2026-0527-3T8B', ticket: 'BTN-2026-0519-9V3X', status: 'pending', agency: 'Office of the Provincial Governor — Batangas' },
+    { id: 'mp1', seat: 'E-25', name: 'Maria Cristina Reyes', age: 34, idType: 'PhilHealth', passengerType: 'Adult', class: 'Aircon', ref: 'BR-2026-0518-7K2A', ticket: 'BTN-2026-0518-3B7K', status: 'pending', vehicle: { type: 'SUV', declared: true } },
+    { id: 'mp2', seat: 'E-26', name: 'Jose Antonio Reyes', age: 36, idType: 'Driver License', passengerType: 'Adult', class: 'Aircon', ref: 'BR-2026-0518-7K2A', ticket: 'BTN-2026-0518-4C8L', status: 'pending' },
+    { id: 'mp3', seat: 'E-27', name: 'Sofia Margarita Reyes', age: 8, idType: 'PSA Birth Cert', passengerType: 'Child', class: 'Aircon', ref: 'BR-2026-0518-7K2A', ticket: 'BTN-2026-0518-5D9M', status: 'pending' },
+    { id: 'mp4', seat: 'D-1', name: 'Eduardo Magtanggol', age: 52, idType: 'UMID', passengerType: 'Adult', class: 'VIP', ref: 'BR-2026-0518-1A6F', ticket: 'BTN-2026-0518-6E1N', status: 'checked' },
+    { id: 'mp5', seat: 'D-2', name: 'Lourdes Magtanggol', age: 49, idType: 'Senior Citizen ID', passengerType: 'Senior', class: 'VIP', ref: 'BR-2026-0518-1A6F', ticket: 'BTN-2026-0518-7F2P', status: 'checked' },
+    { id: 'mp6', seat: 'TE-58', name: 'Roberto Pangilinan', age: 28, idType: 'National ID', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0518-4N8G', ticket: 'BTN-2026-0518-8G3Q', status: 'checked', vehicle: { type: 'Motorcycle', declared: true } },
+    { id: 'mp7', seat: 'TE-59', name: 'Cristina Pangilinan', age: 26, idType: 'National ID', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0518-4N8G', ticket: 'BTN-2026-0518-9H4R', status: 'checked' },
+    { id: 'mp8', seat: 'E-44', name: 'Beatriz Salonga-Cruz', age: 41, idType: 'PWD ID', passengerType: 'PWD', class: 'Aircon', ref: 'BR-2026-0518-5C8R', ticket: 'BTN-2026-0518-1J5S', status: 'pending' },
+    { id: 'mp9', seat: 'E-45', name: 'Ramon Aquino Jr.', age: 21, idType: 'Student ID', passengerType: 'Student', class: 'Aircon', ref: 'BR-2026-0518-3X9M', ticket: 'BTN-2026-0518-2K6T', status: 'pending' },
+    { id: 'mp10', seat: 'TE-60', name: 'Andrea Patricia Lim', age: 25, idType: 'Passport', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0518-5J2H', ticket: 'BTN-2026-0518-3L7U', status: 'pending' },
+    { id: 'mp11', seat: 'TE-61', name: 'Felipe Antonio Garcia', age: 38, idType: 'Driver License', passengerType: 'Adult', class: 'Open Air', ref: 'BR-2026-0517-2B5C', ticket: 'BTN-2026-0517-4M8V', status: 'noshow' },
+    { id: 'mp12', seat: 'E-58', name: 'Marisol Yulo-Carrasco', age: 64, idType: 'Senior Citizen ID', passengerType: 'Senior', class: 'Aircon', ref: 'BR-2026-0517-6T1D', ticket: 'BTN-2026-0517-5N9W', status: 'pending' },
+    { id: 'mp13', seat: 'D-30', name: 'Hon. Maria Linda Bautista', age: 56, idType: 'Government ID', idNumber: 'PROV-BAT-08821', passengerType: 'Gov/Hospital', class: 'VIP', ref: 'GH-2026-0527-3T8B', ticket: 'BTN-2026-0519-9V3X', status: 'pending', agency: 'Office of the Provincial Governor — Batangas' },
   ]);
 
   // Map passenger type → required ID for verification at the counter
@@ -10217,9 +10237,9 @@ function BookingDetailScreen({ setScreen, t = T.en }) {
     emergencyReason: 'Bad weather / typhoon',
     emergencyHoursElapsed: 8, // out of 72 — for displaying countdown
     passengers: [
-      { seat: 'A03-B', name: 'Maria Cristina Reyes', age: 34, sex: 'F', idType: 'PhilHealth', idNumber: '12-345678901-2' },
-      { seat: 'A03-C', name: 'Jose Antonio Reyes', age: 36, sex: 'M', idType: 'Driver License', idNumber: 'N01-23-456789' },
-      { seat: 'A03-D', name: 'Sofia Margarita Reyes', age: 8, sex: 'F', idType: 'PSA Birth Cert', idNumber: '2018-NAS-04421' },
+      { seat: 'E-25', name: 'Maria Cristina Reyes', age: 34, sex: 'F', idType: 'PhilHealth', idNumber: '12-345678901-2' },
+      { seat: 'E-26', name: 'Jose Antonio Reyes', age: 36, sex: 'M', idType: 'Driver License', idNumber: 'N01-23-456789' },
+      { seat: 'E-27', name: 'Sofia Margarita Reyes', age: 8, sex: 'F', idType: 'PSA Birth Cert', idNumber: '2018-NAS-04421' },
     ],
     fareBreakdown: {
       adultFare: 550, adultCount: 2,
@@ -11430,24 +11450,24 @@ function StaffBoardingScreen({ setScreen, t = T.en, onShowManifest }) {
   // (didn't board yet), 'walkup' = boarded without counter check (rare),
   // 'noshow' = neither counter nor gangway
   const [pax, setPax] = useState([
-    { id: 'p1', seat: 'A03-B', name: 'Maria Cristina Reyes', age: 34, sex: 'F', idType: 'PhilHealth', idNumber: '12-345678901-2', contact: '+63 917 234 5678', class: 'Aircon', ref: 'BR-2026-0518-7K2A', status: 'boarded', category: 'adult' },
-    { id: 'p2', seat: 'A03-C', name: 'Jose Antonio Reyes', age: 36, sex: 'M', idType: 'Driver License', idNumber: 'N01-23-456789', contact: '+63 917 234 5678', class: 'Aircon', ref: 'BR-2026-0518-7K2A', status: 'boarded', category: 'adult' },
-    { id: 'p3', seat: 'A03-D', name: 'Sofia Margarita Reyes', age: 8, sex: 'F', idType: 'PSA Birth Cert', idNumber: '2018-NAS-04421', contact: 'with parent', class: 'Aircon', ref: 'BR-2026-0518-7K2A', status: 'boarded', category: 'child' },
-    { id: 'p4', seat: 'V01-A', name: 'Eduardo Magtanggol', age: 52, sex: 'M', idType: 'UMID', idNumber: 'CRN-0012-3456789-0', contact: '+63 919 887 2210', class: 'VIP', ref: 'BR-2026-0518-1A6F', status: 'boarded', category: 'adult' },
-    { id: 'p5', seat: 'V01-B', name: 'Lourdes Magtanggol', age: 49, sex: 'F', idType: 'Senior Citizen ID', idNumber: 'SEN-2024-04421', contact: '+63 919 887 2210', class: 'VIP', ref: 'BR-2026-0518-1A6F', status: 'boarded', category: 'adult' },
-    { id: 'p6', seat: 'O02-D', name: 'Roberto Pangilinan', age: 28, sex: 'M', idType: 'National ID', idNumber: 'PCN 1234-5678-9012', contact: '+63 928 445 6701', class: 'Open Air', ref: 'BR-2026-0518-4N8G', status: 'boarded', category: 'adult' },
-    { id: 'p7', seat: 'O02-E', name: 'Cristina Pangilinan', age: 26, sex: 'F', idType: 'National ID', idNumber: 'PCN 9876-5432-1098', contact: '+63 928 445 6701', class: 'Open Air', ref: 'BR-2026-0518-4N8G', status: 'boarded', category: 'adult' },
-    { id: 'p8', seat: 'A04-A', name: 'Beatriz Salonga-Cruz', age: 41, sex: 'F', idType: 'PWD ID', idNumber: 'PWD-2022-NAS-00832', contact: '+63 917 882 1144', class: 'Aircon', ref: 'BR-2026-0518-5C8R', status: 'boarded', category: 'adult' },
-    { id: 'p9', seat: 'A04-B', name: 'Ramon Aquino Jr.', age: 31, sex: 'M', idType: 'SSS', idNumber: '34-5678901-2', contact: '+63 906 778 9921', class: 'Aircon', ref: 'BR-2026-0518-3X9M', status: 'checked', category: 'adult' },
-    { id: 'p10', seat: 'O02-F', name: 'Andrea Patricia Lim', age: 25, sex: 'F', idType: 'Passport', idNumber: 'P1234567A', contact: '+63 945 112 6630', class: 'Open Air', ref: 'BR-2026-0518-5J2H', status: 'checked', category: 'adult' },
-    { id: 'p11', seat: 'O02-G', name: 'Felipe Antonio Garcia', age: 38, sex: 'M', idType: 'Driver License', idNumber: 'N02-87-665544', contact: '+63 917 332 8821', class: 'Open Air', ref: 'BR-2026-0517-2B5C', status: 'noshow', category: 'adult' },
-    { id: 'p12', seat: 'A05-A', name: 'Marisol Yulo-Carrasco', age: 44, sex: 'F', idType: 'UMID', idNumber: 'CRN-0023-1234567-8', contact: '+63 920 887 6655', class: 'Aircon', ref: 'BR-2026-0517-6T1D', status: 'boarded', category: 'adult' },
-    { id: 'bp_gh1', seat: 'V03-D', name: 'Hon. Maria Linda Bautista', age: 56, sex: 'F', idType: 'Government ID', idNumber: 'PROV-BAT-08821', contact: '+63 917 555 0188', class: 'VIP', ref: 'GH-2026-0527-3T8B', status: 'checked', category: 'adult', passengerType: 'Gov/Hospital', agency: 'Office of the Provincial Governor — Batangas', reasonForTravel: 'Official meeting with Lubang LGU' },
+    { id: 'p1', seat: 'E-25', name: 'Maria Cristina Reyes', age: 34, sex: 'F', idType: 'PhilHealth', idNumber: '12-345678901-2', contact: '+63 917 234 5678', class: 'Aircon', ref: 'BR-2026-0518-7K2A', status: 'boarded', category: 'adult' },
+    { id: 'p2', seat: 'E-26', name: 'Jose Antonio Reyes', age: 36, sex: 'M', idType: 'Driver License', idNumber: 'N01-23-456789', contact: '+63 917 234 5678', class: 'Aircon', ref: 'BR-2026-0518-7K2A', status: 'boarded', category: 'adult' },
+    { id: 'p3', seat: 'E-27', name: 'Sofia Margarita Reyes', age: 8, sex: 'F', idType: 'PSA Birth Cert', idNumber: '2018-NAS-04421', contact: 'with parent', class: 'Aircon', ref: 'BR-2026-0518-7K2A', status: 'boarded', category: 'child' },
+    { id: 'p4', seat: 'D-1', name: 'Eduardo Magtanggol', age: 52, sex: 'M', idType: 'UMID', idNumber: 'CRN-0012-3456789-0', contact: '+63 919 887 2210', class: 'VIP', ref: 'BR-2026-0518-1A6F', status: 'boarded', category: 'adult' },
+    { id: 'p5', seat: 'D-2', name: 'Lourdes Magtanggol', age: 49, sex: 'F', idType: 'Senior Citizen ID', idNumber: 'SEN-2024-04421', contact: '+63 919 887 2210', class: 'VIP', ref: 'BR-2026-0518-1A6F', status: 'boarded', category: 'adult' },
+    { id: 'p6', seat: 'TE-58', name: 'Roberto Pangilinan', age: 28, sex: 'M', idType: 'National ID', idNumber: 'PCN 1234-5678-9012', contact: '+63 928 445 6701', class: 'Open Air', ref: 'BR-2026-0518-4N8G', status: 'boarded', category: 'adult' },
+    { id: 'p7', seat: 'TE-59', name: 'Cristina Pangilinan', age: 26, sex: 'F', idType: 'National ID', idNumber: 'PCN 9876-5432-1098', contact: '+63 928 445 6701', class: 'Open Air', ref: 'BR-2026-0518-4N8G', status: 'boarded', category: 'adult' },
+    { id: 'p8', seat: 'E-44', name: 'Beatriz Salonga-Cruz', age: 41, sex: 'F', idType: 'PWD ID', idNumber: 'PWD-2022-NAS-00832', contact: '+63 917 882 1144', class: 'Aircon', ref: 'BR-2026-0518-5C8R', status: 'boarded', category: 'adult' },
+    { id: 'p9', seat: 'E-45', name: 'Ramon Aquino Jr.', age: 31, sex: 'M', idType: 'SSS', idNumber: '34-5678901-2', contact: '+63 906 778 9921', class: 'Aircon', ref: 'BR-2026-0518-3X9M', status: 'checked', category: 'adult' },
+    { id: 'p10', seat: 'TE-60', name: 'Andrea Patricia Lim', age: 25, sex: 'F', idType: 'Passport', idNumber: 'P1234567A', contact: '+63 945 112 6630', class: 'Open Air', ref: 'BR-2026-0518-5J2H', status: 'checked', category: 'adult' },
+    { id: 'p11', seat: 'TE-61', name: 'Felipe Antonio Garcia', age: 38, sex: 'M', idType: 'Driver License', idNumber: 'N02-87-665544', contact: '+63 917 332 8821', class: 'Open Air', ref: 'BR-2026-0517-2B5C', status: 'noshow', category: 'adult' },
+    { id: 'p12', seat: 'E-58', name: 'Marisol Yulo-Carrasco', age: 44, sex: 'F', idType: 'UMID', idNumber: 'CRN-0023-1234567-8', contact: '+63 920 887 6655', class: 'Aircon', ref: 'BR-2026-0517-6T1D', status: 'boarded', category: 'adult' },
+    { id: 'bp_gh1', seat: 'D-30', name: 'Hon. Maria Linda Bautista', age: 56, sex: 'F', idType: 'Government ID', idNumber: 'PROV-BAT-08821', contact: '+63 917 555 0188', class: 'VIP', ref: 'GH-2026-0527-3T8B', status: 'checked', category: 'adult', passengerType: 'Gov/Hospital', agency: 'Office of the Provincial Governor — Batangas', reasonForTravel: 'Official meeting with Lubang LGU' },
   ]);
 
   // Companions (under-3 children attached to an adult per MC 180 §3a)
   const companions = [
-    { name: 'Baby Reyes (15 mo)', age: 1, sex: 'F', attachedTo: 'Maria Cristina Reyes', seat: 'A03-B' },
+    { name: 'Baby Reyes (15 mo)', age: 1, sex: 'F', attachedTo: 'Maria Cristina Reyes', seat: 'E-25' },
   ];
 
   // Crew (not counted as passengers per MC 180)
@@ -12429,15 +12449,15 @@ function NativeAppPreviewScreen({ setScreen, t = T.en }) {
 
   // Recent scans for boarding (last 3)
   const recentBoarded = [
-    { name: 'Roberto Pangilinan', seat: 'O02-D', ref: 'BR-2026-0518-4N8G', ts: '06:42' },
-    { name: 'Cristina Pangilinan', seat: 'O02-E', ref: 'BR-2026-0518-4N8G', ts: '06:42' },
-    { name: 'Eduardo Magtanggol', seat: 'V01-A', ref: 'BR-2026-0518-1A6F', ts: '06:38' },
+    { name: 'Roberto Pangilinan', seat: 'TE-58', ref: 'BR-2026-0518-4N8G', ts: '06:42' },
+    { name: 'Cristina Pangilinan', seat: 'TE-59', ref: 'BR-2026-0518-4N8G', ts: '06:42' },
+    { name: 'Eduardo Magtanggol', seat: 'D-1', ref: 'BR-2026-0518-1A6F', ts: '06:38' },
   ];
 
   const recentCheckedIn = [
-    { name: 'Maria Cristina Reyes', seat: 'A03-B', ref: 'BR-2026-0518-7K2A', ts: '06:18' },
-    { name: 'Jose Antonio Reyes', seat: 'A03-C', ref: 'BR-2026-0518-7K2A', ts: '06:18' },
-    { name: 'Sofia Margarita Reyes', seat: 'A03-D', ref: 'BR-2026-0518-7K2A', ts: '06:18' },
+    { name: 'Maria Cristina Reyes', seat: 'E-25', ref: 'BR-2026-0518-7K2A', ts: '06:18' },
+    { name: 'Jose Antonio Reyes', seat: 'E-26', ref: 'BR-2026-0518-7K2A', ts: '06:18' },
+    { name: 'Sofia Margarita Reyes', seat: 'E-27', ref: 'BR-2026-0518-7K2A', ts: '06:18' },
   ];
 
   return (
@@ -13505,7 +13525,7 @@ function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBooki
   // tile updates as approvals and walk-in submits land.
   const { utilizationUsed, utilizationCapacity } = sailings.reduce((acc, s) => {
     if (s.departed) return acc;
-    for (const cls of ['openair', 'aircon', 'vip']) {
+    for (const cls of ['TE', 'E', 'D']) {
       const gov = s.pools?.[cls]?.govHospital;
       if (!gov) continue;
       acc.utilizationCapacity += gov.capacity || 0;
@@ -13523,7 +13543,7 @@ function AdminGovHospitalApprovalsScreen({ setScreen, t = T.en, govHospitalBooki
 
   // Map a booking record's class label to the sailing.pools key.
   const poolKeyForClass = (label) =>
-    label === 'Open Air' ? 'openair' : label === 'Aircon' ? 'aircon' : label === 'VIP' ? 'vip' : null;
+    label === 'Open Air' ? 'TE' : label === 'Aircon' ? 'E' : label === 'VIP' ? 'D' : null;
 
   // Voyage-departure guard: once a sailing has departed the booking's outcome is
   // frozen — approve/reject buttons hide and the row shows a "Voyage departed" lock.
@@ -16833,19 +16853,25 @@ function CustomerCreditWalletScreen({ setScreen, t = T.en }) {
 }
 
 // ============================================================================
-// TIER 1: SEAT SELECTION (Batch 15)
-// Comes after Passenger Forms + ID Photo, before Review + Payment.
+// TIER 1: SEAT SELECTION (Batch 15 · refactored 2026-06-08)
 // Customer picks one seat per passenger from the vessel-specific seat map.
-// Layout varies by class:
-//   - Open Air (~80 seats): 10 rows × 8 across in benches, no aisle markers
-//   - Aircon (~50 seats):    10 rows × 5 across with center aisle, A-E lettering
-//   - VIP (~12 seats):       3 rows × 4 around the lounge, lettered VIP-1..VIP-12
-// Pre-occupied seats are shown grayed-out (~15-20% of capacity for demo).
-// Class is locked from the previous step; selected count must equal pax count
-// before "Continue" enables.
+//
+// The seat plan is driven by ../data/vesselSeatPlans.js — a faithful
+// transcription of the seating-arrangement PDFs for the two real vessels:
+//   · OUR LADY OF ST. THERESE      (D · E · TA · TE — 299 seats)
+//   · OUR MOTHER OF PERPETUAL HELP (D · E · TA · TE — 306 seats)
+//
+// Each class is rendered block-by-block to mirror the cabin layout from the
+// PDF. Seat labels are flat (e.g. "TA-15", "D-44") matching the printed plan.
+// Pre-occupied seats and a small Senior/PWD priority slice are seeded for the
+// demo; class is locked from the previous step (vessel toggle is a mockup-
+// only control).
 // ============================================================================
+
 function SeatSelectionScreen({ setScreen, t = T.en }) {
-  const [selectedClass, setSelectedClass] = useState('Aircon');
+  const vesselKeys = Object.keys(VESSEL_SEAT_PLANS);
+  const [selectedVessel, setSelectedVessel] = useState(vesselKeys[0]);
+  const [selectedClass, setSelectedClass] = useState('TA');
   const [paxCount] = useState(3);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [priorityToast, setPriorityToast] = useState(null);
@@ -16857,63 +16883,44 @@ function SeatSelectionScreen({ setScreen, t = T.en }) {
   ];
   const passengerNames = passengers.map(p => p.name);
 
-  // Class-specific config — each describes the layout, color theme, and any
-  // pre-occupied seats. In production these would be derived from voyage
-  // availability returned by the backend; here they're seeded.
-  const classConfigs = {
-    'Open Air': {
-      fareLabel: '₱350 / pax',
-      themeFg: '#1E40AF',
-      themeBg: '#DBEAFE',
-      rows: 10,
-      cols: 8,
-      idFor: (r, c) => `O${String(r + 1).padStart(2, '0')}-${String.fromCharCode(65 + c)}`,
-      occupied: ['O01-A','O01-B','O02-C','O03-F','O04-A','O04-B','O04-C','O05-G','O05-H','O07-D','O08-A','O09-F','O09-G','O10-H'],
-      prioritySeats: ['O10-A','O10-B','O10-C','O10-F','O10-G','O10-H'],
-      aisleCols: [],
-      icon: Sun,
-      vesselLabel: 'Upper deck · open-air benches · 80 seats',
-    },
-    'Aircon': {
-      fareLabel: '₱550 / pax',
-      themeFg: '#FF385C',
-      themeBg: '#FFE5E9',
-      rows: 10,
-      cols: 5,
-      idFor: (r, c) => `A${String(r + 1).padStart(2, '0')}-${String.fromCharCode(65 + c)}`,
-      occupied: ['A01-A','A01-D','A02-B','A03-C','A04-A','A04-E','A05-D','A07-B','A07-C','A09-A'],
-      prioritySeats: ['A01-B','A01-C','A01-E','A10-A'],
-      aisleCols: [2],
-      icon: Snowflake,
-      vesselLabel: 'Main cabin · air-conditioned · 50 seats',
-    },
-    'VIP': {
-      fareLabel: '₱850 / pax',
-      themeFg: '#A16207',
-      themeBg: '#FEF3C7',
-      rows: 3,
-      cols: 4,
-      idFor: (r, c) => `V${String(r + 1).padStart(2, '0')}-${String.fromCharCode(65 + c)}`,
-      occupied: ['V01-A','V02-C'],
-      prioritySeats: ['V01-B','V01-C'],
-      aisleCols: [1],
-      icon: Crown,
-      vesselLabel: 'Forward lounge · reclining + privacy curtain · 12 seats',
-    },
-  };
+  const vessel = VESSEL_SEAT_PLANS[selectedVessel];
+  const classPlan = vessel.classes[selectedClass];
+  const meta = CLASS_META[selectedClass];
+  const fare = CLASS_DEFAULT_FARE[selectedClass];
 
-  const config = classConfigs[selectedClass];
-  const occupiedSet = new Set(config.occupied);
-  const prioritySet = new Set(config.prioritySeats || []);
-  const totalSeats = config.rows * config.cols;
-  const availableSeats = totalSeats - config.occupied.length;
+  const allSeatLabels = React.useMemo(
+    () => seatLabelsForClass(selectedVessel, selectedClass),
+    [selectedVessel, selectedClass]
+  );
 
-  const regularAvailable = Array.from({ length: config.rows * config.cols }, (_, i) => {
-    const r = Math.floor(i / config.cols);
-    const c = i % config.cols;
-    return config.idFor(r, c);
-  }).filter(id => !occupiedSet.has(id) && !prioritySet.has(id) && !selectedSeats.some(s => s.seatId === id));
-  const regularsSoldOut = regularAvailable.length === 0;
+  // Deterministic seed for occupied & priority based on vessel+class so toggles
+  // are stable. ~18% occupied; ~6% priority (first seats in class — front row).
+  const { occupiedSet, prioritySet } = React.useMemo(() => {
+    const n = allSeatLabels.length;
+    const seedStr = selectedVessel + ':' + selectedClass;
+    let h = 0;
+    for (let i = 0; i < seedStr.length; i++) h = (h * 31 + seedStr.charCodeAt(i)) >>> 0;
+    const occupied = new Set();
+    const occCount = Math.round(n * 0.18);
+    let cur = h;
+    for (let i = 0; i < occCount; i++) {
+      cur = (cur * 1103515245 + 12345) >>> 0;
+      occupied.add(allSeatLabels[cur % n]);
+    }
+    const priCount = Math.max(2, Math.min(6, Math.round(n * 0.06)));
+    const priority = new Set();
+    for (let i = 0; i < priCount; i++) priority.add(allSeatLabels[i]);
+    for (const p of priority) occupied.delete(p);
+    return { occupiedSet: occupied, prioritySet: priority };
+  }, [allSeatLabels, selectedVessel, selectedClass]);
+
+  const totalSeats = allSeatLabels.length;
+  const availableSeats = totalSeats - occupiedSet.size;
+
+  const regularAvailableCount = allSeatLabels.filter(
+    (id) => !occupiedSet.has(id) && !prioritySet.has(id) && !selectedSeats.some((s) => s.seatId === id)
+  ).length;
+  const regularsSoldOut = regularAvailableCount === 0;
 
   const handleSeatTap = (seatId) => {
     if (occupiedSet.has(seatId)) return;
@@ -16939,14 +16946,10 @@ function SeatSelectionScreen({ setScreen, t = T.en }) {
     });
   };
 
-  // When class changes (demo toggle), drop any seats that don't match the new layout
-  const handleClassChange = (newClass) => {
-    setSelectedClass(newClass);
-    setSelectedSeats([]);
-  };
+  const handleClassChange = (newClass) => { setSelectedClass(newClass); setSelectedSeats([]); };
+  const handleVesselChange = (newVessel) => { setSelectedVessel(newVessel); setSelectedSeats([]); };
 
   const isPriority = (seatId) => prioritySet.has(seatId);
-
   const seatStateFor = (seatId) => {
     if (occupiedSet.has(seatId)) return 'occupied';
     const idx = selectedSeats.findIndex((s) => s.seatId === seatId);
@@ -16956,12 +16959,16 @@ function SeatSelectionScreen({ setScreen, t = T.en }) {
 
   const isComplete = selectedSeats.length === paxCount;
   const nextEmptyPaxIndex = selectedSeats.length;
+  const passengerSlotFor = (seatId) => {
+    const idx = selectedSeats.findIndex((s) => s.seatId === seatId);
+    return idx >= 0 ? idx + 1 : null;
+  };
 
   return (
     <div>
       <MobileBadge strategy="Mobile First" />
 
-      {/* Step indicator — note 6 steps now: Date, Sailing, Passengers, Seats, Review, Pay */}
+      {/* Step indicator */}
       <div className="flex items-center gap-2 mb-6 text-sm flex-wrap">
         <span style={{ color: COLORS.inkMuted }}>1. {t.stepDate} ✓</span>
         <ChevronRight size={14} style={{ color: COLORS.inkMuted }} />
@@ -16977,44 +16984,42 @@ function SeatSelectionScreen({ setScreen, t = T.en }) {
       </div>
 
       <h1 className="text-3xl font-bold mb-1" style={{ color: COLORS.ink }}>{t.seatSelTitle}</h1>
-      <p className="text-sm mb-5" style={{ color: COLORS.inkMuted }}>
+      <p className="text-sm mb-4" style={{ color: COLORS.inkMuted }}>
         {t.seatSelSub}
-        <span style={{ color: config.themeFg }}> · {selectedClass}</span>
+        <span style={{ color: meta.themeFg }}> · {meta.label}</span>
       </p>
 
-      {/* Demo control — class toggle */}
-      <div
-        className="rounded-xl p-3 mb-4 border-2 border-dashed"
-        style={{ borderColor: COLORS.border, background: COLORS.bgMuted }}
-      >
+      {/* Demo control — vessel + class toggle */}
+      <div className="rounded-xl p-3 mb-4 border-2 border-dashed" style={{ borderColor: COLORS.border, background: COLORS.bgMuted }}>
         <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-          <div className="text-xs font-semibold" style={{ color: COLORS.inkMuted }}>
-            📐 Mockup control · preview each class layout
-          </div>
-          <div className="text-xs" style={{ color: COLORS.inkMuted }}>
-            Class is locked from step 2 in production
-          </div>
+          <div className="text-xs font-semibold" style={{ color: COLORS.inkMuted }}>📐 Mockup control · preview each vessel & class</div>
+          <div className="text-xs" style={{ color: COLORS.inkMuted }}>Locked in production</div>
         </div>
-        <div className="grid grid-cols-3 gap-2">
-          {(['Open Air', 'Aircon', 'VIP']).map((c) => {
-            const cfg = classConfigs[c];
-            const Icon = cfg.icon;
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          {vesselKeys.map((vk) => {
+            const v = VESSEL_SEAT_PLANS[vk];
+            const active = selectedVessel === vk;
+            return (
+              <button key={vk} onClick={() => handleVesselChange(vk)}
+                className="px-2 py-2 rounded-lg border-2 text-center transition-all"
+                style={{ background: active ? '#FFF1F2' : 'white', borderColor: active ? COLORS.primary : COLORS.border, color: active ? COLORS.primary : COLORS.ink }}>
+                <div className="flex items-center justify-center gap-1.5"><Ship size={14} /><span className="text-xs font-bold">{v.short}</span></div>
+                <div className="text-[10px] mt-0.5" style={{ color: COLORS.inkMuted }}>{v.capacity} seats · 4 classes</div>
+              </button>
+            );
+          })}
+        </div>
+        <div className="grid grid-cols-4 gap-1.5">
+          {CLASS_CODES.map((c) => {
+            const cm = CLASS_META[c];
+            const cap = vessel.classes[c].capacity;
             const active = selectedClass === c;
             return (
-              <button
-                key={c}
-                onClick={() => handleClassChange(c)}
-                className="px-2 py-2 rounded-lg border-2 text-center transition-all"
-                style={{
-                  background: active ? cfg.themeBg : 'white',
-                  borderColor: active ? cfg.themeFg : COLORS.border,
-                  color: active ? cfg.themeFg : COLORS.ink,
-                }}
-              >
-                <div className="flex items-center justify-center gap-1.5">
-                  <Icon size={14} />
-                  <span className="text-xs font-bold">{c}</span>
-                </div>
+              <button key={c} onClick={() => handleClassChange(c)}
+                className="px-1.5 py-2 rounded-lg border-2 text-center transition-all"
+                style={{ background: active ? cm.themeBg : 'white', borderColor: active ? cm.themeFg : COLORS.border, color: active ? cm.themeFg : COLORS.ink }}>
+                <div className="text-[11px] font-bold leading-tight">{cm.short}</div>
+                <div className="text-[9px] mt-0.5 font-mono" style={{ color: active ? cm.themeFg : COLORS.inkMuted }}>{c} · {cap}</div>
               </button>
             );
           })}
@@ -17022,65 +17027,36 @@ function SeatSelectionScreen({ setScreen, t = T.en }) {
       </div>
 
       {/* Passenger seat-assignment chips */}
-      <div
-        className="bg-white rounded-2xl p-4 mb-4 border"
-        style={{ borderColor: COLORS.border }}
-      >
-        <div className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: COLORS.inkMuted }}>
-          Seats picked · {selectedSeats.length} of {paxCount}
-        </div>
+      <div className="bg-white rounded-2xl p-4 mb-4 border" style={{ borderColor: COLORS.border }}>
+        <div className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: COLORS.inkMuted }}>Seats picked · {selectedSeats.length} of {paxCount}</div>
         <div className="space-y-2">
           {Array.from({ length: paxCount }).map((_, i) => {
             const seat = selectedSeats[i];
             const isNext = i === nextEmptyPaxIndex && !seat;
             return (
-              <div
-                key={i}
-                className="flex items-center justify-between p-2.5 rounded-lg border"
-                style={{
-                  background: seat ? config.themeBg : isNext ? '#FFFBEB' : 'white',
-                  borderColor: seat ? config.themeFg : isNext ? '#FCD34D' : COLORS.border,
-                }}
-              >
+              <div key={i} className="flex items-center justify-between p-2.5 rounded-lg border"
+                style={{ background: seat ? meta.themeBg : isNext ? '#FFFBEB' : 'white', borderColor: seat ? meta.themeFg : isNext ? '#FCD34D' : COLORS.border }}>
                 <div className="flex items-center gap-2 min-w-0">
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                    style={{
-                      background: seat ? config.themeFg : isNext ? COLORS.warning : COLORS.bgMuted,
-                      color: seat || isNext ? 'white' : COLORS.inkMuted,
-                    }}
-                  >
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                    style={{ background: seat ? meta.themeFg : isNext ? COLORS.warning : COLORS.bgMuted, color: seat || isNext ? 'white' : COLORS.inkMuted }}>
                     {i + 1}
                   </div>
                   <div className="text-sm min-w-0">
-                    <div className="font-semibold truncate" style={{ color: COLORS.ink }}>
-                      {passengerNames[i] || `Passenger ${i + 1}`}
-                    </div>
+                    <div className="font-semibold truncate" style={{ color: COLORS.ink }}>{passengerNames[i] || `Passenger ${i + 1}`}</div>
                     {passengers[i] && (passengers[i].type === 'Senior' || passengers[i].type === 'PWD') && (
-                      <div className="text-[10px] font-semibold mt-0.5" style={{ color: '#7C3AED' }}>
-                        ♿ {passengers[i].type}
-                      </div>
+                      <div className="text-[10px] font-semibold mt-0.5" style={{ color: '#7C3AED' }}>♿ {passengers[i].type}</div>
                     )}
                   </div>
                 </div>
                 {seat ? (
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono font-bold text-sm" style={{ color: config.themeFg }}>
-                      {seat.seatId}
-                    </span>
-                    <button
-                      onClick={() => handleSeatTap(seat.seatId)}
-                      className="w-6 h-6 rounded-full flex items-center justify-center"
-                      style={{ background: 'white', color: COLORS.inkMuted }}
-                      aria-label="Remove seat"
-                    >
+                    <span className="font-mono font-bold text-sm" style={{ color: meta.themeFg }}>{seat.seatId}</span>
+                    <button onClick={() => handleSeatTap(seat.seatId)} className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'white', color: COLORS.inkMuted }} aria-label="Remove seat">
                       <X size={12} />
                     </button>
                   </div>
                 ) : (
-                  <span className="text-xs font-semibold" style={{ color: isNext ? COLORS.warning : COLORS.inkMuted }}>
-                    {isNext ? 'Tap a seat below →' : 'Not yet picked'}
-                  </span>
+                  <span className="text-xs font-semibold" style={{ color: isNext ? COLORS.warning : COLORS.inkMuted }}>{isNext ? 'Tap a seat below →' : 'Not yet picked'}</span>
                 )}
               </div>
             );
@@ -17090,147 +17066,108 @@ function SeatSelectionScreen({ setScreen, t = T.en }) {
 
       {/* Priority toast */}
       {priorityToast && (
-        <div className="rounded-xl p-3 mb-3 text-xs font-semibold flex items-center gap-2 animate-pulse"
-          style={{ background: '#EDE9FE', color: '#7C3AED', border: '2px solid #7C3AED' }}>
+        <div className="rounded-xl p-3 mb-3 text-xs font-semibold flex items-center gap-2 animate-pulse" style={{ background: '#EDE9FE', color: '#7C3AED', border: '2px solid #7C3AED' }}>
           <span>♿</span> {priorityToast}
         </div>
       )}
 
       {/* Legend */}
       <div className="flex items-center gap-3 mb-3 flex-wrap text-xs" style={{ color: COLORS.inkMuted }}>
-        <div className="flex items-center gap-1.5">
-          <div className="w-5 h-5 rounded-md border-2 bg-white" style={{ borderColor: COLORS.border }} />
-          <span>{t.availableSeat}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-5 h-5 rounded-md" style={{ background: config.themeFg }} />
-          <span style={{ color: config.themeFg }}>{t.yourSeat}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: '#E4E4E4' }}>
-            <X size={10} style={{ color: '#717171' }} />
-          </div>
-          <span>{t.occupiedSeat}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-5 h-5 rounded-md border-2 flex items-center justify-center" style={{ background: '#EDE9FE', borderColor: '#7C3AED' }}>
-            <span style={{ fontSize: 8 }}>♿</span>
-          </div>
-          <span style={{ color: '#7C3AED' }}>{t.prioritySeat}</span>
-        </div>
-        <div className="ml-auto font-mono" style={{ color: COLORS.inkMuted }}>
-          {availableSeats}/{totalSeats} free
-        </div>
+        <div className="flex items-center gap-1.5"><div className="w-5 h-5 rounded-md border-2 bg-white" style={{ borderColor: COLORS.border }} /><span>{t.availableSeat}</span></div>
+        <div className="flex items-center gap-1.5"><div className="w-5 h-5 rounded-md" style={{ background: meta.themeFg }} /><span style={{ color: meta.themeFg }}>{t.yourSeat}</span></div>
+        <div className="flex items-center gap-1.5"><div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: '#E4E4E4' }}><X size={10} style={{ color: '#717171' }} /></div><span>{t.occupiedSeat}</span></div>
+        <div className="flex items-center gap-1.5"><div className="w-5 h-5 rounded-md border-2 flex items-center justify-center" style={{ background: '#EDE9FE', borderColor: '#7C3AED' }}><span style={{ fontSize: 8 }}>♿</span></div><span style={{ color: '#7C3AED' }}>{t.prioritySeat}</span></div>
+        <div className="ml-auto font-mono" style={{ color: COLORS.inkMuted }}>{availableSeats}/{totalSeats} free</div>
       </div>
 
       {/* SEAT MAP */}
       <div className="bg-white rounded-2xl p-4 mb-4 border" style={{ borderColor: COLORS.border }}>
         <div className="text-[10px] uppercase tracking-wide mb-1 text-center" style={{ color: COLORS.inkMuted }}>
-          {config.vesselLabel}
+          {vessel.label} · {meta.label} · {classPlan.floor} · ₱{fare}
         </div>
 
-        {/* Bow indicator (front of vessel) */}
+        {/* Stern indicator — back of vessel, rendered at top */}
         <div className="flex items-center justify-center mb-3">
-          <div
-            className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 px-3 py-1 rounded-full"
-            style={{ background: COLORS.bgMuted, color: COLORS.inkMuted }}
-          >
-            <Anchor size={10} /> Bow · front of vessel
-          </div>
+          <div className="text-[10px] uppercase tracking-widest px-3 py-1 rounded-full" style={{ background: COLORS.bgMuted, color: COLORS.inkMuted }}>Stern · rear of vessel</div>
         </div>
 
-        {/* Seat grid */}
+        {/* Block layout — rows top (back) to bottom (front) */}
         <div className="overflow-x-auto -mx-2 px-2 flex justify-center">
           <div className="inline-block">
-            {Array.from({ length: config.rows }).map((_, r) => (
-              <div key={r} className="flex items-center gap-1.5 mb-1.5">
-                {/* Row label */}
-                <div
-                  className="w-6 text-right text-[10px] font-mono flex-shrink-0"
-                  style={{ color: COLORS.inkMuted }}
-                >
-                  {String(r + 1).padStart(2, '0')}
-                </div>
-                {Array.from({ length: config.cols }).map((_, c) => {
-                  const seatId = config.idFor(r, c);
-                  const state = seatStateFor(seatId);
-                  const isAvailable = state === 'available';
-                  const isSelected = state === 'selected';
-                  const isOccupied = state === 'occupied';
-                  const seatLabel = String.fromCharCode(65 + c);
-                  return (
-                    <React.Fragment key={c}>
-                      <button
-                        onClick={() => handleSeatTap(seatId)}
-                        disabled={isOccupied}
-                        className="w-8 h-8 md:w-9 md:h-9 rounded-md border-2 flex items-center justify-center text-[10px] md:text-xs font-bold transition-all flex-shrink-0 relative"
-                        style={{
-                          background: isSelected ? config.themeFg : isOccupied ? '#E4E4E4' : isPriority(seatId) ? '#EDE9FE' : 'white',
-                          borderColor: isSelected ? config.themeFg : isOccupied ? '#D1D5DB' : isPriority(seatId) ? '#7C3AED' : COLORS.border,
-                          color: isSelected ? 'white' : isOccupied ? '#9CA3AF' : isPriority(seatId) ? '#7C3AED' : COLORS.ink,
-                          cursor: isOccupied ? 'not-allowed' : 'pointer',
-                          opacity: isOccupied ? 0.6 : 1,
-                        }}
-                        title={isOccupied ? `${seatId} (taken)` : isPriority(seatId) ? `${seatId} (PWD/Senior priority)` : seatId}
-                      >
-                        {isOccupied ? <X size={12} /> : seatLabel}
-                        {isPriority(seatId) && !isOccupied && !isSelected && (
-                          <span className="absolute -top-1 -right-1 text-[7px] leading-none" style={{ color: '#7C3AED' }}>♿</span>
+            {classPlan.rows.map((row, rIdx) => {
+              const isDivider = classPlan.dividers && classPlan.dividers.includes(rIdx);
+              return (
+                <React.Fragment key={rIdx}>
+                  {isDivider && (
+                    <div className="flex items-center gap-2 my-2">
+                      <div className="flex-1 h-px" style={{ background: COLORS.border }} />
+                      <span className="text-[9px] uppercase tracking-widest" style={{ color: COLORS.inkMuted }}>back door</span>
+                      <div className="flex-1 h-px" style={{ background: COLORS.border }} />
+                    </div>
+                  )}
+                  <div className="flex items-center justify-center gap-3 mb-1.5">
+                    {row.map((block, bIdx) => (
+                      <div key={bIdx} className="flex items-center gap-1">
+                        {block.length === 0 ? (
+                          <div className="w-8 h-8 md:w-9 md:h-9 flex-shrink-0" />
+                        ) : (
+                          block.map((seatNum) => {
+                            const seatId = `${selectedClass}-${seatNum}`;
+                            const state = seatStateFor(seatId);
+                            const isSelected = state === 'selected';
+                            const isOccupied = state === 'occupied';
+                            const slot = passengerSlotFor(seatId);
+                            return (
+                              <button key={seatId} onClick={() => handleSeatTap(seatId)} disabled={isOccupied}
+                                className="w-8 h-8 md:w-9 md:h-9 rounded-md border-2 flex items-center justify-center font-bold transition-all flex-shrink-0 relative"
+                                style={{
+                                  background: isSelected ? meta.themeFg : isOccupied ? '#E4E4E4' : isPriority(seatId) ? '#EDE9FE' : 'white',
+                                  borderColor: isSelected ? meta.themeFg : isOccupied ? '#D1D5DB' : isPriority(seatId) ? '#7C3AED' : COLORS.border,
+                                  color: isSelected ? 'white' : isOccupied ? '#9CA3AF' : isPriority(seatId) ? '#7C3AED' : COLORS.ink,
+                                  cursor: isOccupied ? 'not-allowed' : 'pointer',
+                                  opacity: isOccupied ? 0.6 : 1,
+                                  fontSize: 9, lineHeight: 1,
+                                }}
+                                title={isOccupied ? `${seatId} (taken)` : isPriority(seatId) ? `${seatId} (PWD/Senior priority)` : seatId}>
+                                {isOccupied ? <X size={12} /> : isSelected ? `P${slot}` : seatNum}
+                                {isPriority(seatId) && !isOccupied && !isSelected && (
+                                  <span className="absolute -top-1 -right-1 text-[7px] leading-none" style={{ color: '#7C3AED' }}>♿</span>
+                                )}
+                              </button>
+                            );
+                          })
                         )}
-                      </button>
-                      {config.aisleCols.includes(c) && (
-                        <div
-                          className="w-3 md:w-4 text-center text-[8px] uppercase flex-shrink-0"
-                          style={{ color: COLORS.inkMuted }}
-                        >
-                          ·
-                        </div>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </div>
-            ))}
+                      </div>
+                    ))}
+                  </div>
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
 
-        {/* Stern indicator */}
+        {/* Bow indicator — front of vessel */}
         <div className="flex items-center justify-center mt-3">
-          <div
-            className="text-[10px] uppercase tracking-widest px-3 py-1 rounded-full"
-            style={{ background: COLORS.bgMuted, color: COLORS.inkMuted }}
-          >
-            Stern · rear
+          <div className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: COLORS.bgMuted, color: COLORS.inkMuted }}>
+            <Anchor size={10} /> Bow · front of vessel
           </div>
         </div>
       </div>
 
-      {/* Note about pre-occupied seats */}
-      <div
-        className="rounded-xl p-3 mb-5 text-xs flex items-start gap-2"
-        style={{ background: '#EFF6FF', color: '#1E40AF' }}
-      >
+      {/* Note */}
+      <div className="rounded-xl p-3 mb-5 text-xs flex items-start gap-2" style={{ background: '#EFF6FF', color: '#1E40AF' }}>
         <Info size={12} className="flex-shrink-0 mt-0.5" />
-        <div>
-          Pre-taken seats are bookings already paid for this sailing. Seat assignments can't be changed after payment, but if you reschedule (50% fee, see policy), you'll pick fresh seats on the new sailing.
-        </div>
+        <div>Pre-taken seats are bookings already paid for this sailing. Seat assignments can't be changed after payment, but if you reschedule (50% fee, see policy), you'll pick fresh seats on the new sailing.</div>
       </div>
 
       {/* Navigation footer */}
       <div className="flex gap-3 mt-6">
         <OutlineButton onClick={() => setScreen('passengers')} className="flex-1">← Edit passengers</OutlineButton>
-        <button
-          onClick={() => isComplete && setScreen('review')}
-          disabled={!isComplete}
+        <button onClick={() => isComplete && setScreen('review')} disabled={!isComplete}
           className="flex-[2] h-12 rounded-xl font-semibold text-white text-sm transition-colors"
-          style={{
-            background: isComplete ? COLORS.primary : COLORS.inkMuted,
-            opacity: isComplete ? 1 : 0.5,
-            cursor: isComplete ? 'pointer' : 'not-allowed',
-          }}
+          style={{ background: isComplete ? COLORS.primary : COLORS.inkMuted, opacity: isComplete ? 1 : 0.5, cursor: isComplete ? 'pointer' : 'not-allowed' }}
           onMouseEnter={(e) => { if (isComplete) e.currentTarget.style.background = COLORS.primaryHover; }}
-          onMouseLeave={(e) => { if (isComplete) e.currentTarget.style.background = COLORS.primary; }}
-        >
+          onMouseLeave={(e) => { if (isComplete) e.currentTarget.style.background = COLORS.primary; }}>
           {isComplete
             ? `${t.continueToReview} · ${selectedSeats.map((s) => s.seatId).join(', ')} →`
             : `Pick ${paxCount - selectedSeats.length} more seat${paxCount - selectedSeats.length === 1 ? '' : 's'}`}
@@ -18592,7 +18529,7 @@ export default function FandSMarineMockup() {
       submittedAt: 'May 28 · 14:32',
       sailingId: 's2', voyageDate: 'May 19, 2026', voyageTime: '11:30',
       vessel: 'MV Our Lady of St Therese', route: 'BAT-NAS → MIN-TIL', class: 'Aircon',
-      seat: 'A06-E',
+      seat: 'E-72',
       passenger: { name: 'Dr. Anselmo Ramirez', age: 47, sex: 'M' },
       agency: 'DOH - Region IV-A', designation: 'Medical Director',
       idType: 'DOH Issued ID', idNumber: 'DOH-2024-19283',
@@ -18605,7 +18542,7 @@ export default function FandSMarineMockup() {
       submittedAt: 'May 28 · 15:08',
       sailingId: 's3', voyageDate: 'May 19, 2026', voyageTime: '16:00',
       vessel: 'MV Our Lady of St Therese', route: 'BAT-NAS → MIN-TIL', class: 'Open Air',
-      seat: 'O09-G',
+      seat: 'TE-87',
       passenger: { name: 'Engr. Carlos Velasco', age: 52, sex: 'M' },
       agency: 'DPWH - District Engineering Office', designation: 'District Engineer',
       idType: 'Government ID', idNumber: 'DPWH-IV-44912',
@@ -18618,7 +18555,7 @@ export default function FandSMarineMockup() {
       submittedAt: 'May 27 · 09:14',
       sailingId: 's2', voyageDate: 'May 19, 2026', voyageTime: '11:30',
       vessel: 'MV Our Lady of St Therese', route: 'BAT-NAS → MIN-TIL', class: 'VIP',
-      seat: 'V03-D',
+      seat: 'D-30',
       passenger: { name: 'Hon. Maria Linda Bautista', age: 56, sex: 'F' },
       agency: 'Office of the Provincial Governor — Batangas', designation: 'Provincial Administrator',
       idType: 'Government ID', idNumber: 'PROV-BAT-08821',
@@ -18632,18 +18569,20 @@ export default function FandSMarineMockup() {
   // Each sailing carries the `pools` object — see consumePool/buildPools.
   const [sailings, setSailings] = useState([
     { id: 's1', time: '06:00', vessel: 'MV Our Lady of St Therese', manifestDeclared: true, departed: true,
-      pools: { openair: buildPools(80), aircon: buildPools(30), vip: buildPools(10) } },
+      pools: { TE: buildPools(36), TA: buildPools(55), E: buildPools(112), D: buildPools(96) } },
     { id: 's2', time: '11:30', vessel: 'MV Our Lady of St Therese', manifestDeclared: false, departed: false, status: 'Boarding now',
       pools: {
-        openair: { regular: { capacity: 71, taken: 58 }, govHospital: { capacity: 5, taken: 1, pending: 1 }, seniorPwd: { capacity: 4, taken: 2 } },
-        aircon:  { regular: { capacity: 21, taken: 16 }, govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 3 } },
-        vip:     { regular: { capacity: 1, taken: 1 },   govHospital: { capacity: 5, taken: 2, pending: 0 }, seniorPwd: { capacity: 4, taken: 1 } },
+        TE: { regular: { capacity: 27, taken: 22 }, govHospital: { capacity: 5, taken: 1, pending: 1 }, seniorPwd: { capacity: 4, taken: 2 } },
+        TA: { regular: { capacity: 46, taken: 30 }, govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 2 } },
+        E:  { regular: { capacity: 103, taken: 76 }, govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 3 } },
+        D:  { regular: { capacity: 87, taken: 65 },  govHospital: { capacity: 5, taken: 2, pending: 0 }, seniorPwd: { capacity: 4, taken: 1 } },
       } },
     { id: 's3', time: '16:00', vessel: 'MV Our Lady of St Therese', manifestDeclared: false, departed: false, status: 'Next sailing',
       pools: {
-        openair: { regular: { capacity: 71, taken: 30 }, govHospital: { capacity: 5, taken: 0, pending: 1 }, seniorPwd: { capacity: 4, taken: 0 } },
-        aircon:  { regular: { capacity: 21, taken: 0 },  govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 0 } },
-        vip:     { regular: { capacity: 1, taken: 0 },   govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 0 } },
+        TE: { regular: { capacity: 27, taken: 8 },  govHospital: { capacity: 5, taken: 0, pending: 1 }, seniorPwd: { capacity: 4, taken: 0 } },
+        TA: { regular: { capacity: 46, taken: 14 }, govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 0 } },
+        E:  { regular: { capacity: 103, taken: 22 }, govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 0 } },
+        D:  { regular: { capacity: 87, taken: 18 },  govHospital: { capacity: 5, taken: 0, pending: 0 }, seniorPwd: { capacity: 4, taken: 0 } },
       } },
   ]);
   const t = T[lang];
@@ -19189,17 +19128,17 @@ export default function FandSMarineMockup() {
                       </thead>
                       <tbody>
                         {[
-                          { n: 1, t: 'BTN-..3B7K', s: 'A03-B', nm: 'Maria Cristina Reyes', a: 34, sx: 'F', id: 'PhilHealth', idn: '12-3456..', cl: 'Aircon' },
-                          { n: 2, t: 'BTN-..4C8L', s: 'A03-C', nm: 'Jose Antonio Reyes', a: 36, sx: 'M', id: 'Driver Lic', idn: 'N01-23..', cl: 'Aircon' },
-                          { n: 3, t: 'BTN-..5D9M', s: 'A03-D', nm: 'Sofia Margarita Reyes', a: 8, sx: 'F', id: 'PSA Birth', idn: '2018-NAS..', cl: 'Aircon' },
-                          { n: 4, t: 'BTN-..6E1N', s: 'V01-A', nm: 'Eduardo Magtanggol', a: 52, sx: 'M', id: 'UMID', idn: 'CRN-0012..', cl: 'VIP' },
-                          { n: 5, t: 'BTN-..7F2P', s: 'V01-B', nm: 'Lourdes Magtanggol', a: 49, sx: 'F', id: 'Senior ID', idn: 'SEN-2024..', cl: 'VIP' },
-                          { n: 6, t: 'BTN-..8G3Q', s: 'O02-D', nm: 'Roberto Pangilinan', a: 28, sx: 'M', id: 'National ID', idn: 'PCN 1234..', cl: 'Open Air' },
-                          { n: 7, t: 'BTN-..9H4R', s: 'O02-E', nm: 'Cristina Pangilinan', a: 26, sx: 'F', id: 'National ID', idn: 'PCN 9876..', cl: 'Open Air' },
-                          { n: 8, t: 'BTN-..1J5S', s: 'A04-A', nm: 'Beatriz Salonga-Cruz', a: 41, sx: 'F', id: 'PWD ID', idn: 'PWD-2022..', cl: 'Aircon' },
-                          { n: 9, t: 'BTN-..2K6T', s: 'A04-B', nm: 'Ramon Aquino Jr.', a: 31, sx: 'M', id: 'SSS', idn: '34-5678..', cl: 'Aircon' },
-                          { n: 10, t: 'BTN-..3L7U', s: 'O02-F', nm: 'Andrea Patricia Lim', a: 25, sx: 'F', id: 'Passport', idn: 'P12345..', cl: 'Open Air' },
-                          { n: 11, t: 'BTN-..5N9W', s: 'A05-A', nm: 'Marisol Yulo-Carrasco', a: 44, sx: 'F', id: 'UMID', idn: 'CRN-0023..', cl: 'Aircon' },
+                          { n: 1, t: 'BTN-..3B7K', s: 'E-25', nm: 'Maria Cristina Reyes', a: 34, sx: 'F', id: 'PhilHealth', idn: '12-3456..', cl: 'Aircon' },
+                          { n: 2, t: 'BTN-..4C8L', s: 'E-26', nm: 'Jose Antonio Reyes', a: 36, sx: 'M', id: 'Driver Lic', idn: 'N01-23..', cl: 'Aircon' },
+                          { n: 3, t: 'BTN-..5D9M', s: 'E-27', nm: 'Sofia Margarita Reyes', a: 8, sx: 'F', id: 'PSA Birth', idn: '2018-NAS..', cl: 'Aircon' },
+                          { n: 4, t: 'BTN-..6E1N', s: 'D-1', nm: 'Eduardo Magtanggol', a: 52, sx: 'M', id: 'UMID', idn: 'CRN-0012..', cl: 'VIP' },
+                          { n: 5, t: 'BTN-..7F2P', s: 'D-2', nm: 'Lourdes Magtanggol', a: 49, sx: 'F', id: 'Senior ID', idn: 'SEN-2024..', cl: 'VIP' },
+                          { n: 6, t: 'BTN-..8G3Q', s: 'TE-58', nm: 'Roberto Pangilinan', a: 28, sx: 'M', id: 'National ID', idn: 'PCN 1234..', cl: 'Open Air' },
+                          { n: 7, t: 'BTN-..9H4R', s: 'TE-59', nm: 'Cristina Pangilinan', a: 26, sx: 'F', id: 'National ID', idn: 'PCN 9876..', cl: 'Open Air' },
+                          { n: 8, t: 'BTN-..1J5S', s: 'E-44', nm: 'Beatriz Salonga-Cruz', a: 41, sx: 'F', id: 'PWD ID', idn: 'PWD-2022..', cl: 'Aircon' },
+                          { n: 9, t: 'BTN-..2K6T', s: 'E-45', nm: 'Ramon Aquino Jr.', a: 31, sx: 'M', id: 'SSS', idn: '34-5678..', cl: 'Aircon' },
+                          { n: 10, t: 'BTN-..3L7U', s: 'TE-60', nm: 'Andrea Patricia Lim', a: 25, sx: 'F', id: 'Passport', idn: 'P12345..', cl: 'Open Air' },
+                          { n: 11, t: 'BTN-..5N9W', s: 'E-58', nm: 'Marisol Yulo-Carrasco', a: 44, sx: 'F', id: 'UMID', idn: 'CRN-0023..', cl: 'Aircon' },
                         ].map(p => (
                           <tr key={p.n}>
                             <td style={{ border: '1px solid #ccc', padding: '2px 4px', textAlign: 'center' }}>{p.n}</td>
@@ -19216,7 +19155,7 @@ export default function FandSMarineMockup() {
                       </tbody>
                     </table>
                     <div style={{ fontSize: 8, marginTop: 4, fontStyle: 'italic', color: '#666' }}>
-                      Infant (lap): Baby Reyes (15 mo, F) — attached to Maria Cristina Reyes, Seat A03-B
+                      Infant (lap): Baby Reyes (15 mo, F) — attached to Maria Cristina Reyes, Seat E-25
                     </div>
                   </div>
 
