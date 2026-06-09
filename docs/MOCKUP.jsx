@@ -1327,7 +1327,7 @@ function ReviewScreen({ setScreen }) {
             <h3 className="font-bold text-lg mb-4" style={{ color: COLORS.ink }}>Price details</h3>
             <div className="space-y-2 text-sm pb-4 border-b" style={{ borderColor: COLORS.border }}>
               <div className="flex justify-between">
-                <span style={{ color: COLORS.ink }}>3 × Aircon @ ₱550</span>
+                <span style={{ color: COLORS.ink }}>3 × Economy @ ₱550</span>
                 <span style={{ color: COLORS.ink }}>₱1,650</span>
               </div>
               <div className="flex justify-between" style={{ color: COLORS.success }}>
@@ -1338,17 +1338,13 @@ function ReviewScreen({ setScreen }) {
                 <span>Senior discount (20%)</span>
                 <span>−₱110</span>
               </div>
-              <div className="flex justify-between">
-                <span style={{ color: COLORS.inkMuted }}>Booking fee</span>
-                <span style={{ color: COLORS.ink }}>₱20</span>
-              </div>
             </div>
             <div className="flex justify-between items-baseline py-4">
               <span className="font-bold" style={{ color: COLORS.ink }}>Total</span>
-              <span className="text-2xl font-bold" style={{ color: COLORS.primary }}>₱1,285</span>
+              <span className="text-2xl font-bold" style={{ color: COLORS.primary }}>₱1,265</span>
             </div>
             <PrimaryButton onClick={() => setScreen('email')} size="lg" className="w-full">
-              Pay ₱1,285 with GCash →
+              Pay ₱1,265 with GCash →
             </PrimaryButton>
             <p className="text-xs text-center mt-3" style={{ color: COLORS.inkMuted }}>
               By proceeding you agree to our terms and cancellation policy.
