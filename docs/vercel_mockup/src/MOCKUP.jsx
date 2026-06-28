@@ -11134,12 +11134,8 @@ function CustomerRefundScreen({ setScreen, t = T.en }) {
 
             <div className="space-y-2">
               {[
-                { range: t.moreThan5Days,    percent: 50, tone: 'warning',     current: hoursUntilDeparture >= 120 },
-                { range: t.fiveDaysBefore,   percent: 40, tone: 'warning',     current: hoursUntilDeparture >= 96  && hoursUntilDeparture < 120 },
-                { range: t.fourDaysBefore,   percent: 30, tone: 'warning',     current: hoursUntilDeparture >= 72  && hoursUntilDeparture < 96 },
-                { range: t.threeDaysBefore,  percent: 20, tone: 'warning',     current: hoursUntilDeparture >= 48  && hoursUntilDeparture < 72 },
-                { range: t.twoDaysBefore,    percent: 10, tone: 'destructive', current: hoursUntilDeparture >= 24  && hoursUntilDeparture < 48 },
-                { range: t.lessThan24h,      percent: 0,  tone: 'destructive', current: hoursUntilDeparture < 24 },
+                { range: t.refundTier3Plus,  percent: 90, tone: 'warning',     current: hoursUntilDeparture >= 72 },
+                { range: t.refundTierUnder3, percent: 80, tone: 'destructive', current: hoursUntilDeparture < 72 },
               ].map((tier, i) => (
                 <div
                   key={i}
@@ -14136,9 +14132,12 @@ function CustomerNoShowRecoveryScreen({ setScreen, t = T.en }) {
 
   // Refund ladder — clock starts at manifest finalization
   const computeRefund = (hours) => {
-    // 3 days or more out → 10% deduction; under 3 days (incl. <24h / no-show) → 20%.
-    if (hours >= 72) return { percent: 90, label: '90% refund', tier: '3 days or more before departure (10% deduction)', tone: 'warning' };
-    return            { percent: 80, label: '80% refund', tier: 'Under 3 days, incl. <24h & no-show (20% deduction)', tone: 'destructive' };
+    if (hours < 24) return { percent: 50, label: '50% refund', tier: '0-24h after manifest', tone: 'warning' };
+    if (hours < 48) return { percent: 40, label: '40% refund', tier: '24-48h after manifest', tone: 'warning' };
+    if (hours < 72) return { percent: 30, label: '30% refund', tier: '48-72h after manifest', tone: 'warning' };
+    if (hours < 96) return { percent: 20, label: '20% refund', tier: '72-96h after manifest', tone: 'warning' };
+    if (hours < 120) return { percent: 10, label: '10% refund', tier: '96-120h after manifest', tone: 'destructive' };
+    return { percent: 0, label: 'No refund', tier: 'Past 5-day grace period', tone: 'destructive' };
   };
 
   const refundCalc = computeRefund(hoursSinceManifest);
@@ -17797,6 +17796,8 @@ const T = {
     cancellationFee: 'Cancellation fee',
     youReceive: 'You receive',
     cancellationPolicy: 'Cancellation policy',
+    refundTier3Plus: '3 days or more before departure',
+    refundTierUnder3: 'Less than 3 days (incl. within 24h)',
     moreThan5Days: 'More than 5 days before',
     fiveDaysBefore: '5 days before departure',
     fourDaysBefore: '4 days before departure',
@@ -18480,6 +18481,8 @@ const T = {
     cancellationFee: 'Cancellation fee',
     youReceive: 'Matatanggap mo',
     cancellationPolicy: 'Patakaran sa pag-cancel',
+    refundTier3Plus: '3 araw o higit pa bago ang biyahe',
+    refundTierUnder3: 'Mababa sa 3 araw (kasama ang loob ng 24h)',
     moreThan5Days: 'Higit sa 5 araw bago',
     fiveDaysBefore: '5 araw bago umalis',
     fourDaysBefore: '4 na araw bago umalis',
