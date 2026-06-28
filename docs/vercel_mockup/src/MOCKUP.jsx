@@ -1375,6 +1375,13 @@ function ReviewScreen({ setScreen, t = T.en }) {
   const total = subtotal + fee;
   const activeMethod = PAYMENT_METHODS.find((m) => m.id === paymentMethod);
 
+  const [showPolicy, setShowPolicy] = useState(false);
+  const [canAgree, setCanAgree] = useState(false);
+  const handlePolicyScroll = (e) => {
+    const el = e.currentTarget;
+    if (el.scrollHeight - el.scrollTop - el.clientHeight < 24) setCanAgree(true);
+  };
+
   return (
     <div>
       <MobileBadge strategy="Mobile First" />
@@ -1564,7 +1571,7 @@ function ReviewScreen({ setScreen, t = T.en }) {
               <span className="font-bold" style={{ color: COLORS.ink }}>{t.total}</span>
               <span className="text-2xl font-bold" style={{ color: COLORS.primary }}>₱{total.toLocaleString()}</span>
             </div>
-            <PrimaryButton onClick={() => setScreen('email')} size="lg" className="w-full">
+            <PrimaryButton onClick={() => { setShowPolicy(true); }} size="lg" className="w-full">
               {t.payWith} ₱{total.toLocaleString()} with {activeMethod.name} →
             </PrimaryButton>
             <p className="text-xs text-center mt-3" style={{ color: COLORS.inkMuted }}>
@@ -1576,6 +1583,46 @@ function ReviewScreen({ setScreen, t = T.en }) {
       <div className="mt-4">
         <OutlineButton onClick={() => setScreen('seatSelection')}>{t.backToSeats}</OutlineButton>
       </div>
+
+      {showPolicy && (
+        <div className="fixed inset-0 z-50 flex flex-col" style={{ background: 'white' }}>
+          <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: COLORS.border }}>
+            <h3 className="font-bold text-base" style={{ color: COLORS.ink }}>{t.reviewPolicies}</h3>
+            <button onClick={() => { setShowPolicy(false); }} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100">
+              <X size={18} />
+            </button>
+          </div>
+          <div onScroll={handlePolicyScroll} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 text-sm" style={{ color: COLORS.ink }}>
+            <p className="text-xs" style={{ color: COLORS.inkMuted }}>{t.policyIntro}</p>
+            {[
+              { title: t.polDownpaymentTitle, body: t.polDownpaymentBody },
+              { title: t.polRefundTitle, body: t.polRefundBody },
+              { title: t.polVehicleCancelTitle, body: t.polVehicleCancelBody },
+              { title: t.polDisruptionTitle, body: t.polDisruptionBody },
+            ].map((p, i) => (
+              <div key={i} className="rounded-xl border p-4" style={{ borderColor: COLORS.border }}>
+                <div className="font-semibold mb-1" style={{ color: COLORS.ink }}>{p.title}</div>
+                <p style={{ color: COLORS.inkMuted }}>{p.body}</p>
+              </div>
+            ))}
+            <div className="h-2" />
+          </div>
+          <div className="px-4 py-3 border-t" style={{ borderColor: COLORS.border }}>
+            {!canAgree && (
+              <p className="text-center text-xs mb-2" style={{ color: COLORS.inkMuted }}>{t.scrollToAgree}</p>
+            )}
+            <div style={!canAgree ? { opacity: 0.4, pointerEvents: 'none' } : undefined}>
+              <PrimaryButton
+                onClick={() => { if (canAgree) { setShowPolicy(false); setScreen('email'); } }}
+                size="lg"
+                className="w-full"
+              >
+                {t.iAgree}
+              </PrimaryButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -17418,6 +17465,18 @@ const T = {
     payWith: 'Pay',
     agreeTerms: 'By proceeding you agree to our terms and cancellation policy.',
     backToSeats: '← Back to seats',
+    reviewPolicies: 'Review booking policies',
+    policyIntro: 'Please read all policies. Scroll to the bottom to enable the "I AGREE" button.',
+    iAgree: 'I AGREE',
+    scrollToAgree: 'Scroll to the bottom to continue',
+    polDownpaymentTitle: 'Downpayment',
+    polDownpaymentBody: 'A 50% downpayment of the vehicle fee is collected online to hold your deck slot. The remaining 50% is paid at the port on boarding day. Passenger fares are paid in full online.',
+    polRefundTitle: 'Passenger cancellation & refund',
+    polRefundBody: '3 days or more before departure: 10% deduction (90% refunded). Less than 3 days, including within 24 hours and no-shows: 20% deduction (80% refunded).',
+    polVehicleCancelTitle: 'Vehicle cancellation',
+    polVehicleCancelBody: 'Vehicle reservations may be cancelled for a full downpayment refund up to 24 hours before departure. Within 24 hours, the vehicle reservation cannot be cancelled and the downpayment is non-refundable, because the reserved deck space can no longer be resold.',
+    polDisruptionTitle: 'Bad weather, calamity & vessel issues',
+    polDisruptionBody: 'If management cancels a sailing due to calamity, bad weather, or emergency vessel repair, affected passengers may rebook to other dates or receive a full refund at no charge.',
     vehicleDeclared: 'Vehicle declared',
     payAtCounter: 'Pay at counter on check-in',
     vehicleReservConf: 'Reservation confirmed for this sailing. Vehicle fee will be assessed and collected by check-in staff at the port.',
@@ -18089,6 +18148,18 @@ const T = {
     payWith: 'Magbayad',
     agreeTerms: 'Sa pagpapatuloy, sumasang-ayon ka sa aming terms at cancellation policy.',
     backToSeats: '← Bumalik sa upuan',
+    reviewPolicies: 'Repasuhin ang mga patakaran sa booking',
+    policyIntro: 'Pakibasa ang lahat ng patakaran. Mag-scroll hanggang dulo para mabuksan ang "SUMASANG-AYON AKO".',
+    iAgree: 'SUMASANG-AYON AKO',
+    scrollToAgree: 'Mag-scroll hanggang dulo para magpatuloy',
+    polDownpaymentTitle: 'Paunang bayad',
+    polDownpaymentBody: 'Naniningil ng 50% na paunang bayad sa vehicle fee online para itabi ang slot sa deck. Ang natitirang 50% ay babayaran sa pier sa araw ng biyahe. Ang pamasahe ng pasahero ay buong binabayaran online.',
+    polRefundTitle: 'Pagkansela at refund ng pasahero',
+    polRefundBody: '3 araw o higit pa bago ang biyahe: 10% na bawas (90% isinasauli). Mababa sa 3 araw, kasama ang loob ng 24 oras at no-show: 20% na bawas (80% isinasauli).',
+    polVehicleCancelTitle: 'Pagkansela ng sasakyan',
+    polVehicleCancelBody: 'Maaaring kanselahin ang reserbasyon ng sasakyan para sa buong refund ng paunang bayad hanggang 24 oras bago ang biyahe. Sa loob ng 24 oras, hindi na maaaring kanselahin at hindi na maibabalik ang paunang bayad, dahil hindi na maibebenta muli ang nakalaang espasyo sa deck.',
+    polDisruptionTitle: 'Masamang panahon, kalamidad at problema sa barko',
+    polDisruptionBody: 'Kung kinansela ng management ang biyahe dahil sa kalamidad, masamang panahon, o emergency na pagkukumpuni ng barko, maaaring mag-rebook sa ibang petsa o makatanggap ng buong refund ang mga apektadong pasahero nang walang bayad.',
     vehicleDeclared: 'Sasakyan na idineklara',
     payAtCounter: 'Magbayad sa counter sa check-in',
     vehicleReservConf: 'Nakumpirma ang reserbasyon para sa biyaheng ito. Ang bayad sa sasakyan ay sinisingil at kokolektahin ng check-in staff sa pier.',
