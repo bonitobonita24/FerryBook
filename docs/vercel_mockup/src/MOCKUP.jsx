@@ -1377,10 +1377,17 @@ function ReviewScreen({ setScreen, t = T.en }) {
 
   const [showPolicy, setShowPolicy] = useState(false);
   const [canAgree, setCanAgree] = useState(false);
+  const policyBodyRef = useRef(null);
   const handlePolicyScroll = (e) => {
     const el = e.currentTarget;
     if (el.scrollHeight - el.scrollTop - el.clientHeight < 24) setCanAgree(true);
   };
+  useEffect(() => {
+    if (!showPolicy) return;
+    setCanAgree(false);
+    const el = policyBodyRef.current;
+    if (el && el.scrollHeight - el.clientHeight < 24) setCanAgree(true);
+  }, [showPolicy]);
 
   return (
     <div>
@@ -1544,9 +1551,9 @@ function ReviewScreen({ setScreen, t = T.en }) {
                   <span>−₱{driverWaiver.toLocaleString()}</span>
                 </div>
               )}
-              <div className="flex justify-between">
-                <span style={{ color: COLORS.ink }}>{t.vehicleLine} ({vehicle.label})</span>
-                <span style={{ color: COLORS.ink }}>₱{vehicle.fare.toLocaleString()}</span>
+              <div className="flex justify-between text-xs" style={{ color: COLORS.inkMuted }}>
+                <span>{t.vehicleLine} ({vehicle.label}) · {t.fullFareLabel}</span>
+                <span>₱{vehicle.fare.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span style={{ color: COLORS.ink }}>{t.vehicleDownpayment}</span>
@@ -1592,7 +1599,7 @@ function ReviewScreen({ setScreen, t = T.en }) {
               <X size={18} />
             </button>
           </div>
-          <div onScroll={handlePolicyScroll} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 text-sm" style={{ color: COLORS.ink }}>
+          <div ref={policyBodyRef} onScroll={handlePolicyScroll} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 text-sm" style={{ color: COLORS.ink }}>
             <p className="text-xs" style={{ color: COLORS.inkMuted }}>{t.policyIntro}</p>
             {[
               { title: t.polDownpaymentTitle, body: t.polDownpaymentBody },
@@ -10367,7 +10374,7 @@ function BookingDetailScreen({ setScreen, t = T.en }) {
     departCode: 'BAT-NAS',
     arrivePort: 'Tilik Port, Lubang',
     arriveCode: 'MIN-TIL',
-    hoursUntilDeparture: 86, // ≥72h, so 30% refund per the operator-favorable ladder (Confirmed only)
+    hoursUntilDeparture: 86, // ≥72h, so 90% refund (10% deduction) per the 2-tier pre-departure ladder (Confirmed only)
     manifestFinalizedAt: 'Tue, May 19, 2026 · 06:18', // when applicable (No-Show)
     hoursSinceManifest: 18, // within the 0-24h tier (for No-Show only)
     emergencyAnnouncementRef: 'EMC-2026-0521-7K2M', // when Emergency
@@ -10863,7 +10870,7 @@ function BookingDetailScreen({ setScreen, t = T.en }) {
                   </div>
                   <div className="text-xs" style={{ color: COLORS.inkMuted }}>
                     {isPreRefundable
-                      ? `Partial refund (up to 50%) — ${booking.hoursUntilDeparture}h until departure`
+                      ? `Partial refund (up to 90%) — ${booking.hoursUntilDeparture}h until departure`
                       : 'Refund not available — less than 24h. Reschedule still possible →'}
                   </div>
                 </div>
@@ -17448,6 +17455,7 @@ const T = {
     seniorDiscount: 'Senior discount (20%)',
     driverRidesFree: 'Driver rides free (vehicle owner)',
     vehicleLine: 'Vehicle',
+    fullFareLabel: 'full fare',
     vehicleDownpayment: 'Vehicle downpayment (50%)',
     remainingOnBoarding: 'Remaining ₱{bal} due on boarding day.',
     total: 'Total',
@@ -18133,6 +18141,7 @@ const T = {
     seniorDiscount: 'Discount ng senior (20%)',
     driverRidesFree: 'Libre ang driver (may-ari ng sasakyan)',
     vehicleLine: 'Sasakyan',
+    fullFareLabel: 'buong bayad',
     vehicleDownpayment: 'Paunang bayad sa sasakyan (50%)',
     remainingOnBoarding: 'Natitirang ₱{bal} babayaran sa araw ng biyahe.',
     total: 'Kabuuan',
