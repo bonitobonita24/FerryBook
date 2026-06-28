@@ -1370,6 +1370,11 @@ function ReviewScreen({ setScreen, t = T.en }) {
   const vehicleBalance = vehicle.fare - vehicleDownpayment;
   const subtotal = PAX_SUBTOTAL - driverWaiver + vehicleDownpayment;   // due now (pre-fee)
 
+  const [paymentMethod, setPaymentMethod] = useState('gcash');
+  const fee = computeFee(subtotal, paymentMethod);
+  const total = subtotal + fee;
+  const activeMethod = PAYMENT_METHODS.find((m) => m.id === paymentMethod);
+
   return (
     <div>
       <MobileBadge strategy="Mobile First" />
@@ -1489,26 +1494,23 @@ function ReviewScreen({ setScreen, t = T.en }) {
             <h3 className="font-bold text-lg mb-4" style={{ color: COLORS.ink }}>{t.paymentMethod}</h3>
             <p className="text-xs mb-4" style={{ color: COLORS.inkMuted }}>Powered by Xendit · secure payment processing</p>
             <div className="grid grid-cols-3 gap-2">
-              {[
-                { name: 'GCash', icon: '💚', selected: true },
-                { name: 'Maya', icon: '🟢' },
-                { name: 'GrabPay', icon: '🟩' },
-                { name: 'Card', icon: '💳' },
-                { name: 'Banking', icon: '🏦' },
-                { name: 'OTC', icon: '🏪' },
-              ].map((p, i) => (
+              {PAYMENT_METHODS.map((p) => {
+                const selected = p.id === paymentMethod;
+                return (
                 <button
-                  key={i}
+                  key={p.id}
+                  onClick={() => setPaymentMethod(p.id)}
                   className="h-14 rounded-xl border-2 flex flex-col items-center justify-center gap-0.5"
                   style={{
-                    borderColor: p.selected ? COLORS.ink : COLORS.border,
-                    background: p.selected ? COLORS.bgMuted : 'white',
+                    borderColor: selected ? COLORS.ink : COLORS.border,
+                    background: selected ? COLORS.bgMuted : 'white',
                   }}
                 >
                   <span className="text-lg">{p.icon}</span>
                   <span className="text-[10px] font-semibold" style={{ color: COLORS.ink }}>{p.name}</span>
                 </button>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -1547,12 +1549,23 @@ function ReviewScreen({ setScreen, t = T.en }) {
                 {t.remainingOnBoarding.replace('{bal}', vehicleBalance.toLocaleString())}
               </div>
             </div>
-            <div className="flex justify-between items-baseline py-4">
+            <div className="space-y-2 text-sm pt-3">
+              <div className="flex justify-between">
+                <span style={{ color: COLORS.ink }}>{t.subtotalLabel}</span>
+                <span style={{ color: COLORS.ink }}>₱{subtotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span style={{ color: COLORS.ink }}>{t.transactionFee} ({activeMethod.name} {PAYMENT_FEES[paymentMethod].label})</span>
+                <span style={{ color: COLORS.ink }}>₱{fee.toLocaleString()}</span>
+              </div>
+              <div className="text-xs" style={{ color: COLORS.inkMuted }}>{t.feesVaryNote}</div>
+            </div>
+            <div className="flex justify-between items-baseline py-4 border-t mt-2" style={{ borderColor: COLORS.border }}>
               <span className="font-bold" style={{ color: COLORS.ink }}>{t.total}</span>
-              <span className="text-2xl font-bold" style={{ color: COLORS.primary }}>₱1,265</span>
+              <span className="text-2xl font-bold" style={{ color: COLORS.primary }}>₱{total.toLocaleString()}</span>
             </div>
             <PrimaryButton onClick={() => setScreen('email')} size="lg" className="w-full">
-              {t.payWith} ₱1,265 with GCash →
+              {t.payWith} ₱{total.toLocaleString()} with {activeMethod.name} →
             </PrimaryButton>
             <p className="text-xs text-center mt-3" style={{ color: COLORS.inkMuted }}>
               {t.agreeTerms}
@@ -17399,6 +17412,9 @@ const T = {
     vehicleDownpayment: 'Vehicle downpayment (50%)',
     remainingOnBoarding: 'Remaining ₱{bal} due on boarding day.',
     total: 'Total',
+    subtotalLabel: 'Subtotal',
+    transactionFee: 'Transaction fee',
+    feesVaryNote: 'Fees vary by payment method (powered by Xendit).',
     payWith: 'Pay',
     agreeTerms: 'By proceeding you agree to our terms and cancellation policy.',
     backToSeats: '← Back to seats',
@@ -18067,6 +18083,9 @@ const T = {
     vehicleDownpayment: 'Paunang bayad sa sasakyan (50%)',
     remainingOnBoarding: 'Natitirang ₱{bal} babayaran sa araw ng biyahe.',
     total: 'Kabuuan',
+    subtotalLabel: 'Subtotal',
+    transactionFee: 'Bayad sa transaksyon',
+    feesVaryNote: 'Nag-iiba ang bayarin depende sa paraan ng pagbabayad (powered by Xendit).',
     payWith: 'Magbayad',
     agreeTerms: 'Sa pagpapatuloy, sumasang-ayon ka sa aming terms at cancellation policy.',
     backToSeats: '← Bumalik sa upuan',
