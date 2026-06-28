@@ -1361,6 +1361,15 @@ function PassengersScreen({ setScreen, t = T.en }) {
 // TIER 1: REVIEW + PAYMENT
 // ============================================================================
 function ReviewScreen({ setScreen, t = T.en }) {
+  // Demo booking: 3 pax (existing) + declared SUV (already shown at the
+  // vehicle row). Pax subtotal = 1650 − 275 (child) − 110 (senior) = 1265.
+  const PAX_SUBTOTAL = 1265;
+  const vehicle = { typeId: 'suv', label: 'SUV', fare: VEHICLE_FARES.suv };
+  const driverWaiver = isFourWheel(vehicle.typeId) ? 550 : 0;          // pax #1 fare waived
+  const vehicleDownpayment = Math.round(vehicle.fare * VEHICLE_DOWNPAYMENT_RATE);
+  const vehicleBalance = vehicle.fare - vehicleDownpayment;
+  const subtotal = PAX_SUBTOTAL - driverWaiver + vehicleDownpayment;   // due now (pre-fee)
+
   return (
     <div>
       <MobileBadge strategy="Mobile First" />
@@ -1427,7 +1436,14 @@ function ReviewScreen({ setScreen, t = T.en }) {
             ].map((p, i) => (
               <div key={i} className="flex items-center justify-between py-2 text-sm border-b last:border-0" style={{ borderColor: COLORS.border }}>
                 <div>
-                  <div className="font-semibold" style={{ color: COLORS.ink }}>{p.name}</div>
+                  <div className="font-semibold flex items-center flex-wrap gap-1" style={{ color: COLORS.ink }}>
+                  {p.name}
+                  {i === 0 && (
+                    <span className="ml-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: '#DBEAFE', color: '#1E40AF' }}>
+                      🚗 {t.driverOwnerTag}
+                    </span>
+                  )}
+                </div>
                   <div className="flex items-center gap-2 text-xs flex-wrap" style={{ color: COLORS.inkMuted }}>
                     <span>{p.type}</span>
                     <span className="font-mono font-semibold px-1.5 py-0.5 rounded" style={{ background: '#FFE5E9', color: COLORS.primary }}>
@@ -1512,6 +1528,23 @@ function ReviewScreen({ setScreen, t = T.en }) {
               <div className="flex justify-between" style={{ color: COLORS.success }}>
                 <span>{t.seniorDiscount}</span>
                 <span>−₱110</span>
+              </div>
+              {driverWaiver > 0 && (
+                <div className="flex justify-between" style={{ color: COLORS.success }}>
+                  <span>{t.driverRidesFree}</span>
+                  <span>−₱{driverWaiver.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span style={{ color: COLORS.ink }}>{t.vehicleLine} ({vehicle.label})</span>
+                <span style={{ color: COLORS.ink }}>₱{vehicle.fare.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span style={{ color: COLORS.ink }}>{t.vehicleDownpayment}</span>
+                <span style={{ color: COLORS.ink }}>₱{vehicleDownpayment.toLocaleString()}</span>
+              </div>
+              <div className="text-xs" style={{ color: COLORS.inkMuted }}>
+                {t.remainingOnBoarding.replace('{bal}', vehicleBalance.toLocaleString())}
               </div>
             </div>
             <div className="flex justify-between items-baseline py-4">
@@ -17361,6 +17394,10 @@ const T = {
     priceDetails: 'Price details',
     childDiscount: 'Child discount (50%)',
     seniorDiscount: 'Senior discount (20%)',
+    driverRidesFree: 'Driver rides free (vehicle owner)',
+    vehicleLine: 'Vehicle',
+    vehicleDownpayment: 'Vehicle downpayment (50%)',
+    remainingOnBoarding: 'Remaining ₱{bal} due on boarding day.',
     total: 'Total',
     payWith: 'Pay',
     agreeTerms: 'By proceeding you agree to our terms and cancellation policy.',
@@ -18025,6 +18062,10 @@ const T = {
     priceDetails: 'Detalye ng presyo',
     childDiscount: 'Discount ng bata (50%)',
     seniorDiscount: 'Discount ng senior (20%)',
+    driverRidesFree: 'Libre ang driver (may-ari ng sasakyan)',
+    vehicleLine: 'Sasakyan',
+    vehicleDownpayment: 'Paunang bayad sa sasakyan (50%)',
+    remainingOnBoarding: 'Natitirang ₱{bal} babayaran sa araw ng biyahe.',
     total: 'Kabuuan',
     payWith: 'Magbayad',
     agreeTerms: 'Sa pagpapatuloy, sumasang-ayon ka sa aming terms at cancellation policy.',
