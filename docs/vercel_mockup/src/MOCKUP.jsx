@@ -943,6 +943,11 @@ function PassengersScreen({ setScreen, t = T.en }) {
   const [idTypes, setIdTypes] = useState({ 1: 'Driver License', 2: 'PhilHealth', 3: 'Senior ID' });
   const [otherIdLabels, setOtherIdLabels] = useState({});
 
+  // Demo: days from "today" to the selected departure. Flip ≤2 to preview the
+  // closed-slot state (item 2). Default 7 keeps the happy path open.
+  const daysUntilDeparture = 7;
+  const vehicleClosed = daysUntilDeparture <= VEHICLE_CUTOFF_DAYS;
+
   return (
     <div>
       <MobileBadge strategy="Mobile First" />
@@ -1003,9 +1008,10 @@ function PassengersScreen({ setScreen, t = T.en }) {
           <input
             type="checkbox"
             checked={withVehicle}
+            disabled={vehicleClosed}
             onChange={(e) => { setWithVehicle(e.target.checked); if (!e.target.checked) setVehicleType(''); }}
             className="w-5 h-5 rounded mt-0.5 flex-shrink-0"
-            style={{ accentColor: '#1E40AF' }}
+            style={{ accentColor: '#1E40AF', opacity: vehicleClosed ? 0.4 : 1 }}
           />
           <div className="flex-1">
             <div className="font-semibold flex items-center gap-2" style={{ color: COLORS.ink }}>
@@ -1019,6 +1025,13 @@ function PassengersScreen({ setScreen, t = T.en }) {
             </div>
           </div>
         </label>
+
+        {vehicleClosed && (
+          <div className="mt-3 rounded-xl p-3 text-xs flex items-start gap-2" style={{ background: '#FEF2F2', color: '#B91C1C' }}>
+            <Info size={12} className="flex-shrink-0 mt-0.5" />
+            <span>{t.vehicleSlotsClosed}</span>
+          </div>
+        )}
 
         {withVehicle && (
           <div className="mt-4 space-y-3">
@@ -1081,6 +1094,11 @@ function PassengersScreen({ setScreen, t = T.en }) {
                     style={{ background: '#FFE5E9', color: COLORS.primary }}
                   >
                     {t.accountOwner}
+                  </span>
+                )}
+                {isCreator && withVehicle && (
+                  <span className="ml-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full align-middle" style={{ background: '#DBEAFE', color: '#1E40AF' }}>
+                    🚗 {t.driverOwnerTag}
                   </span>
                 )}
               </h3>
@@ -17317,6 +17335,8 @@ const T = {
     discountClaims: 'Discount claims (Senior, PWD, Student, Child, Infant) require specific IDs at the counter. The booking discount is forfeited if the matching original ID isn\'t shown — staff are required to verify before letting the passenger board.',
     weWillSend: "We'll send this checklist with your e-ticket so the right person brings the right ID on travel day.",
     bringVehicle: 'Bringing a vehicle?',
+    vehicleSlotsClosed: 'Vehicle slots close 2 days before departure (limited deck space).',
+    driverOwnerTag: 'Driver / Vehicle Owner',
     vehicleReserveOnly: 'Reserve a vehicle slot for this sailing. Vehicle fee is assessed and paid at the port on the day of travel.',
     vehicleType: 'Vehicle Type',
     reservationOnly: 'Reservation only — no vehicle fee is charged online.',
@@ -17979,6 +17999,8 @@ const T = {
     discountClaims: 'Ang discount claims (Senior, PWD, Student, Child, Infant) ay nangangailangan ng tiyak na ID sa counter. Ang discount ay mawawala kung hindi maipakita ang tamang orihinal na ID — kinakailangan ng staff na ma-verify bago payagang sumakay.',
     weWillSend: 'Ipapadala namin ang checklist na ito kasama ng iyong e-ticket para madala ng tamang tao ang tamang ID sa araw ng biyahe.',
     bringVehicle: 'May dala kang sasakyan?',
+    vehicleSlotsClosed: 'Nagsasara ang slot ng sasakyan 2 araw bago ang biyahe (limitado ang espasyo sa deck).',
+    driverOwnerTag: 'Driver / May-ari ng Sasakyan',
     vehicleReserveOnly: 'Magreserba ng slot para sa sasakyan sa biyaheng ito. Ang bayad sa sasakyan ay sinisingil at binabayaran sa pier sa araw ng biyahe.',
     vehicleType: 'Uri ng Sasakyan',
     reservationOnly: 'Reserbasyon lamang — walang bayad sa sasakyan ang sinisingil online.',
