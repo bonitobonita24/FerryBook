@@ -41,6 +41,38 @@ const COLORS = {
   destructive: '#E63946',
 };
 
+// ── Vehicle reservation + payment-fee config (demo values) ───────────────────
+const VEHICLE_FARES = {
+  motorcycle: 350, sedan: 1500, suv: 2000, van: 2500, 'light-truck': 3500,
+};
+const isFourWheel = (typeId) => !!typeId && typeId !== 'motorcycle';
+const VEHICLE_DOWNPAYMENT_RATE = 0.5;   // 50% due online, balance on boarding
+const VEHICLE_CUTOFF_DAYS = 2;          // vehicle reservation closes ≤2 days out
+const VEHICLE_CANCEL_CUTOFF_HRS = 24;   // vehicle cancellation only >24h before
+
+// Xendit PH demo transaction fees, shown per payment method
+const PAYMENT_FEES = {
+  gcash:   { kind: 'pct',  value: 0.023, label: '2.3%' },
+  maya:    { kind: 'pct',  value: 0.020, label: '2.0%' },
+  grabpay: { kind: 'pct',  value: 0.023, label: '2.3%' },
+  card:    { kind: 'pct',  value: 0.035, label: '3.5%' },
+  bank:    { kind: 'pct',  value: 0.015, label: '1.5%' },
+  otc:     { kind: 'flat', value: 25,    label: '₱25' },
+};
+const PAYMENT_METHODS = [
+  { id: 'gcash',   name: 'GCash',   icon: '💚' },
+  { id: 'maya',    name: 'Maya',    icon: '🟢' },
+  { id: 'grabpay', name: 'GrabPay', icon: '🟩' },
+  { id: 'card',    name: 'Card',    icon: '💳' },
+  { id: 'bank',    name: 'Banking', icon: '🏦' },
+  { id: 'otc',     name: 'OTC',     icon: '🏪' },
+];
+function computeFee(amount, methodId) {
+  const f = PAYMENT_FEES[methodId];
+  if (!f) return 0;
+  return f.kind === 'flat' ? f.value : Math.round(amount * f.value);
+}
+
 // ============================================================================
 // MOBILE STRATEGY BADGE
 // ============================================================================
