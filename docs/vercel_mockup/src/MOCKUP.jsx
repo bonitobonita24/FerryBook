@@ -5723,7 +5723,7 @@ function AdminFaresScreen({ setScreen, t = T.en }) {
     TE: 350, TA: 450, E: 550, D: 850,
   });
   const [discounts, setDiscounts] = useState({
-    roundTrip: 10, senior: 20, pwd: 20, student: 15,
+    senior: 20, pwd: 20, student: 15,
   });
   const [overrides, setOverrides] = useState([
     { id: 'o1', port: 'BAT-CAL', portName: 'Calatagan Port', className: 'VIP', delta: 50, type: 'surcharge', reason: 'Calatagan service surcharge', appliedTo: 'All sailings departing BAT-CAL' },
@@ -5857,7 +5857,6 @@ function AdminFaresScreen({ setScreen, t = T.en }) {
           </p>
           <div className="space-y-2.5">
             {[
-              { id: 'roundTrip', label: 'Round-trip', sub: 'Both legs booked together' },
               { id: 'senior', label: 'Senior', sub: 'Per RA 9994 · age 60+' },
               { id: 'pwd', label: 'PWD', sub: 'Per RA 10754 · valid PWD ID' },
               { id: 'student', label: 'Student', sub: 'Valid school ID + summer/weekday' },
@@ -10972,12 +10971,9 @@ function CustomerRefundScreen({ setScreen, t = T.en }) {
   //   24-48h (2 days)           → 10%
   //   <24h (1 day / day-of)     → 0%, reschedule still allowed for a flat fee
   const computeRefund = (hours) => {
-    if (hours >= 120) return { percent: 50, label: '50% refund', tier: 'More than 5 days out', tone: 'warning' };
-    if (hours >= 96)  return { percent: 40, label: '40% refund', tier: '5 days before departure', tone: 'warning' };
-    if (hours >= 72)  return { percent: 30, label: '30% refund', tier: '4 days before departure', tone: 'warning' };
-    if (hours >= 48)  return { percent: 20, label: '20% refund', tier: '3 days before departure', tone: 'warning' };
-    if (hours >= 24)  return { percent: 10, label: '10% refund', tier: '2 days before departure', tone: 'destructive' };
-    return            { percent: 0,  label: 'No refund', tier: '<24h — reschedule only', tone: 'destructive' };
+    // 3 days or more out → 10% deduction; under 3 days (incl. <24h / no-show) → 20%.
+    if (hours >= 72) return { percent: 90, label: '90% refund', tier: '3 days or more before departure (10% deduction)', tone: 'warning' };
+    return            { percent: 80, label: '80% refund', tier: 'Under 3 days, incl. <24h & no-show (20% deduction)', tone: 'destructive' };
   };
 
   const refundCalc = computeRefund(hoursUntilDeparture);
@@ -14140,12 +14136,9 @@ function CustomerNoShowRecoveryScreen({ setScreen, t = T.en }) {
 
   // Refund ladder — clock starts at manifest finalization
   const computeRefund = (hours) => {
-    if (hours < 24) return { percent: 50, label: '50% refund', tier: '0-24h after manifest', tone: 'warning' };
-    if (hours < 48) return { percent: 40, label: '40% refund', tier: '24-48h after manifest', tone: 'warning' };
-    if (hours < 72) return { percent: 30, label: '30% refund', tier: '48-72h after manifest', tone: 'warning' };
-    if (hours < 96) return { percent: 20, label: '20% refund', tier: '72-96h after manifest', tone: 'warning' };
-    if (hours < 120) return { percent: 10, label: '10% refund', tier: '96-120h after manifest', tone: 'destructive' };
-    return { percent: 0, label: 'No refund', tier: 'Past 5-day grace period', tone: 'destructive' };
+    // 3 days or more out → 10% deduction; under 3 days (incl. <24h / no-show) → 20%.
+    if (hours >= 72) return { percent: 90, label: '90% refund', tier: '3 days or more before departure (10% deduction)', tone: 'warning' };
+    return            { percent: 80, label: '80% refund', tier: 'Under 3 days, incl. <24h & no-show (20% deduction)', tone: 'destructive' };
   };
 
   const refundCalc = computeRefund(hoursSinceManifest);
@@ -17341,7 +17334,7 @@ const T = {
     pickDate: 'Pick your date, see live seat availability, book secure with GCash, Maya, or card.',
     heroTag: '🚢 Batangas ↔ Lubang Island · Daily Departures',
     oneWay: 'One-way',
-    roundTrip: 'Round-trip · save 10%',
+    roundTrip: 'Round-trip',
     from: 'FROM',
     to: 'TO',
     depart: 'DEPART',
@@ -18024,7 +18017,7 @@ const T = {
     pickDate: 'Pumili ng petsa, tingnan ang mga bakanteng upuan, at magbayad gamit ang GCash, Maya, o card.',
     heroTag: '🚢 Batangas ↔ Lubang Island · Araw-araw na Biyahe',
     oneWay: 'Isang lakad',
-    roundTrip: 'Balikan · tipid 10%',
+    roundTrip: 'Balikan',
     from: 'MULA SA',
     to: 'PAPUNTA SA',
     depart: 'ALIS',
