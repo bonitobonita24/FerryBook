@@ -1,0 +1,2 @@
+# Playwright MCP run artifacts (console logs, page snapshots, screenshots)
+.playwright-mcp/
