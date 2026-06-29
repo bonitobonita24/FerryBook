@@ -1065,6 +1065,9 @@ function PassengersScreen({ setScreen, t = T.en }) {
               <Info size={12} className="flex-shrink-0 mt-0.5" />
               <div>
                 <strong>{t.reservationOnly}</strong> {t.reservationOnlyDesc}
+                {isFourWheel(vehicleType)
+                  ? <> {t.reservationFreeRide}</>
+                  : <> {t.reservationNoFreeRide}</>}
               </div>
             </div>
           </div>
@@ -1385,8 +1388,17 @@ function ReviewScreen({ setScreen, t = T.en }) {
   useEffect(() => {
     if (!showPolicy) return;
     setCanAgree(false);
-    const el = policyBodyRef.current;
-    if (el && el.scrollHeight - el.clientHeight < 24) setCanAgree(true);
+    // Measure overflow AFTER layout settles. Measuring synchronously on open can
+    // read the body before its flex-1 height is constrained, falsely reporting
+    // "no overflow" and unlocking the gate without any scroll. Defer two frames.
+    let raf2;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        const el = policyBodyRef.current;
+        if (el && el.scrollHeight - el.clientHeight < 24) setCanAgree(true);
+      });
+    });
+    return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
   }, [showPolicy]);
 
   return (
@@ -17432,7 +17444,9 @@ const T = {
     vehicleReserveOnly: 'Reserve a vehicle slot for this sailing. Vehicle fee is assessed and paid at the port on the day of travel.',
     vehicleType: 'Vehicle Type',
     reservationOnly: 'Reservation only — no vehicle fee is charged online.',
-    reservationOnlyDesc: 'Check-in staff will inspect your vehicle at the port, confirm the type, and process the vehicle billing ticket. 1 passenger ride is included FREE with the vehicle fee.',
+    reservationOnlyDesc: 'Check-in staff will inspect your vehicle at the port, confirm the type, and process the vehicle billing ticket.',
+    reservationFreeRide: '1 passenger ride is included FREE with the vehicle fee (4-wheel vehicles and above).',
+    reservationNoFreeRide: 'Note: motorcycles do not include a free passenger ride — the free-ride incentive applies to 4-wheel vehicles and above only.',
     changeSailing: '← Change sailing',
     pickSeats: 'Pick seats →',
     // Seat Selection
@@ -18118,7 +18132,9 @@ const T = {
     vehicleReserveOnly: 'Magreserba ng slot para sa sasakyan sa biyaheng ito. Ang bayad sa sasakyan ay sinisingil at binabayaran sa pier sa araw ng biyahe.',
     vehicleType: 'Uri ng Sasakyan',
     reservationOnly: 'Reserbasyon lamang — walang bayad sa sasakyan ang sinisingil online.',
-    reservationOnlyDesc: 'Ii-inspeksyon ng check-in staff ang iyong sasakyan sa pier, kukumpirmahin ang uri, at ipoproseso ang vehicle billing ticket. 1 pasahero ang LIBRE sa bayad ng sasakyan.',
+    reservationOnlyDesc: 'Ii-inspeksyon ng check-in staff ang iyong sasakyan sa pier, kukumpirmahin ang uri, at ipoproseso ang vehicle billing ticket.',
+    reservationFreeRide: '1 pasahero ang LIBRE sa bayad ng sasakyan (para sa 4-wheel na sasakyan pataas).',
+    reservationNoFreeRide: 'Paalala: ang motorsiklo ay walang kasamang libreng sakay — ang libreng sakay ay para lamang sa 4-wheel na sasakyan pataas.',
     changeSailing: '← Palitan ang biyahe',
     pickSeats: 'Pumili ng upuan →',
     // Seat Selection
