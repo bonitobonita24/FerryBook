@@ -7689,17 +7689,13 @@ function AdminSettingsScreen({ setScreen, t = T.en }) {
     `We retain: booking records for 5 years per MARINA requirements. Account deletion anonymizes personal identifiers but retains anonymized booking metadata.`
   );
 
-  // Cancellation Policy (Batch 14 — operator-favorable)
-  // Refund ladder: 50% cap → drops 10pp per day in last 5 days → 0% in final 24h.
-  // Each tier holds its percentage; admin can adjust any/all.
+  // Passenger cancellation refund — 2-tier policy (spec item 8).
+  //   ≥3 days (≥72h) before departure          → 90% refund (10% deduction)
+  //   <3 days, incl. within 24h & no-shows     → 80% refund (20% deduction)
   // Reschedule is a separate, decoupled flat-fee % that applies anytime pre-departure.
   const [cancellation, setCancellation] = useState({
-    refundCapPercent: 50,      // ≥120h (more than 5 days out) — the cap
-    refund96hPercent: 40,      // 96-120h tier (5 days before)
-    refund72hPercent: 30,      // 72-96h tier  (4 days before)
-    refund48hPercent: 20,      // 48-72h tier  (3 days before)
-    refund24hPercent: 10,      // 24-48h tier  (2 days before)
-    noRefundHours: 24,         // under this many hours → 0% refund (locked from configuration; tied to operations cutoff)
+    refund3dPlusPercent: 90,   // ≥3 days (≥72h) before departure → 90% refund (10% deduction)
+    refundUnder3dPercent: 80,  // <3 days, incl. within 24h & no-shows → 80% refund (20% deduction)
     rescheduleFeePercent: 50,  // flat fee on pre-departure reschedule, applies regardless of timing
   });
 
@@ -7860,109 +7856,48 @@ function AdminSettingsScreen({ setScreen, t = T.en }) {
             </div>
             <p className="text-xs mb-5" style={{ color: COLORS.inkMuted }}>
               How much of the booking is refundable when a customer cancels <strong>before</strong> the sailing
-              departs. Default policy caps refunds at 50% (no matter how early the cancellation), then drops 10
-              percentage points per day starting 5 days before departure, reaching 0% in the final 24h.
-              Reschedule is a separate decoupled option — see below.
+              departs. Two tiers: cancel <strong>3 days or more</strong> ahead for a 90% refund (10% deduction);
+              cancel within the <strong>final 3 days</strong> — including the last 24h and no-shows — for an 80%
+              refund (20% deduction). Reschedule is a separate decoupled option — see below.
             </p>
 
             <div className="space-y-2">
-              {/* Tier 1: ≥120h cap */}
+              {/* Tier 1: ≥3 days → 90% refund (10% deduction) */}
               <div className="rounded-xl p-4 border-2" style={{ background: '#FEF3C7', borderColor: '#FDE68A' }}>
                 <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
                   <div className="font-semibold flex items-center gap-1" style={{ color: '#A16207' }}>
                     <input
                       type="number"
-                      value={cancellation.refundCapPercent}
-                      onChange={(e) => setCancellation({ ...cancellation, refundCapPercent: Number(e.target.value) })}
+                      value={cancellation.refund3dPlusPercent}
+                      onChange={(e) => setCancellation({ ...cancellation, refund3dPlusPercent: Number(e.target.value) })}
                       className="w-14 h-8 px-2 rounded border text-sm text-right font-mono bg-white"
                       style={{ borderColor: '#FDE68A', color: '#A16207' }}
                     />
                     <span>% refund</span>
-                    <span className="text-xs font-normal ml-1 px-1.5 py-0.5 rounded-full" style={{ background: '#FDE68A' }}>cap</span>
+                    <span className="text-xs font-normal ml-1 px-1.5 py-0.5 rounded-full" style={{ background: '#FDE68A' }}>{100 - cancellation.refund3dPlusPercent}% deduction</span>
                   </div>
                   <div className="text-sm" style={{ color: '#A16207' }}>
-                    More than 120h (5+ days) before departure
+                    3 days or more before departure
                   </div>
                 </div>
               </div>
 
-              {/* Tier 2: 96-120h */}
-              <div className="rounded-xl p-4 border-2" style={{ background: '#FEF3C7', borderColor: '#FDE68A' }}>
-                <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
-                  <div className="font-semibold flex items-center gap-1" style={{ color: '#A16207' }}>
-                    <input
-                      type="number"
-                      value={cancellation.refund96hPercent}
-                      onChange={(e) => setCancellation({ ...cancellation, refund96hPercent: Number(e.target.value) })}
-                      className="w-14 h-8 px-2 rounded border text-sm text-right font-mono bg-white"
-                      style={{ borderColor: '#FDE68A', color: '#A16207' }}
-                    />
-                    <span>% refund</span>
-                  </div>
-                  <div className="text-sm" style={{ color: '#A16207' }}>96 – 120h before (5 days)</div>
-                </div>
-              </div>
-
-              {/* Tier 3: 72-96h */}
-              <div className="rounded-xl p-4 border-2" style={{ background: '#FEF3C7', borderColor: '#FDE68A' }}>
-                <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
-                  <div className="font-semibold flex items-center gap-1" style={{ color: '#A16207' }}>
-                    <input
-                      type="number"
-                      value={cancellation.refund72hPercent}
-                      onChange={(e) => setCancellation({ ...cancellation, refund72hPercent: Number(e.target.value) })}
-                      className="w-14 h-8 px-2 rounded border text-sm text-right font-mono bg-white"
-                      style={{ borderColor: '#FDE68A', color: '#A16207' }}
-                    />
-                    <span>% refund</span>
-                  </div>
-                  <div className="text-sm" style={{ color: '#A16207' }}>72 – 96h before (4 days)</div>
-                </div>
-              </div>
-
-              {/* Tier 4: 48-72h */}
-              <div className="rounded-xl p-4 border-2" style={{ background: '#FEF3C7', borderColor: '#FDE68A' }}>
-                <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
-                  <div className="font-semibold flex items-center gap-1" style={{ color: '#A16207' }}>
-                    <input
-                      type="number"
-                      value={cancellation.refund48hPercent}
-                      onChange={(e) => setCancellation({ ...cancellation, refund48hPercent: Number(e.target.value) })}
-                      className="w-14 h-8 px-2 rounded border text-sm text-right font-mono bg-white"
-                      style={{ borderColor: '#FDE68A', color: '#A16207' }}
-                    />
-                    <span>% refund</span>
-                  </div>
-                  <div className="text-sm" style={{ color: '#A16207' }}>48 – 72h before (3 days)</div>
-                </div>
-              </div>
-
-              {/* Tier 5: 24-48h */}
+              {/* Tier 2: <3 days, incl. final 24h & no-shows → 80% refund (20% deduction) */}
               <div className="rounded-xl p-4 border-2" style={{ background: '#FFE5E9', borderColor: '#FCA5A5' }}>
                 <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
                   <div className="font-semibold flex items-center gap-1" style={{ color: COLORS.primary }}>
                     <input
                       type="number"
-                      value={cancellation.refund24hPercent}
-                      onChange={(e) => setCancellation({ ...cancellation, refund24hPercent: Number(e.target.value) })}
+                      value={cancellation.refundUnder3dPercent}
+                      onChange={(e) => setCancellation({ ...cancellation, refundUnder3dPercent: Number(e.target.value) })}
                       className="w-14 h-8 px-2 rounded border text-sm text-right font-mono bg-white"
                       style={{ borderColor: '#FCA5A5', color: COLORS.primary }}
                     />
                     <span>% refund</span>
+                    <span className="text-xs font-normal ml-1 px-1.5 py-0.5 rounded-full" style={{ background: '#FCA5A5', color: 'white' }}>{100 - cancellation.refundUnder3dPercent}% deduction</span>
                   </div>
-                  <div className="text-sm" style={{ color: COLORS.primary }}>24 – 48h before (2 days)</div>
-                </div>
-              </div>
-
-              {/* Tier 6: < 24h — 0% LOCKED */}
-              <div className="rounded-xl p-4 border-2" style={{ background: '#FEE2E2', borderColor: '#FCA5A5' }}>
-                <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <div className="font-semibold flex items-center gap-1.5" style={{ color: COLORS.destructive }}>
-                    <span>0% refund</span>
-                    <Lock size={12} />
-                  </div>
-                  <div className="text-sm" style={{ color: COLORS.destructive }}>
-                    Less than 24h before departure — refund unavailable. Reschedule still allowed (see below).
+                  <div className="text-sm" style={{ color: COLORS.primary }}>
+                    Less than 3 days — incl. within 24h &amp; no-shows
                   </div>
                 </div>
               </div>
@@ -7995,7 +7930,7 @@ function AdminSettingsScreen({ setScreen, t = T.en }) {
             <p className="text-xs mb-4" style={{ color: COLORS.inkMuted }}>
               A flat fee charged when a customer reschedules a confirmed booking before departure.
               Decoupled from the refund ladder — reschedule remains available at any time pre-departure,
-              even when the refund tier is 0%. The fare difference between sailings settles on top of this fee.
+              including within the final 24 hours. The fare difference between sailings settles on top of this fee.
             </p>
 
             <div className="rounded-xl p-4 border-2 mb-3" style={{ background: '#FFE5E9', borderColor: '#FCA5A5' }}>
