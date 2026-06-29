@@ -10978,17 +10978,10 @@ function CustomerRefundScreen({ setScreen, t = T.en }) {
     payment: { method: 'GCash', account: '0917 ***5678' },
   };
 
-  // Cancellation policy ladder (Batch 14 — operator-favorable)
-  // Default 50% cap (applies any time before the 5-day window kicks in).
-  // From 5 days out, refund drops by 10 percentage points per day.
-  // In the final 24 hours, no refund — customer can still reschedule for a fee.
-  // Tiers are read as: hours until departure → refund percent.
-  //   ≥120h (more than 5 days)  → 50% (cap)
-  //   96-120h (5 days)          → 40%
-  //   72-96h (4 days)           → 30%
-  //   48-72h (3 days)           → 20%
-  //   24-48h (2 days)           → 10%
-  //   <24h (1 day / day-of)     → 0%, reschedule still allowed for a flat fee
+  // Passenger cancellation refund — 2-tier policy (spec item 8).
+  // Read as: hours until departure → refund percent.
+  //   ≥72h (3 days or more)            → 90% refund (10% deduction)
+  //   <72h (incl. final 24h / no-show) → 80% refund (20% deduction)
   const computeRefund = (hours) => {
     // 3 days or more out → 10% deduction; under 3 days (incl. <24h / no-show) → 20%.
     if (hours >= 72) return { percent: 90, label: '90% refund', tier: '3 days or more before departure (10% deduction)', tone: 'warning' };
