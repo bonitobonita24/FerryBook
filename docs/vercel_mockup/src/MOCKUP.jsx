@@ -41,6 +41,38 @@ const COLORS = {
   destructive: '#E63946',
 };
 
+// ── Vehicle reservation + payment-fee config (demo values) ───────────────────
+const VEHICLE_FARES = {
+  motorcycle: 350, sedan: 1500, suv: 2000, van: 2500, 'light-truck': 3500,
+};
+const isFourWheel = (typeId) => !!typeId && typeId !== 'motorcycle';
+const VEHICLE_DOWNPAYMENT_RATE = 0.5;   // 50% due online, balance on boarding
+const VEHICLE_CUTOFF_DAYS = 2;          // vehicle reservation closes ≤2 days out
+const VEHICLE_CANCEL_CUTOFF_HRS = 24;   // vehicle cancellation only >24h before
+
+// Xendit PH demo transaction fees, shown per payment method
+const PAYMENT_FEES = {
+  gcash:   { kind: 'pct',  value: 0.023, label: '2.3%' },
+  maya:    { kind: 'pct',  value: 0.020, label: '2.0%' },
+  grabpay: { kind: 'pct',  value: 0.023, label: '2.3%' },
+  card:    { kind: 'pct',  value: 0.035, label: '3.5%' },
+  bank:    { kind: 'pct',  value: 0.015, label: '1.5%' },
+  otc:     { kind: 'flat', value: 25,    label: '₱25' },
+};
+const PAYMENT_METHODS = [
+  { id: 'gcash',   name: 'GCash',   icon: '💚' },
+  { id: 'maya',    name: 'Maya',    icon: '🟢' },
+  { id: 'grabpay', name: 'GrabPay', icon: '🟩' },
+  { id: 'card',    name: 'Card',    icon: '💳' },
+  { id: 'bank',    name: 'Banking', icon: '🏦' },
+  { id: 'otc',     name: 'OTC',     icon: '🏪' },
+];
+function computeFee(amount, methodId) {
+  const f = PAYMENT_FEES[methodId];
+  if (!f) return 0;
+  return f.kind === 'flat' ? f.value : Math.round(amount * f.value);
+}
+
 // ============================================================================
 // MOBILE STRATEGY BADGE
 // ============================================================================
@@ -911,6 +943,11 @@ function PassengersScreen({ setScreen, t = T.en }) {
   const [idTypes, setIdTypes] = useState({ 1: 'Driver License', 2: 'PhilHealth', 3: 'Senior ID' });
   const [otherIdLabels, setOtherIdLabels] = useState({});
 
+  // Demo: days from "today" to the selected departure. Flip ≤2 to preview the
+  // closed-slot state (item 2). Default 7 keeps the happy path open.
+  const daysUntilDeparture = 7;
+  const vehicleClosed = daysUntilDeparture <= VEHICLE_CUTOFF_DAYS;
+
   return (
     <div>
       <MobileBadge strategy="Mobile First" />
@@ -971,9 +1008,10 @@ function PassengersScreen({ setScreen, t = T.en }) {
           <input
             type="checkbox"
             checked={withVehicle}
+            disabled={vehicleClosed}
             onChange={(e) => { setWithVehicle(e.target.checked); if (!e.target.checked) setVehicleType(''); }}
             className="w-5 h-5 rounded mt-0.5 flex-shrink-0"
-            style={{ accentColor: '#1E40AF' }}
+            style={{ accentColor: '#1E40AF', opacity: vehicleClosed ? 0.4 : 1 }}
           />
           <div className="flex-1">
             <div className="font-semibold flex items-center gap-2" style={{ color: COLORS.ink }}>
@@ -987,6 +1025,13 @@ function PassengersScreen({ setScreen, t = T.en }) {
             </div>
           </div>
         </label>
+
+        {vehicleClosed && (
+          <div className="mt-3 rounded-xl p-3 text-xs flex items-start gap-2" style={{ background: '#FEF2F2', color: '#B91C1C' }}>
+            <Info size={12} className="flex-shrink-0 mt-0.5" />
+            <span>{t.vehicleSlotsClosed}</span>
+          </div>
+        )}
 
         {withVehicle && (
           <div className="mt-4 space-y-3">
@@ -1020,6 +1065,9 @@ function PassengersScreen({ setScreen, t = T.en }) {
               <Info size={12} className="flex-shrink-0 mt-0.5" />
               <div>
                 <strong>{t.reservationOnly}</strong> {t.reservationOnlyDesc}
+                {isFourWheel(vehicleType)
+                  ? <> {t.reservationFreeRide}</>
+                  : <> {t.reservationNoFreeRide}</>}
               </div>
             </div>
           </div>
@@ -1049,6 +1097,11 @@ function PassengersScreen({ setScreen, t = T.en }) {
                     style={{ background: '#FFE5E9', color: COLORS.primary }}
                   >
                     {t.accountOwner}
+                  </span>
+                )}
+                {isCreator && withVehicle && (
+                  <span className="ml-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full align-middle" style={{ background: '#DBEAFE', color: '#1E40AF' }}>
+                    🚗 {t.driverOwnerTag}
                   </span>
                 )}
               </h3>
@@ -1311,6 +1364,43 @@ function PassengersScreen({ setScreen, t = T.en }) {
 // TIER 1: REVIEW + PAYMENT
 // ============================================================================
 function ReviewScreen({ setScreen, t = T.en }) {
+  // Demo booking: 3 pax (existing) + declared SUV (already shown at the
+  // vehicle row). Pax subtotal = 1650 − 275 (child) − 110 (senior) = 1265.
+  const PAX_SUBTOTAL = 1265;
+  const vehicle = { typeId: 'suv', label: 'SUV', fare: VEHICLE_FARES.suv };
+  const driverWaiver = isFourWheel(vehicle.typeId) ? 550 : 0;          // pax #1 fare waived
+  const vehicleDownpayment = Math.round(vehicle.fare * VEHICLE_DOWNPAYMENT_RATE);
+  const vehicleBalance = vehicle.fare - vehicleDownpayment;
+  const subtotal = PAX_SUBTOTAL - driverWaiver + vehicleDownpayment;   // due now (pre-fee)
+
+  const [paymentMethod, setPaymentMethod] = useState('gcash');
+  const fee = computeFee(subtotal, paymentMethod);
+  const total = subtotal + fee;
+  const activeMethod = PAYMENT_METHODS.find((m) => m.id === paymentMethod);
+
+  const [showPolicy, setShowPolicy] = useState(false);
+  const [canAgree, setCanAgree] = useState(false);
+  const policyBodyRef = useRef(null);
+  const handlePolicyScroll = (e) => {
+    const el = e.currentTarget;
+    if (el.scrollHeight - el.scrollTop - el.clientHeight < 24) setCanAgree(true);
+  };
+  useEffect(() => {
+    if (!showPolicy) return;
+    setCanAgree(false);
+    // Measure overflow AFTER layout settles. Measuring synchronously on open can
+    // read the body before its flex-1 height is constrained, falsely reporting
+    // "no overflow" and unlocking the gate without any scroll. Defer two frames.
+    let raf2;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        const el = policyBodyRef.current;
+        if (el && el.scrollHeight - el.clientHeight < 24) setCanAgree(true);
+      });
+    });
+    return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
+  }, [showPolicy]);
+
   return (
     <div>
       <MobileBadge strategy="Mobile First" />
@@ -1377,7 +1467,14 @@ function ReviewScreen({ setScreen, t = T.en }) {
             ].map((p, i) => (
               <div key={i} className="flex items-center justify-between py-2 text-sm border-b last:border-0" style={{ borderColor: COLORS.border }}>
                 <div>
-                  <div className="font-semibold" style={{ color: COLORS.ink }}>{p.name}</div>
+                  <div className="font-semibold flex items-center flex-wrap gap-1" style={{ color: COLORS.ink }}>
+                  {p.name}
+                  {i === 0 && (
+                    <span className="ml-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: '#DBEAFE', color: '#1E40AF' }}>
+                      🚗 {t.driverOwnerTag}
+                    </span>
+                  )}
+                </div>
                   <div className="flex items-center gap-2 text-xs flex-wrap" style={{ color: COLORS.inkMuted }}>
                     <span>{p.type}</span>
                     <span className="font-mono font-semibold px-1.5 py-0.5 rounded" style={{ background: '#FFE5E9', color: COLORS.primary }}>
@@ -1423,26 +1520,23 @@ function ReviewScreen({ setScreen, t = T.en }) {
             <h3 className="font-bold text-lg mb-4" style={{ color: COLORS.ink }}>{t.paymentMethod}</h3>
             <p className="text-xs mb-4" style={{ color: COLORS.inkMuted }}>Powered by Xendit · secure payment processing</p>
             <div className="grid grid-cols-3 gap-2">
-              {[
-                { name: 'GCash', icon: '💚', selected: true },
-                { name: 'Maya', icon: '🟢' },
-                { name: 'GrabPay', icon: '🟩' },
-                { name: 'Card', icon: '💳' },
-                { name: 'Banking', icon: '🏦' },
-                { name: 'OTC', icon: '🏪' },
-              ].map((p, i) => (
+              {PAYMENT_METHODS.map((p) => {
+                const selected = p.id === paymentMethod;
+                return (
                 <button
-                  key={i}
+                  key={p.id}
+                  onClick={() => setPaymentMethod(p.id)}
                   className="h-14 rounded-xl border-2 flex flex-col items-center justify-center gap-0.5"
                   style={{
-                    borderColor: p.selected ? COLORS.ink : COLORS.border,
-                    background: p.selected ? COLORS.bgMuted : 'white',
+                    borderColor: selected ? COLORS.ink : COLORS.border,
+                    background: selected ? COLORS.bgMuted : 'white',
                   }}
                 >
                   <span className="text-lg">{p.icon}</span>
                   <span className="text-[10px] font-semibold" style={{ color: COLORS.ink }}>{p.name}</span>
                 </button>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -1463,13 +1557,41 @@ function ReviewScreen({ setScreen, t = T.en }) {
                 <span>{t.seniorDiscount}</span>
                 <span>−₱110</span>
               </div>
+              {driverWaiver > 0 && (
+                <div className="flex justify-between" style={{ color: COLORS.success }}>
+                  <span>{t.driverRidesFree}</span>
+                  <span>−₱{driverWaiver.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-xs" style={{ color: COLORS.inkMuted }}>
+                <span>{t.vehicleLine} ({vehicle.label}) · {t.fullFareLabel}</span>
+                <span>₱{vehicle.fare.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span style={{ color: COLORS.ink }}>{t.vehicleDownpayment}</span>
+                <span style={{ color: COLORS.ink }}>₱{vehicleDownpayment.toLocaleString()}</span>
+              </div>
+              <div className="text-xs" style={{ color: COLORS.inkMuted }}>
+                {t.remainingOnBoarding.replace('{bal}', vehicleBalance.toLocaleString())}
+              </div>
             </div>
-            <div className="flex justify-between items-baseline py-4">
+            <div className="space-y-2 text-sm pt-3">
+              <div className="flex justify-between">
+                <span style={{ color: COLORS.ink }}>{t.subtotalLabel}</span>
+                <span style={{ color: COLORS.ink }}>₱{subtotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span style={{ color: COLORS.ink }}>{t.transactionFee} ({activeMethod.name} {PAYMENT_FEES[paymentMethod].label})</span>
+                <span style={{ color: COLORS.ink }}>₱{fee.toLocaleString()}</span>
+              </div>
+              <div className="text-xs" style={{ color: COLORS.inkMuted }}>{t.feesVaryNote}</div>
+            </div>
+            <div className="flex justify-between items-baseline py-4 border-t mt-2" style={{ borderColor: COLORS.border }}>
               <span className="font-bold" style={{ color: COLORS.ink }}>{t.total}</span>
-              <span className="text-2xl font-bold" style={{ color: COLORS.primary }}>₱1,265</span>
+              <span className="text-2xl font-bold" style={{ color: COLORS.primary }}>₱{total.toLocaleString()}</span>
             </div>
-            <PrimaryButton onClick={() => setScreen('email')} size="lg" className="w-full">
-              {t.payWith} ₱1,265 with GCash →
+            <PrimaryButton onClick={() => { setShowPolicy(true); }} size="lg" className="w-full">
+              {t.payWith} ₱{total.toLocaleString()} with {activeMethod.name} →
             </PrimaryButton>
             <p className="text-xs text-center mt-3" style={{ color: COLORS.inkMuted }}>
               {t.agreeTerms}
@@ -1480,6 +1602,46 @@ function ReviewScreen({ setScreen, t = T.en }) {
       <div className="mt-4">
         <OutlineButton onClick={() => setScreen('seatSelection')}>{t.backToSeats}</OutlineButton>
       </div>
+
+      {showPolicy && (
+        <div className="fixed inset-0 z-50 flex flex-col" style={{ background: 'white' }}>
+          <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: COLORS.border }}>
+            <h3 className="font-bold text-base" style={{ color: COLORS.ink }}>{t.reviewPolicies}</h3>
+            <button onClick={() => { setShowPolicy(false); }} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100">
+              <X size={18} />
+            </button>
+          </div>
+          <div ref={policyBodyRef} onScroll={handlePolicyScroll} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 text-sm" style={{ color: COLORS.ink }}>
+            <p className="text-xs" style={{ color: COLORS.inkMuted }}>{t.policyIntro}</p>
+            {[
+              { title: t.polDownpaymentTitle, body: t.polDownpaymentBody },
+              { title: t.polRefundTitle, body: t.polRefundBody },
+              { title: t.polVehicleCancelTitle, body: t.polVehicleCancelBody },
+              { title: t.polDisruptionTitle, body: t.polDisruptionBody },
+            ].map((p, i) => (
+              <div key={i} className="rounded-xl border p-4" style={{ borderColor: COLORS.border }}>
+                <div className="font-semibold mb-1" style={{ color: COLORS.ink }}>{p.title}</div>
+                <p style={{ color: COLORS.inkMuted }}>{p.body}</p>
+              </div>
+            ))}
+            <div className="h-2" />
+          </div>
+          <div className="px-4 py-3 border-t" style={{ borderColor: COLORS.border }}>
+            {!canAgree && (
+              <p className="text-center text-xs mb-2" style={{ color: COLORS.inkMuted }}>{t.scrollToAgree}</p>
+            )}
+            <div style={!canAgree ? { opacity: 0.4, pointerEvents: 'none' } : undefined}>
+              <PrimaryButton
+                onClick={() => { if (canAgree) { setShowPolicy(false); setScreen('email'); } }}
+                size="lg"
+                className="w-full"
+              >
+                {t.iAgree}
+              </PrimaryButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -5580,7 +5742,7 @@ function AdminFaresScreen({ setScreen, t = T.en }) {
     TE: 350, TA: 450, E: 550, D: 850,
   });
   const [discounts, setDiscounts] = useState({
-    roundTrip: 10, senior: 20, pwd: 20, student: 15,
+    senior: 20, pwd: 20, student: 15,
   });
   const [overrides, setOverrides] = useState([
     { id: 'o1', port: 'BAT-CAL', portName: 'Calatagan Port', className: 'VIP', delta: 50, type: 'surcharge', reason: 'Calatagan service surcharge', appliedTo: 'All sailings departing BAT-CAL' },
@@ -5714,7 +5876,6 @@ function AdminFaresScreen({ setScreen, t = T.en }) {
           </p>
           <div className="space-y-2.5">
             {[
-              { id: 'roundTrip', label: 'Round-trip', sub: 'Both legs booked together' },
               { id: 'senior', label: 'Senior', sub: 'Per RA 9994 · age 60+' },
               { id: 'pwd', label: 'PWD', sub: 'Per RA 10754 · valid PWD ID' },
               { id: 'student', label: 'Student', sub: 'Valid school ID + summer/weekday' },
@@ -10225,7 +10386,7 @@ function BookingDetailScreen({ setScreen, t = T.en }) {
     departCode: 'BAT-NAS',
     arrivePort: 'Tilik Port, Lubang',
     arriveCode: 'MIN-TIL',
-    hoursUntilDeparture: 86, // ≥72h, so 30% refund per the operator-favorable ladder (Confirmed only)
+    hoursUntilDeparture: 86, // ≥72h, so 90% refund (10% deduction) per the 2-tier pre-departure ladder (Confirmed only)
     manifestFinalizedAt: 'Tue, May 19, 2026 · 06:18', // when applicable (No-Show)
     hoursSinceManifest: 18, // within the 0-24h tier (for No-Show only)
     emergencyAnnouncementRef: 'EMC-2026-0521-7K2M', // when Emergency
@@ -10721,7 +10882,7 @@ function BookingDetailScreen({ setScreen, t = T.en }) {
                   </div>
                   <div className="text-xs" style={{ color: COLORS.inkMuted }}>
                     {isPreRefundable
-                      ? `Partial refund (up to 50%) — ${booking.hoursUntilDeparture}h until departure`
+                      ? `Partial refund (up to 90%) — ${booking.hoursUntilDeparture}h until departure`
                       : 'Refund not available — less than 24h. Reschedule still possible →'}
                   </div>
                 </div>
@@ -10817,24 +10978,14 @@ function CustomerRefundScreen({ setScreen, t = T.en }) {
     payment: { method: 'GCash', account: '0917 ***5678' },
   };
 
-  // Cancellation policy ladder (Batch 14 — operator-favorable)
-  // Default 50% cap (applies any time before the 5-day window kicks in).
-  // From 5 days out, refund drops by 10 percentage points per day.
-  // In the final 24 hours, no refund — customer can still reschedule for a fee.
-  // Tiers are read as: hours until departure → refund percent.
-  //   ≥120h (more than 5 days)  → 50% (cap)
-  //   96-120h (5 days)          → 40%
-  //   72-96h (4 days)           → 30%
-  //   48-72h (3 days)           → 20%
-  //   24-48h (2 days)           → 10%
-  //   <24h (1 day / day-of)     → 0%, reschedule still allowed for a flat fee
+  // Passenger cancellation refund — 2-tier policy (spec item 8).
+  // Read as: hours until departure → refund percent.
+  //   ≥72h (3 days or more)            → 90% refund (10% deduction)
+  //   <72h (incl. final 24h / no-show) → 80% refund (20% deduction)
   const computeRefund = (hours) => {
-    if (hours >= 120) return { percent: 50, label: '50% refund', tier: 'More than 5 days out', tone: 'warning' };
-    if (hours >= 96)  return { percent: 40, label: '40% refund', tier: '5 days before departure', tone: 'warning' };
-    if (hours >= 72)  return { percent: 30, label: '30% refund', tier: '4 days before departure', tone: 'warning' };
-    if (hours >= 48)  return { percent: 20, label: '20% refund', tier: '3 days before departure', tone: 'warning' };
-    if (hours >= 24)  return { percent: 10, label: '10% refund', tier: '2 days before departure', tone: 'destructive' };
-    return            { percent: 0,  label: 'No refund', tier: '<24h — reschedule only', tone: 'destructive' };
+    // 3 days or more out → 10% deduction; under 3 days (incl. <24h / no-show) → 20%.
+    if (hours >= 72) return { percent: 90, label: '90% refund', tier: '3 days or more before departure (10% deduction)', tone: 'warning' };
+    return            { percent: 80, label: '80% refund', tier: 'Under 3 days, incl. <24h & no-show (20% deduction)', tone: 'destructive' };
   };
 
   const refundCalc = computeRefund(hoursUntilDeparture);
@@ -10995,12 +11146,8 @@ function CustomerRefundScreen({ setScreen, t = T.en }) {
 
             <div className="space-y-2">
               {[
-                { range: t.moreThan5Days,    percent: 50, tone: 'warning',     current: hoursUntilDeparture >= 120 },
-                { range: t.fiveDaysBefore,   percent: 40, tone: 'warning',     current: hoursUntilDeparture >= 96  && hoursUntilDeparture < 120 },
-                { range: t.fourDaysBefore,   percent: 30, tone: 'warning',     current: hoursUntilDeparture >= 72  && hoursUntilDeparture < 96 },
-                { range: t.threeDaysBefore,  percent: 20, tone: 'warning',     current: hoursUntilDeparture >= 48  && hoursUntilDeparture < 72 },
-                { range: t.twoDaysBefore,    percent: 10, tone: 'destructive', current: hoursUntilDeparture >= 24  && hoursUntilDeparture < 48 },
-                { range: t.lessThan24h,      percent: 0,  tone: 'destructive', current: hoursUntilDeparture < 24 },
+                { range: t.refundTier3Plus,  percent: 90, tone: 'warning',     current: hoursUntilDeparture >= 72 },
+                { range: t.refundTierUnder3, percent: 80, tone: 'destructive', current: hoursUntilDeparture < 72 },
               ].map((tier, i) => (
                 <div
                   key={i}
@@ -17198,7 +17345,7 @@ const T = {
     pickDate: 'Pick your date, see live seat availability, book secure with GCash, Maya, or card.',
     heroTag: '🚢 Batangas ↔ Lubang Island · Daily Departures',
     oneWay: 'One-way',
-    roundTrip: 'Round-trip · save 10%',
+    roundTrip: 'Round-trip',
     from: 'FROM',
     to: 'TO',
     depart: 'DEPART',
@@ -17285,10 +17432,14 @@ const T = {
     discountClaims: 'Discount claims (Senior, PWD, Student, Child, Infant) require specific IDs at the counter. The booking discount is forfeited if the matching original ID isn\'t shown — staff are required to verify before letting the passenger board.',
     weWillSend: "We'll send this checklist with your e-ticket so the right person brings the right ID on travel day.",
     bringVehicle: 'Bringing a vehicle?',
+    vehicleSlotsClosed: 'Vehicle slots close 2 days before departure (limited deck space).',
+    driverOwnerTag: 'Driver / Vehicle Owner',
     vehicleReserveOnly: 'Reserve a vehicle slot for this sailing. Vehicle fee is assessed and paid at the port on the day of travel.',
     vehicleType: 'Vehicle Type',
     reservationOnly: 'Reservation only — no vehicle fee is charged online.',
-    reservationOnlyDesc: 'Check-in staff will inspect your vehicle at the port, confirm the type, and process the vehicle billing ticket. 1 passenger ride is included FREE with the vehicle fee.',
+    reservationOnlyDesc: 'Check-in staff will inspect your vehicle at the port, confirm the type, and process the vehicle billing ticket.',
+    reservationFreeRide: '1 passenger ride is included FREE with the vehicle fee (4-wheel vehicles and above).',
+    reservationNoFreeRide: 'Note: motorcycles do not include a free passenger ride — the free-ride incentive applies to 4-wheel vehicles and above only.',
     changeSailing: '← Change sailing',
     pickSeats: 'Pick seats →',
     // Seat Selection
@@ -17309,10 +17460,30 @@ const T = {
     priceDetails: 'Price details',
     childDiscount: 'Child discount (50%)',
     seniorDiscount: 'Senior discount (20%)',
+    driverRidesFree: 'Driver rides free (vehicle owner)',
+    vehicleLine: 'Vehicle',
+    fullFareLabel: 'full fare',
+    vehicleDownpayment: 'Vehicle downpayment (50%)',
+    remainingOnBoarding: 'Remaining ₱{bal} due on boarding day.',
     total: 'Total',
+    subtotalLabel: 'Subtotal',
+    transactionFee: 'Transaction fee',
+    feesVaryNote: 'Fees vary by payment method (powered by Xendit).',
     payWith: 'Pay',
     agreeTerms: 'By proceeding you agree to our terms and cancellation policy.',
     backToSeats: '← Back to seats',
+    reviewPolicies: 'Review booking policies',
+    policyIntro: 'Please read all policies. Scroll to the bottom to enable the "I AGREE" button.',
+    iAgree: 'I AGREE',
+    scrollToAgree: 'Scroll to the bottom to continue',
+    polDownpaymentTitle: 'Downpayment',
+    polDownpaymentBody: 'A 50% downpayment of the vehicle fee is collected online to hold your deck slot. The remaining 50% is paid at the port on boarding day. Passenger fares are paid in full online.',
+    polRefundTitle: 'Passenger cancellation & refund',
+    polRefundBody: '3 days or more before departure: 10% deduction (90% refunded). Less than 3 days, including within 24 hours and no-shows: 20% deduction (80% refunded).',
+    polVehicleCancelTitle: 'Vehicle cancellation',
+    polVehicleCancelBody: 'Vehicle reservations may be cancelled for a full downpayment refund up to 24 hours before departure. Within 24 hours, the vehicle reservation cannot be cancelled and the downpayment is non-refundable, because the reserved deck space can no longer be resold.',
+    polDisruptionTitle: 'Bad weather, calamity & vessel issues',
+    polDisruptionBody: 'If management cancels a sailing due to calamity, bad weather, or emergency vessel repair, affected passengers may rebook to other dates or receive a full refund at no charge.',
     vehicleDeclared: 'Vehicle declared',
     payAtCounter: 'Pay at counter on check-in',
     vehicleReservConf: 'Reservation confirmed for this sailing. Vehicle fee will be assessed and collected by check-in staff at the port.',
@@ -17640,6 +17811,8 @@ const T = {
     cancellationFee: 'Cancellation fee',
     youReceive: 'You receive',
     cancellationPolicy: 'Cancellation policy',
+    refundTier3Plus: '3 days or more before departure',
+    refundTierUnder3: 'Less than 3 days (incl. within 24h)',
     moreThan5Days: 'More than 5 days before',
     fiveDaysBefore: '5 days before departure',
     fourDaysBefore: '4 days before departure',
@@ -17650,7 +17823,7 @@ const T = {
     refundAndFee: 'refund',
     cancFee: 'cancellation fee',
     yourRefund: 'Your refund',
-    maxRefundCap: 'Maximum refund is capped at 50% regardless of how early you cancel. From 5 days before departure, the percentage drops by 10 points per day until it reaches 0% in the final 24 hours.',
+    maxRefundCap: 'Your refund is set by the cancellation tier above: a 10% deduction if you cancel 3 days or more before departure, or a 20% deduction within the final 3 days (including within 24 hours and no-shows). The earlier you cancel, the more you get back.',
     operatorCancelRefund: "If your sailing is cancelled by F and S Marine (weather, vessel issue, MARINA-mandated cancellation), you always get a 100% refund regardless of timing.",
     simulateTiming: 'simulate departure timing',
     reasonForCancel: 'Reason for cancellation',
@@ -17860,7 +18033,7 @@ const T = {
     pickDate: 'Pumili ng petsa, tingnan ang mga bakanteng upuan, at magbayad gamit ang GCash, Maya, o card.',
     heroTag: '🚢 Batangas ↔ Lubang Island · Araw-araw na Biyahe',
     oneWay: 'Isang lakad',
-    roundTrip: 'Balikan · tipid 10%',
+    roundTrip: 'Balikan',
     from: 'MULA SA',
     to: 'PAPUNTA SA',
     depart: 'ALIS',
@@ -17947,10 +18120,14 @@ const T = {
     discountClaims: 'Ang discount claims (Senior, PWD, Student, Child, Infant) ay nangangailangan ng tiyak na ID sa counter. Ang discount ay mawawala kung hindi maipakita ang tamang orihinal na ID — kinakailangan ng staff na ma-verify bago payagang sumakay.',
     weWillSend: 'Ipapadala namin ang checklist na ito kasama ng iyong e-ticket para madala ng tamang tao ang tamang ID sa araw ng biyahe.',
     bringVehicle: 'May dala kang sasakyan?',
+    vehicleSlotsClosed: 'Nagsasara ang slot ng sasakyan 2 araw bago ang biyahe (limitado ang espasyo sa deck).',
+    driverOwnerTag: 'Driver / May-ari ng Sasakyan',
     vehicleReserveOnly: 'Magreserba ng slot para sa sasakyan sa biyaheng ito. Ang bayad sa sasakyan ay sinisingil at binabayaran sa pier sa araw ng biyahe.',
     vehicleType: 'Uri ng Sasakyan',
     reservationOnly: 'Reserbasyon lamang — walang bayad sa sasakyan ang sinisingil online.',
-    reservationOnlyDesc: 'Ii-inspeksyon ng check-in staff ang iyong sasakyan sa pier, kukumpirmahin ang uri, at ipoproseso ang vehicle billing ticket. 1 pasahero ang LIBRE sa bayad ng sasakyan.',
+    reservationOnlyDesc: 'Ii-inspeksyon ng check-in staff ang iyong sasakyan sa pier, kukumpirmahin ang uri, at ipoproseso ang vehicle billing ticket.',
+    reservationFreeRide: '1 pasahero ang LIBRE sa bayad ng sasakyan (para sa 4-wheel na sasakyan pataas).',
+    reservationNoFreeRide: 'Paalala: ang motorsiklo ay walang kasamang libreng sakay — ang libreng sakay ay para lamang sa 4-wheel na sasakyan pataas.',
     changeSailing: '← Palitan ang biyahe',
     pickSeats: 'Pumili ng upuan →',
     // Seat Selection
@@ -17971,10 +18148,30 @@ const T = {
     priceDetails: 'Detalye ng presyo',
     childDiscount: 'Discount ng bata (50%)',
     seniorDiscount: 'Discount ng senior (20%)',
+    driverRidesFree: 'Libre ang driver (may-ari ng sasakyan)',
+    vehicleLine: 'Sasakyan',
+    fullFareLabel: 'buong bayad',
+    vehicleDownpayment: 'Paunang bayad sa sasakyan (50%)',
+    remainingOnBoarding: 'Natitirang ₱{bal} babayaran sa araw ng biyahe.',
     total: 'Kabuuan',
+    subtotalLabel: 'Subtotal',
+    transactionFee: 'Bayad sa transaksyon',
+    feesVaryNote: 'Nag-iiba ang bayarin depende sa paraan ng pagbabayad (powered by Xendit).',
     payWith: 'Magbayad',
     agreeTerms: 'Sa pagpapatuloy, sumasang-ayon ka sa aming terms at cancellation policy.',
     backToSeats: '← Bumalik sa upuan',
+    reviewPolicies: 'Repasuhin ang mga patakaran sa booking',
+    policyIntro: 'Pakibasa ang lahat ng patakaran. Mag-scroll hanggang dulo para mabuksan ang "SUMASANG-AYON AKO".',
+    iAgree: 'SUMASANG-AYON AKO',
+    scrollToAgree: 'Mag-scroll hanggang dulo para magpatuloy',
+    polDownpaymentTitle: 'Paunang bayad',
+    polDownpaymentBody: 'Naniningil ng 50% na paunang bayad sa vehicle fee online para itabi ang slot sa deck. Ang natitirang 50% ay babayaran sa pier sa araw ng biyahe. Ang pamasahe ng pasahero ay buong binabayaran online.',
+    polRefundTitle: 'Pagkansela at refund ng pasahero',
+    polRefundBody: '3 araw o higit pa bago ang biyahe: 10% na bawas (90% isinasauli). Mababa sa 3 araw, kasama ang loob ng 24 oras at no-show: 20% na bawas (80% isinasauli).',
+    polVehicleCancelTitle: 'Pagkansela ng sasakyan',
+    polVehicleCancelBody: 'Maaaring kanselahin ang reserbasyon ng sasakyan para sa buong refund ng paunang bayad hanggang 24 oras bago ang biyahe. Sa loob ng 24 oras, hindi na maaaring kanselahin at hindi na maibabalik ang paunang bayad, dahil hindi na maibebenta muli ang nakalaang espasyo sa deck.',
+    polDisruptionTitle: 'Masamang panahon, kalamidad at problema sa barko',
+    polDisruptionBody: 'Kung kinansela ng management ang biyahe dahil sa kalamidad, masamang panahon, o emergency na pagkukumpuni ng barko, maaaring mag-rebook sa ibang petsa o makatanggap ng buong refund ang mga apektadong pasahero nang walang bayad.',
     vehicleDeclared: 'Sasakyan na idineklara',
     payAtCounter: 'Magbayad sa counter sa check-in',
     vehicleReservConf: 'Nakumpirma ang reserbasyon para sa biyaheng ito. Ang bayad sa sasakyan ay sinisingil at kokolektahin ng check-in staff sa pier.',
@@ -18302,6 +18499,8 @@ const T = {
     cancellationFee: 'Cancellation fee',
     youReceive: 'Matatanggap mo',
     cancellationPolicy: 'Patakaran sa pag-cancel',
+    refundTier3Plus: '3 araw o higit pa bago ang biyahe',
+    refundTierUnder3: 'Mababa sa 3 araw (kasama ang loob ng 24h)',
     moreThan5Days: 'Higit sa 5 araw bago',
     fiveDaysBefore: '5 araw bago umalis',
     fourDaysBefore: '4 na araw bago umalis',
@@ -18312,7 +18511,7 @@ const T = {
     refundAndFee: 'refund',
     cancFee: 'cancellation fee',
     yourRefund: 'Iyong refund',
-    maxRefundCap: 'Ang pinakamataas na refund ay 50% anuman ang kaaga ng pag-cancel mo. Mula 5 araw bago umalis, bumababa ng 10 puntos bawat araw ang porsyento hanggang maabot ang 0% sa huling 24 oras.',
+    maxRefundCap: 'Ang iyong refund ay batay sa tier sa itaas: 10% na bawas kung magkakansela 3 araw o higit pa bago umalis, o 20% na bawas sa loob ng huling 3 araw (kasama ang loob ng 24 oras at mga no-show). Mas maaga kang magkansela, mas malaki ang maibabalik.',
     operatorCancelRefund: 'Kung ang iyong biyahe ay na-cancel ng F and S Marine (panahon, barko, MARINA-mandated na pagkansela), palagi kang makakakuha ng 100% refund anuman ang oras.',
     simulateTiming: 'i-simulate ang oras ng pag-alis',
     reasonForCancel: 'Dahilan ng pag-cancel',
