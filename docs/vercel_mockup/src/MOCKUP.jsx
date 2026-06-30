@@ -67,10 +67,16 @@ const PAYMENT_METHODS = [
   { id: 'bank',    name: 'Banking', icon: '🏦' },
   { id: 'otc',     name: 'OTC',     icon: '🏪' },
 ];
+const VAT_RATE = 0.12;                   // PH 12% VAT charged by Xendit on the transaction fee
+const round2 = (n) => Math.round(n * 100) / 100;            // keep centavo precision
+const peso2 = (n) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 function computeFee(amount, methodId) {
   const f = PAYMENT_FEES[methodId];
   if (!f) return 0;
-  return f.kind === 'flat' ? f.value : Math.round(amount * f.value);
+  return f.kind === 'flat' ? f.value : round2(amount * f.value);
+}
+function computeFeeVat(fee) {
+  return round2(fee * VAT_RATE);          // 12% VAT applied on the Xendit fee itself
 }
 
 // ============================================================================
@@ -1375,7 +1381,8 @@ function ReviewScreen({ setScreen, t = T.en }) {
 
   const [paymentMethod, setPaymentMethod] = useState('gcash');
   const fee = computeFee(subtotal, paymentMethod);
-  const total = subtotal + fee;
+  const feeVat = computeFeeVat(fee);
+  const total = subtotal + fee + feeVat;
   const activeMethod = PAYMENT_METHODS.find((m) => m.id === paymentMethod);
 
   const [showPolicy, setShowPolicy] = useState(false);
@@ -1582,16 +1589,20 @@ function ReviewScreen({ setScreen, t = T.en }) {
               </div>
               <div className="flex justify-between">
                 <span style={{ color: COLORS.ink }}>{t.transactionFee} ({activeMethod.name} {PAYMENT_FEES[paymentMethod].label})</span>
-                <span style={{ color: COLORS.ink }}>₱{fee.toLocaleString()}</span>
+                <span style={{ color: COLORS.ink }}>₱{peso2(fee)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span style={{ color: COLORS.ink }}>{t.vat}</span>
+                <span style={{ color: COLORS.ink }}>₱{peso2(feeVat)}</span>
               </div>
               <div className="text-xs" style={{ color: COLORS.inkMuted }}>{t.feesVaryNote}</div>
             </div>
             <div className="flex justify-between items-baseline py-4 border-t mt-2" style={{ borderColor: COLORS.border }}>
               <span className="font-bold" style={{ color: COLORS.ink }}>{t.total}</span>
-              <span className="text-2xl font-bold" style={{ color: COLORS.primary }}>₱{total.toLocaleString()}</span>
+              <span className="text-2xl font-bold" style={{ color: COLORS.primary }}>₱{peso2(total)}</span>
             </div>
             <PrimaryButton onClick={() => { setShowPolicy(true); }} size="lg" className="w-full">
-              {t.payWith} ₱{total.toLocaleString()} with {activeMethod.name} →
+              {t.payWith} ₱{peso2(total)} with {activeMethod.name} →
             </PrimaryButton>
             <p className="text-xs text-center mt-3" style={{ color: COLORS.inkMuted }}>
               {t.agreeTerms}
@@ -17403,6 +17414,7 @@ const T = {
     total: 'Total',
     subtotalLabel: 'Subtotal',
     transactionFee: 'Transaction fee',
+    vat: 'VAT (12%)',
     feesVaryNote: 'Fees vary by payment method (powered by Xendit).',
     payWith: 'Pay',
     agreeTerms: 'By proceeding you agree to our terms and cancellation policy.',
@@ -18091,6 +18103,7 @@ const T = {
     total: 'Kabuuan',
     subtotalLabel: 'Subtotal',
     transactionFee: 'Bayad sa transaksyon',
+    vat: 'VAT (12%)',
     feesVaryNote: 'Nag-iiba ang bayarin depende sa paraan ng pagbabayad (powered by Xendit).',
     payWith: 'Magbayad',
     agreeTerms: 'Sa pagpapatuloy, sumasang-ayon ka sa aming terms at cancellation policy.',
